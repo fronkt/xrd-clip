@@ -1,0 +1,37 @@
+# --- CSD licence guard: NEVER commit structure data ---
+# The CSD licence does not permit redistribution of deposited structures.
+# Ship refcode lists + configs only; licence holders regenerate from those.
+*.cif
+*.cif.gz
+*.gcd
+*.res
+*.mol2
+*.sdf
+data/
+structures/
+!refcodes/
+!refcodes/*.txt
+
+# Derived artifacts
+*.npz
+*.npy
+*.pt
+*.ckpt
+checkpoints/
+runs/
+wandb/
+outputs/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.ipynb_checkpoints/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
