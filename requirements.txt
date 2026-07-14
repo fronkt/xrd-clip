@@ -1,0 +1,11 @@
+# Main-interpreter deps (stages 2+, GPU box). NO ccdc here — that lives only in the CCDC miniconda.
+# On the RTX 5090, install torch from the cu128 index BEFORE this file:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu128
+numpy>=1.26
+scipy>=1.11
+pymatgen>=2024.1
+rdkit>=2024.3
+torch>=2.4
+pytest>=8.0
+# optional, sim-to-real test set:
+# opxrd            # pip install opxrd  (real experimental patterns; see docs/DATA_SOURCES.md)

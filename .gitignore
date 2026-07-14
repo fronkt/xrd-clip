@@ -9,6 +9,11 @@
 *.sdf
 data/
 structures/
+# cache/ holds the stage-1 jsonl.gz shards, which contain CSD-derived CIF TEXT inside them.
+# The *.cif rule does NOT catch CIFs embedded in a .gz, so the whole cache is blocked explicitly.
+cache/
+runs/
+results/
 !refcodes/
 !refcodes/*.txt
 
