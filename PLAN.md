@@ -130,8 +130,11 @@ patterns). This had to be caught before training; it would have quietly corrupte
 - [ ] Build scaffold splits on the full set
 
 ### Week 1 — Jul 21–27: model + first real results
-- [x] Encoders, contrastive model, training loop (built early)
-- [x] Overfit-tiny-subset plumbing check
+- [x] Encoders, contrastive model, training loop (built early), 6.1M params
+- [x] **Overfit-tiny-subset plumbing check PASSED**: 48 structures → train top-1 = 1.000 at
+      epoch 48 (loss 2.78 → 0.64). Architecture + loss + data plumbing all correct.
+- [x] Full-library retrieval eval (`retrieve.py`) runs end to end; untrained model retrieves at
+      ~chance (0.015 vs 1/200), confirming the harness has no leak.
 - [ ] **Full training run on the Vast 5090** (B=512, ~50 epochs, est. ≲3 GPU-hr)
 - [ ] Full-library retrieval eval (build reference embeddings, top-k on scaffold test)
 - [ ] Robustness sweep harness → the money figure
