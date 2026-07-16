@@ -7,6 +7,13 @@ and what happens next. Updated 2026-07-14.
 
 ## Progress log
 
+**2026-07-16** — **Full dataset is GPU-ready.** Full simulation complete: **308,862 stick patterns**
+(98.0% of the 315,060 extracted), 1.2 GB, ~18 h wall (the asymmetric-unit symmetry analysis is the
+added cost vs the earlier 5 h estimate). Asymmetric-unit atom counts bounded (median 45, max 300).
+Full-set scaffold + random splits built and leakage-verified: **247,089 / 30,887 / 30,886**
+train/val/test; largest scaffold family 10,457. Refcode lists committed (publishable provenance).
+Remaining: ship `cache/sticks/` + `refcodes/` to a 5090 and run `configs/train_5090.md`.
+
 **2026-07-14** — Pipeline built + validated on pilot; week-0 gate PASSED; overfit plumbing check
 top-1=1.000; 315,060 structures extracted. (Details throughout.)
 
