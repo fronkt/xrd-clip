@@ -1,0 +1,15 @@
+{
+  "n_structures": 1106,
+  "n_scaffold_groups": 884,
+  "scaffold_counts": {
+    "train": 884,
+    "val": 111,
+    "test": 111
+  },
+  "random_counts": {
+    "train": 884,
+    "val": 111,
+    "test": 111
+  },
+  "seed": 0
+}
