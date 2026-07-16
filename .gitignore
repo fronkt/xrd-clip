@@ -7,13 +7,16 @@
 *.res
 *.mol2
 *.sdf
-data/
-structures/
+# Anchor these to the repo ROOT (leading slash) so they block top-level data dirs WITHOUT also
+# matching the source package src/xrdclip/data/ — an un-anchored `data/` silently swallowed the
+# entire pipeline source once already.
+/data/
+/structures/
 # cache/ holds the stage-1 jsonl.gz shards, which contain CSD-derived CIF TEXT inside them.
 # The *.cif rule does NOT catch CIFs embedded in a .gz, so the whole cache is blocked explicitly.
-cache/
-runs/
-results/
+/cache/
+/runs/
+/results/
 !refcodes/
 !refcodes/*.txt
 
