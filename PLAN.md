@@ -5,6 +5,25 @@ and what happens next. Updated 2026-07-14.
 
 ---
 
+## Progress log
+
+**2026-07-14** — Pipeline built + validated on pilot; week-0 gate PASSED; overfit plumbing check
+top-1=1.000; 315,060 structures extracted. (Details throughout.)
+
+**2026-07-15** — Day 2. First real training attempt + three fixes:
+- **OOM bug found & fixed:** the structure encoder was being fed the *full unit cell* (all Z
+  symmetry copies, up to 1000+ atoms), exploding the Transformer's O(atoms²) attention to ~17 GB
+  and thrashing swap on the 31 GB box. Now feeds the **asymmetric unit** (median 42 atoms, capped
+  256). Correct *and* compact. Fixes the pending full run too.
+- **Repo bug found & fixed:** `.gitignore`'s unanchored `data/` rule was silently excluding the
+  source package `src/xrdclip/data/` — six core modules (extract/simulate/augment/splits/dedup/
+  dataset) were never committed. Anchored the ignore rules to root and recovered the source.
+- **CPU training reality:** ~104 s/epoch for the 5.7M-param model on this CPU. A pilot run
+  (884 train / 111 val scaffold split, 50 epochs) is in flight to answer the week-1 gate at small
+  scale; the paper-scale run needs the Vast 5090. opXRD confirmed as the sim-to-real set.
+
+---
+
 ## 0. Where this stands right now
 
 **Week-0 gate: PASSED.** The whole project was conditional on one question — is there real headroom
