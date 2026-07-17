@@ -1,6 +1,6 @@
 {
   "n_structures": 308862,
-  "n_scaffold_groups": 203552,
+  "n_scaffold_groups": 197245,
   "scaffold_counts": {
     "train": 247089,
     "val": 30887,
@@ -11,5 +11,7 @@
     "val": 30886,
     "test": 30887
   },
+  "respect_polymorphs": true,
+  "n_polymorph_families": 10795,
   "seed": 0
 }

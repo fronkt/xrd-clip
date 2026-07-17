@@ -26,10 +26,18 @@ def load_refcodes(path: str) -> "list[str]":
         return [ln.strip() for ln in fh if ln.strip()]
 
 
-def build_loader(store, refcodes, batch_size, augment, workers, shuffle=True, ranges=A.Ranges()):
+def build_loader(store, refcodes, batch_size, augment, workers, shuffle=True, ranges=A.Ranges(),
+                 batch_sampler=None):
     ds = ContrastiveXRDDataset(store, refcodes, augment=augment, ranges=ranges)
-    return DataLoader(ds, batch_size=batch_size, shuffle=shuffle, num_workers=workers,
-                      collate_fn=collate, drop_last=True, pin_memory=torch.cuda.is_available()), ds
+    if batch_sampler is not None:
+        # batch_sampler already fixes batch composition + size; batch_size/shuffle/drop_last are
+        # mutually exclusive with it.
+        loader = DataLoader(ds, batch_sampler=batch_sampler, num_workers=workers,
+                            collate_fn=collate, pin_memory=torch.cuda.is_available())
+    else:
+        loader = DataLoader(ds, batch_size=batch_size, shuffle=shuffle, num_workers=workers,
+                            collate_fn=collate, drop_last=True, pin_memory=torch.cuda.is_available())
+    return loader, ds
 
 
 def main() -> int:
@@ -45,6 +53,9 @@ def main() -> int:
     ap.add_argument("--workers", type=int, default=8, help="cap this on many-core Vast boxes")
     ap.add_argument("--embed_dim", type=int, default=256)
     ap.add_argument("--warmup", type=int, default=3)
+    ap.add_argument("--poly_families", default="",
+                    help="polymorph family map (e.g. refcodes/polymorph_families.json); when set, "
+                         "co-locate sibling polymorphs in each batch as hard negatives (pivot)")
     ap.add_argument("--smoke", action="store_true", help="tiny CPU run to verify the loop end to end")
     ap.add_argument("--overfit", type=int, default=0, help="overfit N structures, no aug (sanity)")
     args = ap.parse_args()
@@ -57,6 +68,7 @@ def main() -> int:
         args.epochs, args.batch_size, args.workers = 2, 16, 0
 
     # --- data ---
+    train_sampler = None
     if args.overfit:
         store = StickStore(args.sticks)
         refs = store.refcodes[: args.overfit]
@@ -71,7 +83,16 @@ def main() -> int:
             train_refs, val_refs = train_refs[:200], val_refs[:64]
         need = set(train_refs) | set(val_refs)
         store = StickStore(args.sticks, refcodes=need)
-        train_loader, _ = build_loader(store, train_refs, args.batch_size, True, args.workers)
+        if args.poly_families:
+            from xrdclip.data.polymorph import load_families, PolymorphBatchSampler
+            fams = load_families(args.poly_families)
+            train_sampler = PolymorphBatchSampler(train_refs, fams, args.batch_size, seed=0)
+            print(f"[train] polymorph hard-negative batches: {train_sampler.n_families:,} families / "
+                  f"{train_sampler.n_family_structs:,} structs, {len(train_sampler):,} batches/epoch")
+            train_loader, _ = build_loader(store, train_refs, args.batch_size, True, args.workers,
+                                           batch_sampler=train_sampler)
+        else:
+            train_loader, _ = build_loader(store, train_refs, args.batch_size, True, args.workers)
         val_loader, _ = build_loader(store, val_refs, min(args.batch_size, len(val_refs)),
                                      False, args.workers, shuffle=False)
         print(f"[train] {len(train_refs):,} train / {len(val_refs):,} val on {device}")
@@ -92,6 +113,8 @@ def main() -> int:
     best_val = -1.0
     for epoch in range(args.epochs):
         model.train()
+        if train_sampler is not None:
+            train_sampler.set_epoch(epoch)      # fresh polymorph-aware shuffle each epoch
         t0, losses, accs = time.time(), [], []
         for batch in train_loader:
             pattern = batch["pattern"].to(device)

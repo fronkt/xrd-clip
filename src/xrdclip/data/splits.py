@@ -25,6 +25,36 @@ from collections import defaultdict
 
 import numpy as np
 
+from xrdclip.data.dedup import _UnionFind
+
+
+def merge_polymorph_groups(groups: "dict[str, list[str]]",
+                           families: "dict[str, list[str]]") -> "dict[str, list[str]]":
+    """Merge scaffold groups that share a polymorph family so no family crosses a split.
+
+    WHY THIS IS NEEDED (found empirically, not on paper): scaffold grouping *usually* keeps a
+    molecule's polymorphs together (they share a scaffold), but acyclic molecules have an empty
+    Murcko scaffold and hit the `__nogroup__<rc>` per-entry fallback -- which scatters their
+    polymorphs into different splits. On the real set that leaked 1,665 of 10,795 families across
+    the boundary, which would let the within-family eval see a sibling during training. Unioning any
+    scaffold groups linked by a shared polymorph family closes that hole while leaving the ~85% of
+    families that were already intra-scaffold untouched.
+    """
+    keys = list(groups.keys())
+    kidx = {k: i for i, k in enumerate(keys)}
+    rc2key = {rc: k for k, rcs in groups.items() for rc in rcs}
+
+    uf = _UnionFind(len(keys))
+    for reps in families.values():
+        pk = list({rc2key[rc] for rc in reps if rc in rc2key})
+        for j in range(1, len(pk)):
+            uf.union(kidx[pk[0]], kidx[pk[j]])
+
+    merged: "dict[str, list[str]]" = defaultdict(list)
+    for k in keys:
+        merged[keys[uf.find(kidx[k])]].extend(groups[k])
+    return dict(merged)
+
 
 def murcko_scaffold(smiles: str) -> str:
     """Bemis-Murcko scaffold of the largest component.
@@ -117,6 +147,9 @@ def main() -> int:
     ap.add_argument("--out", default="refcodes")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--workers", type=int, default=8)
+    ap.add_argument("--poly_families", default="refcodes/polymorph_families.json",
+                    help="polymorph family map; merged into scaffold groups so no family "
+                         "crosses a split (set to '' to disable)")
     args = ap.parse_args()
 
     os.makedirs(args.out, exist_ok=True)
@@ -133,6 +166,16 @@ def main() -> int:
     if real:
         biggest = max(real.items(), key=lambda kv: len(kv[1]))
         print(f"[splits] largest scaffold family: {len(biggest[1]):,} entries")
+
+    # --- polymorph constraint: no polymorph family may straddle a split (see merge_polymorph_groups) ---
+    families = {}
+    if args.poly_families and os.path.exists(args.poly_families):
+        from xrdclip.data.polymorph import load_families
+        families = load_families(args.poly_families)
+        n_before = len(groups)
+        groups = merge_polymorph_groups(groups, families)
+        print(f"[splits] merged {n_before - len(groups):,} scaffold groups to keep "
+              f"{len(families):,} polymorph families intra-split")
 
     # --- scaffold split (the one we train on) ---
     (tr, va, te), counts = split_groups(groups, seed=args.seed)
@@ -162,8 +205,22 @@ def main() -> int:
             rc2scaf[rc] = scaf
     s_tr, s_va, s_te = ({rc2scaf[r] for r in s} for s in (tr, va, te))
     leaks = (s_tr & s_va) | (s_tr & s_te) | (s_va & s_te)
-    assert not leaks, f"SCAFFOLD LEAK across splits: {list(leaks)[:5]}"
-    print("[splits] verified: no scaffold appears in more than one split")
+    assert not leaks, f"GROUP LEAK across splits: {list(leaks)[:5]}"
+    print("[splits] verified: no group appears in more than one split")
+
+    # --- verify no polymorph family straddles a split (the reason for the merge) ---
+    poly_crossing = 0
+    if families:
+        where = {}
+        for name, s in (("train", tr), ("val", va), ("test", te)):
+            for rc in s:
+                where[rc] = name
+        for reps in families.values():
+            locs = {where[rc] for rc in reps if rc in where}
+            if len(locs) > 1:
+                poly_crossing += 1
+        assert poly_crossing == 0, f"POLYMORPH FAMILY LEAK: {poly_crossing} families straddle splits"
+        print(f"[splits] verified: 0 of {len(families):,} polymorph families cross a split")
 
     with open(os.path.join(args.out, "splits_manifest.json"), "w") as fh:
         json.dump({
@@ -171,6 +228,8 @@ def main() -> int:
             "n_scaffold_groups": len(groups),
             "scaffold_counts": {"train": counts[0], "val": counts[1], "test": counts[2]},
             "random_counts": {"train": len(rand[0]), "val": len(rand[1]), "test": len(rand[2])},
+            "respect_polymorphs": bool(families),
+            "n_polymorph_families": len(families),
             "seed": args.seed,
         }, fh, indent=2)
     return 0
