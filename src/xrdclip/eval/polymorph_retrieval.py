@@ -12,6 +12,8 @@ Two entry points, mirroring eval/retrieve.py:
 """
 from __future__ import annotations
 
+from dataclasses import replace
+
 import numpy as np
 import torch
 
@@ -66,6 +68,119 @@ def _baseline_within(groups, store, params, rng, kind: str) -> "tuple[np.ndarray
         ranks.extend(_rank_within(scores).tolist())
         sizes.extend([len(rcs)] * len(rcs))
     return np.array(ranks), np.array(sizes)
+
+
+def _params_brief(p: A.Params) -> dict:
+    """The dials that are turned on at an operating point, for the results record."""
+    return {"zero_offset": p.zero_offset, "strain": p.strain, "domain_nm": p.domain_nm,
+            "march": p.march, "counts": p.counts, "bkg_scale": p.bkg_scale, "hump_scale": p.hump_scale}
+
+
+@torch.no_grad()
+def _family_field_ranks(model, lib, recs, ref_pat, ref_pk, params_list, device, rng):
+    """Rank each family member's own query, under its OWN per-crystal params, for all three methods.
+
+    Every method scores the SAME rendered query pattern, so the comparison is over identical physics:
+      * model        z-scored pattern -> encode_pattern -> cross-modal dot with clean structure lib
+      * correlation  z-scored pattern -> Pearson vs clean rendered reference patterns
+      * peak-list    max-normed pattern -> F1 peak match vs clean reference peak lists
+    Returns (model_ranks, corr_ranks, peak_ranks), each length len(recs).
+    """
+    raw = [A.render_sticks(recs[i], params_list[i], rng=rng) for i in range(len(recs))]
+    q_std = np.stack([A.standardize(y) for y in raw])
+    q_pk = [B.extract_peaks(y) for y in raw]
+
+    x = torch.from_numpy(q_std).unsqueeze(1).to(device)
+    q_emb = model.encode_pattern(x).cpu().numpy()
+
+    m_ranks = _rank_within(q_emb @ lib.T)
+    c_ranks = _rank_within(B.correlation_search_match(q_std, ref_pat))
+    k_ranks = _rank_within(B.peak_list_match(q_pk, ref_pk))
+    return m_ranks, c_ranks, k_ranks
+
+
+@torch.no_grad()
+def within_family_field_average(model, store, groups, points, device, seed=0) -> dict:
+    """Field-average within-family top-1: model vs correlation vs peak-list vs chance.
+
+    within_family_sweep turns one dial at a time; that answers "which physical effect does the
+    embedding survive?" but not "does it win in the field, where every effect is present at once?".
+    The naive answer — one Params with several dials on together — is a TRAP: a fixed same-sign
+    sample-displacement and thermal strain partially CANCEL in the mid-angle range (displacement
+    pushes 2theta up, cell expansion pushes it down), which artificially rescues full-profile
+    correlation; flip one sign and correlation collapses again. A single deterministic operating
+    point therefore reports whatever the experimenter's sign choice happens to be worth.
+
+    So each crystal here gets its OWN sample-displacement and thermal strain, drawn independently
+    (sign and magnitude) from a realistic band, on top of a fixed base of broadening / texture /
+    noise / background. Over the test set both cancellation and addition occur at their natural
+    rates, so the number is the honest expectation over real samples. The model, trained to be
+    shift-invariant, is flat regardless; correlation pays the average cost of a shift it cannot
+    count on cancelling. Each `point` is {"base": Params, "zo_band": deg, "strain_band": frac}.
+    """
+    rng = np.random.default_rng(seed)
+    stems = list(groups.keys())
+    lib_by_stem = {s: embed_library(model, store, groups[s], device) for s in stems}
+    recs_by_stem = {s: [store[rc] for rc in groups[s]] for s in stems}
+    refpat_by_stem = {s: np.stack([A.standardize(A.render_sticks(r, A.CLEAN)) for r in recs_by_stem[s]])
+                      for s in stems}
+    refpk_by_stem = {s: [B.extract_peaks(A.render_sticks(r, A.CLEAN)) for r in recs_by_stem[s]]
+                     for s in stems}
+    sizes_all = np.array([len(groups[s]) for s in stems for _ in groups[s]])
+
+    out: dict = {"chance_top1": float((1.0 / sizes_all).mean()), "points": {}}
+    for name, spec in points.items():
+        base, zb, sb = spec["base"], spec["zo_band"], spec["strain_band"]
+        m_all, c_all, k_all = [], [], []
+        for s in stems:
+            recs = recs_by_stem[s]
+            pl = [replace(base, zero_offset=float(rng.uniform(-zb, zb)),
+                          strain=float(rng.uniform(-sb, sb))) for _ in recs]
+            mr, cr, kr = _family_field_ranks(model, lib_by_stem[s], recs,
+                                             refpat_by_stem[s], refpk_by_stem[s], pl, device, rng)
+            m_all.extend(mr.tolist()); c_all.extend(cr.tolist()); k_all.extend(kr.tolist())
+        m_all, c_all, k_all = np.array(m_all), np.array(c_all), np.array(k_all)
+        out["points"][name] = {
+            "base": _params_brief(base), "zo_band": zb, "strain_band": sb,
+            "model": {"top1": float((m_all < 1).mean()), "top2": float((m_all < 2).mean()),
+                      "mrr": float((1.0 / (m_all + 1)).mean())},
+            "correlation": {"top1": float((c_all < 1).mean())},
+            "peak_list": {"top1": float((k_all < 1).mean())},
+        }
+    return out
+
+
+@torch.no_grad()
+def within_family_sign_decomposition(model, store, groups, base, zo, strain, device, seed=0) -> dict:
+    """The mechanism behind the field average: hold |displacement| and |strain| fixed and vary only
+    their RELATIVE SIGN. `add` = the two shifts reinforce; `cancel` = they oppose (mid-angle
+    cancellation). The model is flat across both (genuine invariance); correlation swings wide,
+    exposing its robustness as a coincidental-cancellation artifact rather than a real property."""
+    combos = {
+        "shifts_cancel": replace(base, zero_offset=+abs(zo), strain=+abs(strain)),   # up-shift + expansion(down) oppose
+        "shifts_add":    replace(base, zero_offset=+abs(zo), strain=-abs(strain)),    # up-shift + contraction(up) reinforce
+    }
+    rng = np.random.default_rng(seed)
+    stems = list(groups.keys())
+    lib_by_stem = {s: embed_library(model, store, groups[s], device) for s in stems}
+    sizes_all = np.array([len(groups[s]) for s in stems for _ in groups[s]])
+
+    out: dict = {"chance_top1": float((1.0 / sizes_all).mean()),
+                 "zo": abs(zo), "strain": abs(strain), "base": _params_brief(base), "combos": {}}
+    for name, p in combos.items():
+        m_ranks = []
+        for s in stems:
+            q = embed_queries(model, store, groups[s], p, device, rng)
+            m_ranks.extend(_rank_within(q @ lib_by_stem[s].T).tolist())
+        m_ranks = np.array(m_ranks)
+        c_ranks, _ = _baseline_within(groups, store, p, rng, "correlation")
+        k_ranks, _ = _baseline_within(groups, store, p, rng, "peak_list")
+        out["combos"][name] = {
+            "model": {"top1": float((m_ranks < 1).mean())},
+            "correlation": {"top1": float((c_ranks < 1).mean())},
+            "peak_list": {"top1": float((k_ranks < 1).mean())},
+        }
+    return out
 
 
 @torch.no_grad()

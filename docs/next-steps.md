@@ -34,22 +34,38 @@ sim-library / real-query setup) and pits **model** vs **full-profile correlation
 
 ## Next steps (priority order)
 
-1. **[CPU, ~10 min, checkpoint in hand] Combined realistic-degradation operating point.** Stack moderate
-   shift + strain + broadening + noise at once (the actual field condition) at one point. Converts the
-   "wins on 2 of 5 axes, one-at-a-time" figure into a single decisive headline where the learned embedding
-   is the *only* method well above chance. **Highest-value remaining experiment.**
+1. **[DONE 2026-07-17] Combined realistic-degradation experiment.** `scripts/09_combined.py` +
+   `results/combined.{json,png}`. The naive "stack every dial at fixed values" plan turned out to be a
+   **trap we caught before it shipped**: a fixed same-sign sample-displacement and thermal strain
+   *partially cancel* (displacement pushes 2θ up, cell expansion pushes it down), which artificially
+   rescues the correlation baseline; flip one sign and it collapses. So a single deterministic operating
+   point reports whatever sign the experimenter happened to pick. The honest replacement has two panels:
+   - **Field average** (per-crystal random shift signs + magnitudes, realistic bands, on top of fixed
+     broadening/texture/noise/bkg): model **flat 0.55→0.52** mild→harsh while correlation falls
+     0.78→0.60 and peak-list 0.80→0.60, converging toward but not yet crossing the model at these bands.
+   - **Sign decomposition** (identical moderate |shift|: 0.10° displacement, 0.6% strain; vary only the
+     *relative sign*) — the money panel: correlation **0.807 (cancel) → 0.334 (add)**, peak-list
+     **0.784 → 0.340**, while the model holds **0.555 → 0.534**. **For the ~50% of real samples where the
+     two shifts reinforce, both classical search-match methods fall to composition-only chance (0.38)
+     while the learned embedding is unmoved.** This is the honest, reviewer-proof headline: the model's
+     invariance is genuine and sign-independent; the baselines' apparent robustness is a coincidental
+     cancellation they cannot count on.
+   Framing note for the writeup: do **not** claim "model is the only method above chance in the field."
+   That is only true on the shifts-add half; state it exactly that way. The stability + sign-invariance
+   contrast is the real, defensible result.
 2. **[GPU, ~2.6 hr, needs a fresh box] No-augmentation ablation.** Train a twin *without* shift/strain
    augmentation; show it matches on clean but collapses under degradation. The exact answer to
    "isn't this just simulated-fingerprint leak?" — the most convincing single result for an archival paper.
-   The only remaining item that needs the GPU.
+   **The only remaining item that needs the GPU** — and the strongest lever left, since the combined
+   result is now a robustness/invariance story rather than a domination story.
 3. **Own the broadening weakness.** Either harden it (heavier broadening in the aug suite → folds into the
    #2 retrain) or frame it honestly as the method's boundary. Decide while writing.
 4. **Write the 5-pager.** Related Work anchored on XCCP/XtalNet (composition/symmetry → pinned at chance =
-   our wedge); Methods; the sweep figure reordered to lead with shift/strain; ablation table.
-5. **⚠️ GATING RISK — confirm URTC 2026 eligibility + dates NOW.** Open question: Purdue affiliation vs
-   URTC's HS-needs-a-collegiate-program rule; the ~Aug 3 date is unconfirmed. This is a Frank-action
-   (email organizers) and it is **on the critical path** — if xrd-clip can't be a paper, the fallback is a
-   poster or rerouting the finished batterycv write-up into the URTC slot. Resolve before investing in the writeup.
+   our wedge); Methods; lead the robustness figure with the sign-decomposition panel (§1 above), then the
+   shift/strain one-dial sweep, then broadening as the stated limitation; ablation table from #2.
+5. **[RESOLVED 2026-07-17 — user confirmed] URTC 2026 eligibility + dates.** Frank confirmed xrd-clip is
+   eligible and the dates are locked (was the gating risk; no longer blocking). xrd-clip proceeds as a
+   paper — no fallback to poster/batterycv-reroute needed. Remaining path is #2 (GPU ablation) + #4 (write).
 
 ## Scheduling note
 

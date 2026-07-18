@@ -1,0 +1,119 @@
+{
+  "n_families": 1077,
+  "n_targets": 2835,
+  "field": {
+    "chance_top1": 0.3798941798941799,
+    "points": {
+      "mild": {
+        "base": {
+          "zero_offset": 0.0,
+          "strain": 0.0,
+          "domain_nm": 150.0,
+          "march": 0.9,
+          "counts": 100000.0,
+          "bkg_scale": 0.05,
+          "hump_scale": 0.03
+        },
+        "zo_band": 0.05,
+        "strain_band": 0.003,
+        "model": {
+          "top1": 0.5537918871252204,
+          "top2": 0.8402116402116402,
+          "mrr": 0.733877213982323
+        },
+        "correlation": {
+          "top1": 0.7823633156966491
+        },
+        "peak_list": {
+          "top1": 0.7971781305114638
+        }
+      },
+      "moderate": {
+        "base": {
+          "zero_offset": 0.0,
+          "strain": 0.0,
+          "domain_nm": 70.0,
+          "march": 0.8,
+          "counts": 20000.0,
+          "bkg_scale": 0.1,
+          "hump_scale": 0.05
+        },
+        "zo_band": 0.1,
+        "strain_band": 0.006,
+        "model": {
+          "top1": 0.5509700176366843,
+          "top2": 0.837389770723104,
+          "mrr": 0.7317450098976758
+        },
+        "correlation": {
+          "top1": 0.674074074074074
+        },
+        "peak_list": {
+          "top1": 0.7315696649029982
+        }
+      },
+      "harsh": {
+        "base": {
+          "zero_offset": 0.0,
+          "strain": 0.0,
+          "domain_nm": 30.0,
+          "march": 0.7,
+          "counts": 5000.0,
+          "bkg_scale": 0.15,
+          "hump_scale": 0.08
+        },
+        "zo_band": 0.2,
+        "strain_band": 0.01,
+        "model": {
+          "top1": 0.5213403880070546,
+          "top2": 0.8239858906525573,
+          "mrr": 0.712553391504421
+        },
+        "correlation": {
+          "top1": 0.5992945326278659
+        },
+        "peak_list": {
+          "top1": 0.6014109347442681
+        }
+      }
+    }
+  },
+  "sign": {
+    "chance_top1": 0.3798941798941799,
+    "zo": 0.1,
+    "strain": 0.006,
+    "base": {
+      "zero_offset": 0.0,
+      "strain": 0.0,
+      "domain_nm": 70.0,
+      "march": 0.8,
+      "counts": 20000.0,
+      "bkg_scale": 0.1,
+      "hump_scale": 0.05
+    },
+    "combos": {
+      "shifts_cancel": {
+        "model": {
+          "top1": 0.5548500881834215
+        },
+        "correlation": {
+          "top1": 0.8074074074074075
+        },
+        "peak_list": {
+          "top1": 0.7837742504409171
+        }
+      },
+      "shifts_add": {
+        "model": {
+          "top1": 0.5340388007054674
+        },
+        "correlation": {
+          "top1": 0.3340388007054674
+        },
+        "peak_list": {
+          "top1": 0.3400352733686067
+        }
+      }
+    }
+  }
+}

@@ -21,6 +21,8 @@
 /results/*
 !/results/polymorph.json
 !/results/polymorph.png
+!/results/combined.json
+!/results/combined.png
 # Local pre-pivot splits safety copy — already recoverable from git history (commit 786cdca).
 /refcodes/_pre_polymorph_backup/
 !refcodes/
