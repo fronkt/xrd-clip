@@ -1,7 +1,8 @@
 # xrd-clip — post-run next steps (toward IEEE URTC 2026)
 
-**Status as of 2026-07-17.** The polymorph-pivot training run + full degradation sweep are **done**.
-The experiment is ~90% complete; what remains is *hardening the result* and *writing*, not new capability.
+**Status as of 2026-07-18.** The polymorph-pivot training run, full degradation sweep, **and both
+no-augmentation ablations are done**. All GPU work for xrd-clip is complete; every remaining item is
+CPU/writing. The experiment is ~95% complete — what remains is the writeup.
 This doc is the live next-steps ledger. Pre-run rationale lives in `polymorph-pivot-plan.md` +
 `competitive-landscape-2026.md` (unchanged); the results/figure are committed at `results/polymorph.{json,png}`.
 
@@ -29,8 +30,20 @@ sim-library / real-query setup) and pits **model** vs **full-profile correlation
   - March-Dollase texture + Poisson noise: model stable (~0.53–0.56) but second to correlation's ~1.0.
 - **Clean caveat:** at zero degradation the model (0.561) loses to trivial baselines because clean
   within-family retrieval is self-matching an identical simulated pattern (correlation = 1.0 trivially).
-  That is the *context*, not the result. Robustness here is **learned** (shift/strain were in the training
-  augmentation suite), not emergent — state this plainly before a reviewer does.
+  That is the *context*, not the result.
+- **What the ablations settle (2026-07-18, both DONE) — the earlier "robustness is learned (shift/strain)"
+  note was WRONG on the shift/strain half.** The robustness decomposes into two distinct kinds:
+  - **Peak-position (shift/strain) invariance is EMERGENT / architectural**, *not* taught by augmentation.
+    A twin trained with the shift+strain ranges zeroed (`--no_shift_aug`) tracks the main model within
+    ≤1% everywhere (clean 0.553; field 0.560/0.547/0.528). A twin trained on perfectly clean patterns
+    (`--no_aug`) is *still* flat under a pure zero-offset sweep (0.557→0.552 at 0.1°). Removing the shift
+    augmentation costs nothing — the encoder is intrinsically shift/strain tolerant.
+  - **Measurement-profile robustness (broadening / texture / noise / background) is LEARNED** from the
+    physics-grounded augmentation. The `--no_aug` twin collapses to composition-only chance (0.38) the
+    moment realistic profile effects are present — full-field mild/mod/harsh = **0.380/0.381/0.379**, and
+    the broadening sweep alone walks it down **0.557→0.410→0.395→0.390** (100/50/20 nm). This is the direct
+    refutation of "isn't this just simulated-fingerprint leak?": a clean-trained encoder cannot retrieve
+    under realistic conditions *at all*; the augmentation is doing genuine sim→real generalization work.
 
 ## Next steps (priority order)
 
@@ -53,22 +66,36 @@ sim-library / real-query setup) and pits **model** vs **full-profile correlation
    Framing note for the writeup: do **not** claim "model is the only method above chance in the field."
    That is only true on the shifts-add half; state it exactly that way. The stability + sign-invariance
    contrast is the real, defensible result.
-2. **[GPU, ~2.6 hr, needs a fresh box] No-augmentation ablation.** Train a twin *without* shift/strain
-   augmentation; show it matches on clean but collapses under degradation. The exact answer to
-   "isn't this just simulated-fingerprint leak?" — the most convincing single result for an archival paper.
-   **The only remaining item that needs the GPU** — and the strongest lever left, since the combined
-   result is now a robustness/invariance story rather than a domination story.
-3. **Own the broadening weakness.** Either harden it (heavier broadening in the aug suite → folds into the
-   #2 retrain) or frame it honestly as the method's boundary. Decide while writing.
+2. **[DONE 2026-07-18] No-augmentation ablation (the leak-quantifier).** Ran two twins on a fresh RTX 5090
+   (box 45213443, **destroyed after pull**; checkpoints md5-verified local, CSD-trained → never pushed).
+   Identical arch/data/60-epochs, only the train-time augmentation changed:
+   - `--no_shift_aug` (strain + zero-offset ranges zeroed, broadening/texture/noise/bkg kept): clean 0.553,
+     field 0.560/0.547/0.528 — **matches the main model within ≤1% everywhere.** ⇒ shift/strain invariance
+     is architectural, not augmentation-taught.
+   - `--no_aug` (train on clean, zero augmentation): clean 0.557 and shift-flat (0.552 @ 0.1°), but
+     full-field **0.380/0.381/0.379 = chance**, broadening sweep **0.557→0.390**. ⇒ measurement-profile
+     robustness is *learned*, and the result is not fingerprint leak.
+   Results committed: `results/{polymorph,combined}_{noshift,noaug}.{json,png}`; this is the paper's
+   ablation table (see § "What the ablations settle" above). **No GPU items remain for xrd-clip.**
+3. **Own the broadening weakness (reframed by the ablation).** Broadening robustness *is* learned — the
+   `--no_aug` twin has none (collapses to ~chance by 20 nm) while the main model recovers most of it
+   (~0.47 at 10 nm). The residual gap to full-profile correlation only at *extreme* broadening is the one
+   honest limitation to state. No retrain needed for the ablation story; decide during writing whether to
+   push heavier broadening into the aug suite or simply frame the boundary.
 4. **Write the 5-pager.** Related Work anchored on XCCP/XtalNet (composition/symmetry → pinned at chance =
    our wedge); Methods; lead the robustness figure with the sign-decomposition panel (§1 above), then the
-   shift/strain one-dial sweep, then broadening as the stated limitation; ablation table from #2.
+   shift/strain one-dial sweep, then broadening as the stated limitation. **The ablation (§2 / "What the
+   ablations settle") is the central defense** and belongs early in Results: it pre-empts the two reviewer
+   objections at once — "just fingerprint leak" (refuted: `--no_aug` collapses to chance under realistic
+   profile) and "robustness is just your augmentation" (refuted for the shift/strain half: `--no_shift_aug`
+   costs nothing → that invariance is architectural). Present it as a table + one sentence of framing.
 5. **[RESOLVED 2026-07-17 — user confirmed] URTC 2026 eligibility + dates.** Frank confirmed xrd-clip is
    eligible and the dates are locked (was the gating risk; no longer blocking). xrd-clip proceeds as a
    paper — no fallback to poster/batterycv-reroute needed. Remaining path is #2 (GPU ablation) + #4 (write).
 
 ## Scheduling note
 
-xrd-clip's GPU run is complete and the Vast box is destroyed. Step #2 is the only xrd-clip item still
-needing the GPU; everything else is CPU/writing. **The GPU is therefore free now** — pxrd-flow Phase-B
-(previously blocked until ~Aug 4) is unblocked ~2.5 weeks early. See `pxrd-flow/tasks/todo.md`.
+All xrd-clip GPU work is complete and every Vast box is destroyed (the ablation box 45213443 was torn
+down 2026-07-18 after checkpoints + results were pulled and md5-verified). Nothing xrd-clip needs the GPU
+anymore — the remainder is writing. **The GPU is therefore free** — pxrd-flow Phase-B (previously blocked
+until ~Aug 4) is unblocked ~2.5 weeks early. See `pxrd-flow/tasks/todo.md`.

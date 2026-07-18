@@ -23,6 +23,15 @@
 !/results/polymorph.png
 !/results/combined.json
 !/results/combined.png
+# Ablation results (2026-07-18): same aggregate-metrics + line-plot content, safe to track.
+!/results/polymorph_noshift.json
+!/results/polymorph_noshift.png
+!/results/combined_noshift.json
+!/results/combined_noshift.png
+!/results/polymorph_noaug.json
+!/results/polymorph_noaug.png
+!/results/combined_noaug.json
+!/results/combined_noaug.png
 # Local pre-pivot splits safety copy — already recoverable from git history (commit 786cdca).
 /refcodes/_pre_polymorph_backup/
 !refcodes/
