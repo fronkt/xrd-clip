@@ -16,7 +16,13 @@
 # The *.cif rule does NOT catch CIFs embedded in a .gz, so the whole cache is blocked explicitly.
 /cache/
 /runs/
-/results/
+# Block results/ wholesale, EXCEPT the headline metrics + figure: these are aggregate retrieval
+# numbers and a matplotlib line-plot only — no coordinates, no refcodes — so they are safe to track.
+/results/*
+!/results/polymorph.json
+!/results/polymorph.png
+# Local pre-pivot splits safety copy — already recoverable from git history (commit 786cdca).
+/refcodes/_pre_polymorph_backup/
 !refcodes/
 !refcodes/*.txt
 
