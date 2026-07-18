@@ -58,6 +58,12 @@ def main() -> int:
                          "co-locate sibling polymorphs in each batch as hard negatives (pivot)")
     ap.add_argument("--smoke", action="store_true", help="tiny CPU run to verify the loop end to end")
     ap.add_argument("--overfit", type=int, default=0, help="overfit N structures, no aug (sanity)")
+    ap.add_argument("--no_aug", action="store_true",
+                    help="ablation: train on CLEAN patterns, no augmentation at all (the leak-quantifier)")
+    ap.add_argument("--no_shift_aug", action="store_true",
+                    help="ablation: keep broadening/texture/noise/bkg but ZERO the shift+strain ranges, "
+                         "to test whether the shift/strain degradation-robustness is learned from "
+                         "augmentation (the main claim) rather than emergent from contrastive training")
     args = ap.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -66,6 +72,18 @@ def main() -> int:
 
     if args.smoke:
         args.epochs, args.batch_size, args.workers = 2, 16, 0
+
+    # --- augmentation policy (ablations) ---
+    import dataclasses
+    train_augment = not args.no_aug
+    train_ranges = A.Ranges()
+    if args.no_shift_aug:
+        # keep every other physical effect, but the model never sees a shifted/strained pattern
+        train_ranges = dataclasses.replace(train_ranges, strain=(0.0, 0.0), zero_offset=(0.0, 0.0))
+    if args.no_aug:
+        print("[train] ABLATION --no_aug: training on CLEAN patterns (no augmentation)")
+    elif args.no_shift_aug:
+        print("[train] ABLATION --no_shift_aug: shift+strain augmentation disabled, rest kept")
 
     # --- data ---
     train_sampler = None
@@ -89,10 +107,12 @@ def main() -> int:
             train_sampler = PolymorphBatchSampler(train_refs, fams, args.batch_size, seed=0)
             print(f"[train] polymorph hard-negative batches: {train_sampler.n_families:,} families / "
                   f"{train_sampler.n_family_structs:,} structs, {len(train_sampler):,} batches/epoch")
-            train_loader, _ = build_loader(store, train_refs, args.batch_size, True, args.workers,
+            train_loader, _ = build_loader(store, train_refs, args.batch_size, train_augment,
+                                           args.workers, ranges=train_ranges,
                                            batch_sampler=train_sampler)
         else:
-            train_loader, _ = build_loader(store, train_refs, args.batch_size, True, args.workers)
+            train_loader, _ = build_loader(store, train_refs, args.batch_size, train_augment,
+                                           args.workers, ranges=train_ranges)
         val_loader, _ = build_loader(store, val_refs, min(args.batch_size, len(val_refs)),
                                      False, args.workers, shuffle=False)
         print(f"[train] {len(train_refs):,} train / {len(val_refs):,} val on {device}")
