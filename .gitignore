@@ -60,3 +60,11 @@ venv/
 .idea/
 .DS_Store
 Thumbs.db
+
+# LaTeX build aux (keep .tex/.bib/.pdf, drop intermediates)
+paper/*.aux
+paper/*.log
+paper/*.blg
+paper/*.bbl
+paper/*.out
+paper/*.synctex.gz
