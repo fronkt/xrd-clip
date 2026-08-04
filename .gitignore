@@ -32,6 +32,9 @@
 !/results/polymorph_noaug.png
 !/results/combined_noaug.json
 !/results/combined_noaug.png
+# Real-pattern sim-to-real check (2026-08-04): ranks/nearest-neighbours over public refcodes only
+# (no CSD coordinates/CIF content) -- consistent with refcodes/*.txt already being tracked.
+!/results/real_pattern_eval.json
 # Local pre-pivot splits safety copy — already recoverable from git history (commit 786cdca).
 /refcodes/_pre_polymorph_backup/
 !refcodes/

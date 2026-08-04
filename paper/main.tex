@@ -254,16 +254,36 @@ augmentation is doing genuine simulation-to-realistic generalization;
 measurement-profile robustness is \textbf{learned}, while peak-position invariance
 is architectural.
 
+\section{A sim-to-real spot check}\label{sec:realcheck}
+Every result above evaluates the model on the same physics-based simulator it was
+trained with. As an initial check of transfer beyond the simulator, we retrieved
+three \emph{real} experimental PXRD patterns against the full 30{,}887-structure
+test library, digitized point-by-point from the Rietveld powder-refinement data
+deposited as supporting information with the structures' original
+determination papers (Cu-K$\alpha_1$, matching our simulation exactly). For
+racemic ibuprofen (IBPRAC04)~\cite{derollez2010ibuprofen}---whose structure is a
+corpus entry, but whose \emph{real measured pattern} the model has never seen in
+any form---the true structure ranks \textbf{1{,}872 of 30{,}887} by cosine
+similarity (top 6.1\%): well above the library midpoint on a single real query,
+though not top-1. For two real patterns of phenobarbital polymorphs Form
+I/II~\cite{platteau2005phenobarbital}, the specific determination is not itself a
+corpus structure (only sibling PHBARB polymorphs are), so no retrieval rank
+applies; nearest-neighbour inspection surfaced no chemically plausible match,
+underscoring that retrieval scoring requires the query's true structure to be a
+library candidate. This is a small-$N$ spot check, not a systematic real-data
+benchmark---scaling it to the tens of real molecular patterns available in the
+powder-diffraction literature is the natural next step.
+
 \section{Limitations}
-Evaluation is on simulated patterns with a physics-grounded measurement model;
-transfer to experimental patterns (e.g., zero-shot to deposited powder data) is
-future work, for which our augmentation and the sign-cancellation control are
-designed as the diagnostics. The model concedes severe Scherrer broadening to
-full-profile correlation, and within-family top-1 of 0.561, while well above the
-0.380 chance floor, leaves clear headroom---an explicit low-angle/wide-angle
-encoder split~\cite{xu2025xccp} and light Rietveld reranking are natural next
-steps. Our benchmark is molecular (CSD); the inorganic and MOF regimes are already
-served by composition/symmetry-aware retrieval~\cite{xu2025xccp,lai2025xtalnet}.
+The sim-to-real check above is a single-digit-$N$ spot check, not a systematic
+benchmark; the bulk of our evaluation remains on the physics-grounded simulator,
+for which our augmentation and the sign-cancellation control are designed as
+diagnostics. The model concedes severe Scherrer broadening to full-profile
+correlation, and within-family top-1 of 0.561, while well above the 0.380 chance
+floor, leaves clear headroom---an explicit low-angle/wide-angle encoder
+split~\cite{xu2025xccp} and light Rietveld reranking are natural next steps. Our
+benchmark is molecular (CSD); the inorganic and MOF regimes are already served by
+composition/symmetry-aware retrieval~\cite{xu2025xccp,lai2025xtalnet}.
 
 \section{Conclusion}
 Molecular polymorph discrimination is the regime where composition- and

@@ -49,6 +49,26 @@ reads as honest scoping. Because Xplore inclusion is permanent, adding even a ha
 experimental patterns before submission is the single highest-leverage de-risking move.
 
 ## Paper status
-Drafted + compiled: `paper/main.tex` + `paper/refs.bib` (14 citations verified programmatically) +
-`paper/main.pdf` (4 pp). Figures regenerate from committed results via `scripts/10_paper_figs.py`.
-**Remaining = Frank hand-reviews and submits** (AI does not write the submission; review only).
+Drafted + compiled: `paper/main.tex` + `paper/refs.bib` (16 citations verified programmatically) +
+`paper/main.pdf` (still 4 pp after the addition below). Figures regenerate from committed results
+via `scripts/10_paper_figs.py`.
+
+**UPDATE 2026-08-04: sim-to-real spot check added.** The prior "evaluated only on simulated
+patterns" limitation is now partially addressed. Sourced 3 real experimental PXRD patterns from
+IUCr supplementary information (Rietveld powder-refinement CIFs deposited with the original
+structure-determination papers, Cu-K$\alpha_1$ throughout, digitized point-by-point since
+curl-based IUCr SI access from this session's earlier working method is now blocked by
+Cloudflare -- fetched via a real browser session instead). Real patterns + provenance in
+`cache/real_patterns/*.json` (gitignored, not redistributable-scale but small enough to be
+low-risk; not currently pushed -- Frank's call whether to commit). Eval script
+`scripts/11_real_pattern_eval.py` (reuses `retrieve.embed_library`/`baselines`, new code only for
+the real-pattern preprocessing + reporting). Result: IBPRAC04 (ibuprofen, corpus structure, never-seen
+real pattern) ranks 1,872/30,887 by cosine similarity against the full test library (top 6.1%,
+`results/real_pattern_eval.json`). PHBARB05 (phenobarbital Form I/II, real polymorph pair) has no
+retrieval rank since its specific determination is not itself a corpus structure -- reported
+honestly as a scope note, not spun. Sanity-verified: real vs. simulated IBPRAC04 pattern correlate
+at 0.89 with near-identical peak positions (`cache/real_patterns/_sanity_ibprac04.png`), confirming
+the grid/wavelength pipeline is correct. New paper section `\section{A sim-to-real spot check}`
+added before Limitations; Limitations reworded to say "single-digit-N spot check" instead of "future
+work." **Remaining = Frank hand-reviews and submits** (AI does not write the submission; review
+only).

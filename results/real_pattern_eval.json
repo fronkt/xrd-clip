@@ -1,0 +1,103 @@
+{
+  "n_real_patterns": 3,
+  "n_library": 30887,
+  "results": [
+    {
+      "refcode": "IBPRAC04",
+      "base_refcode": "IBPRAC04",
+      "source_doi": "10.1107/S0108768109047363",
+      "n_raw_points": null,
+      "n_library": 30887,
+      "top5_nearest": [
+        [
+          "UWATEV01",
+          0.5521194934844971
+        ],
+        [
+          "UZIJUL01",
+          0.5447193384170532
+        ],
+        [
+          "MOJBOD01",
+          0.5445137023925781
+        ],
+        [
+          "MIPYEP",
+          0.5436569452285767
+        ],
+        [
+          "MIPYEP06",
+          0.5387211441993713
+        ]
+      ],
+      "own_structure_in_library": true,
+      "rank_of_true_structure": 1872,
+      "percentile": 0.9393919772072393,
+      "top1": false,
+      "top10": false,
+      "top100": false
+    },
+    {
+      "refcode": "PHBARB05_FormI",
+      "base_refcode": "PHBARB05",
+      "source_doi": "10.1107/S0108768104031143",
+      "n_raw_points": 3946,
+      "n_library": 30887,
+      "top5_nearest": [
+        [
+          "BUJTEJ",
+          0.5985446572303772
+        ],
+        [
+          "IREJUM",
+          0.561049222946167
+        ],
+        [
+          "CANYOJ",
+          0.5473383069038391
+        ],
+        [
+          "GIJYEF",
+          0.5446306467056274
+        ],
+        [
+          "USUGEW",
+          0.5435437560081482
+        ]
+      ],
+      "own_structure_in_library": false,
+      "note": "PHBARB05 itself is not a corpus structure (sibling polymorphs may be); reporting nearest neighbours only"
+    },
+    {
+      "refcode": "PHBARB05_FormII",
+      "base_refcode": "PHBARB05",
+      "source_doi": "10.1107/S0108768104031143",
+      "n_raw_points": 3946,
+      "n_library": 30887,
+      "top5_nearest": [
+        [
+          "GIJYEF",
+          0.6032578945159912
+        ],
+        [
+          "USUGEW",
+          0.586438775062561
+        ],
+        [
+          "BUJTEJ",
+          0.5760658979415894
+        ],
+        [
+          "IREJUM",
+          0.5679582357406616
+        ],
+        [
+          "BODZEB",
+          0.5581728219985962
+        ]
+      ],
+      "own_structure_in_library": false,
+      "note": "PHBARB05 itself is not a corpus structure (sibling polymorphs may be); reporting nearest neighbours only"
+    }
+  ]
+}
