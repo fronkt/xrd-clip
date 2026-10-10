@@ -315,3 +315,29 @@ The original claim is kept next to each correction.
 | Szymanski 2021: JADE 71.4% | The paper prints 53/76 = 71.4%, but 53/76 = 69.7%. Cite the fraction. |
 | VC-PWDF: 44,939 pairs, 2.84% vs 12.35% disagreement with COMPACK | Search-snippet only (the RSC page returned 403). Don't cite the numbers until read. |
 | MS2Query mean Tanimoto 0.67 | It is 0.63. |
+
+---
+
+## 10. Gate G0 readout (2026-10-10)
+
+Full run: 1,077 families / 2,835 queries, 35 conditions, every method scoring identical rendered
+queries. Ran on a rented RTX 3090 box (~$0.25), destroyed after the pull. Table: `results/g0_table.md`.
+Figure: `results/strong_baselines.png`. Raw: `results/sb_w{1..4}.json` + per-query ranks `.npz`.
+
+**Verdict: the model loses to the best strong baseline in all 35 conditions, with non-overlapping
+95 % family-bootstrap CIs.** The URTC robustness edge came entirely from weak baselines.
+- **2θ zero offset:** Pearson with a zero-shift scan scores 1.000 at every offset; the model scores 0.52–0.56. The 0.88–0.91 dips at 0.05° and 0.15° are sub-grid artefacts of a 0.02° scan step, and interpolating would remove them.
+- **Isotropic strain:** the ln q scan holds 0.86–0.91 out to 1.2 %; the model holds 0.55.
+- **Broadening, texture and noise:** shift-scanned Pearson stays at 0.78–1.00.
+- **Anisotropic thermal strain** (the realistic sim-to-real case) is where the gap is smallest. Every classical method decays with ΔT (WCC l = 2: 0.84 → 0.67 from 50 K to 200 K), while the model stays flat at about 0.55. The gap shrinks from −0.29 to −0.12.
+- **Field-thermal harsh:** −0.12 (model 0.523 vs WCC 0.644). No crossover yet at the strains tested.
+- **VC reimplementation (B3):** it underperforms the cheap baselines on these within-family sets: 0.73 clean, 0.64–0.66 under thermal strain. Even with the strain prior, its cell freedom lets siblings fit. Not quotable until it is validated against critic2.
+
+**What this means for the plan:**
+1. "The learned embedding is more robust than search-match" is dead for simulated queries. v2 must not claim it.
+2. The model's bottleneck is **discrimination**: a clean ceiling of 0.56, against 1.0 for any profile comparison. Its invariance is real (it is the flattest curve on every axis), but that does not help when the starting point is this low.
+3. **The speed argument is weaker than the plan assumed.** Shift-scanned Pearson/WCC costs about 100 µs per pair on CPU, so about 3 s per query over the 31k library, and plain Pearson over the full library is a single matrix multiply. Only the VC-class methods (tens of seconds per candidate) are slow enough for a learned shortlist to matter.
+4. **Real data is now the deciding test.**
+   - The one regime that trends the model's way is large anisotropic strain combined with a degraded profile, which is exactly what real low-temperature-CSD vs room-temperature-pattern queries look like.
+   - Tier A data is in hand: **196 molecular-organic patterns in opXRD CNRS** (164 with H atoms, 32 with H omitted). About 100 are Cu Kα and the rest synchrotron, convertible through d-spacing. Extracted to `C:/Users/frank/xrd-clip-data/opxrd/opxrd_cnrs_organic.json`, outside git; CC BY 4.0.
+   - **Next:** match these to CSD refcodes, then run model vs B1/B2 on real queries. The kill criterion in Section 5 applies directly. If the model's real recall is no better than WCC's, stop the learned-retrieval line and salvage the benchmark.

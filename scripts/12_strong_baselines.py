@@ -129,7 +129,7 @@ def main() -> int:
     from xrdclip.models.clip import XRDClip
     from xrdclip.eval.retrieve import embed_library
 
-    torch.set_num_threads(os.cpu_count() or 4)
+    torch.set_num_threads(int(os.environ.get("NTHREADS", os.cpu_count() or 4)))   # nproc lies on capped boxes
     device = "cuda" if torch.cuda.is_available() else "cpu"
     with open(args.test_refs) as fh:
         test_refs = [ln.strip() for ln in fh if ln.strip()]
@@ -207,7 +207,7 @@ def main() -> int:
             # query (see vc_gpwdf_scores docstring). Tuned on 40 families only: lam 0.003 was best
             # on thermal strain (0.72 vs 0.52 unregularised). Needs critic2 validation.
             sc = SB.vc_gpwdf_scores(qpk, flat_recs, pairs, sigmas=(0.4, 0.2, 0.1),
-                                    prior=(0.003, 0.01, 0.5))
+                                    prior=(0.003, 0.01, 0.5), device=device)
             secs["vc"] = time.perf_counter() - t
             p = 0
             for k, s in enumerate(stems):

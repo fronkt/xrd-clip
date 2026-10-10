@@ -19,6 +19,10 @@
 # Block results/ wholesale, EXCEPT the headline metrics + figure: these are aggregate retrieval
 # numbers and a matplotlib line-plot only — no coordinates, no refcodes — so they are safe to track.
 /results/*
+# v2 Phase 0 / Gate G0 (2026-10-10): aggregate metrics + figure + table only (ranks .npz stay ignored).
+!/results/strong_baselines.json
+!/results/strong_baselines.png
+!/results/g0_table.md
 !/results/polymorph.json
 !/results/polymorph.png
 !/results/combined.json

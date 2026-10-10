@@ -195,7 +195,8 @@ def _overlap(t1, w1, m1, t2, w2, m2, sig):
 def vc_gpwdf_scores(q_peaks: "list[tuple[np.ndarray, np.ndarray]]", cands: "list[dict]",
                     pairs: "list[tuple[int, int]]", max_elong: float = 0.10, max_ang: float = 5.0,
                     max_zero: float = 0.5, sigmas=(0.40, 0.20, 0.10, 0.05), steps: int = 40,
-                    zero_init: "np.ndarray | None" = None, chunk: int = 2048,
+                    zero_init: "np.ndarray | None" = None, max_elems: float = 1.5e8,
+                    device: str = "cpu",
                     prior: "tuple[float, float, float] | None" = None,
                     return_params: bool = False):
     """B3 similarity in [0, 1] for each (query index, candidate index) pair.
@@ -213,9 +214,17 @@ def vc_gpwdf_scores(q_peaks: "list[tuple[np.ndarray, np.ndarray]]", cands: "list
     """
     out = np.zeros(len(pairs), dtype=np.float32)
     params_out = np.zeros((len(pairs), 7), dtype=np.float32)
-    order = np.argsort([len(cands[j]["two_theta"]) for _, j in pairs])   # pad similar sizes together
-    for s0 in range(0, len(order), chunk):
-        sel = order[s0: s0 + chunk]
+    sizes = np.array([len(cands[j]["two_theta"]) for _, j in pairs])
+    order = np.argsort(sizes)                                          # pad similar sizes together
+    # Memory-bounded chunks: the candidate self-overlap is P x nc x nc, which for P = 2048 and
+    # nc = 1000 reflections is 8 GB. Cap P * nc^2 at max_elems instead of P.
+    chunks, s0 = [], 0
+    while s0 < len(order):
+        s1 = s0 + 1
+        while s1 < len(order) and (s1 - s0 + 1) * int(sizes[order[s1]]) ** 2 <= max_elems:
+            s1 += 1
+        chunks.append(order[s0:s1]); s0 = s1
+    for sel in chunks:
         P = len(sel)
         nq = max(len(q_peaks[pairs[k][0]][0]) for k in sel)
         nc = max(len(cands[pairs[k][1]]["two_theta"]) for k in sel)
@@ -234,11 +243,12 @@ def vc_gpwdf_scores(q_peaks: "list[tuple[np.ndarray, np.ndarray]]", cands: "list
             mc[row, :n] = 1
             cell0[row] = torch.from_numpy(np.asarray(c["cell"], dtype=np.float32))
 
+        tq, wq, mq, hkl, wc, mc, cell0 = (x.to(device) for x in (tq, wq, mq, hkl, wc, mc, cell0))
         raw = torch.zeros(P, 7)
         if zero_init is not None:
             z0 = np.clip(zero_init[sel] / max_zero, -0.95, 0.95)
             raw[:, 6] = torch.from_numpy(np.arctanh(z0).astype(np.float32))
-        raw.requires_grad_(True)
+        raw = raw.to(device).requires_grad_(True)
         opt = torch.optim.Adam([raw], lr=0.05)
 
         def score(sig):
@@ -263,8 +273,8 @@ def vc_gpwdf_scores(q_peaks: "list[tuple[np.ndarray, np.ndarray]]", cands: "list
                 loss.backward()
                 opt.step()
         with torch.no_grad():
-            out[sel] = score(sigmas[-1]).numpy()
-            params_out[sel, :3] = (max_elong * torch.tanh(raw[:, :3])).numpy()
-            params_out[sel, 3:6] = (max_ang * torch.tanh(raw[:, 3:6])).numpy()
-            params_out[sel, 6] = (max_zero * torch.tanh(raw[:, 6])).numpy()
+            out[sel] = score(sigmas[-1]).cpu().numpy()
+            params_out[sel, :3] = (max_elong * torch.tanh(raw[:, :3])).cpu().numpy()
+            params_out[sel, 3:6] = (max_ang * torch.tanh(raw[:, 3:6])).cpu().numpy()
+            params_out[sel, 6] = (max_zero * torch.tanh(raw[:, 6])).cpu().numpy()
     return (out, params_out) if return_params else out
