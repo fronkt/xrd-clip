@@ -6,10 +6,10 @@ Status: PLAN ONLY — awaiting Frank's go on Phase 0–1 (free, CPU) (Purdue XRD
 - [x] P0 B2 ln-q lag scan + 2θ zero scan — built + tested
 - [~] P0 B3 torch VC-GPWDF — built + tested; unregularised it bends sibling cells onto the query (clean 0.71 vs fixed-cell 1.0, 40 fams); strain prior λ=0.003 → thermal 0.72. critic2 validation OPEN
 - [ ] P0 B4 hand-crafted peak-feature vector index
-- [~] P0 full sweep `scripts/12_strong_baselines.py --no_vc` — KILLED at 4/34 conditions by Claude Code low-memory reaper (not a bug; resume with --only for remaining). Then VC on key conditions → Gate G0
+- [x] P0 full sweep (35 conditions, Vast 3090 ~$0.25, destroyed) → **G0: model loses everywhere, non-overlapping CIs; smallest gap = anisotropic thermal (−0.12)**. See plan §10 + results/g0_table.md
 - [ ] P1 recall@k ceiling (k 5–200) + rerank (B1/B2/B3/fusion GBDT) + accuracy-vs-time Pareto → Gate G1
 - [ ] P2 ibuprofen diagnosis (bkg subtraction, B1/B3, emb→B3)
-- [ ] P2 Tier A: opXRD CNRS organic filter + CSD refcode match; DASH + SDPD patterns
+- [~] P2 Tier A: opXRD CNRS organic filter DONE (196 patterns; data in C:/Users/frank/xrd-clip-data/opxrd) → NEXT: CSD refcode match + real-query eval (decisive for kill criterion); DASH + SDPD still open
 - [x] P2 CSD powder-study CIFs: API CIFs carry NO raw profiles; 99 powder studies in test lib (36 in families, 93 DOIs) → refcodes/powder_study_test_refs.json = IUCr/SI scrape targets
 - [x] P2 Tier C: Gmail DRAFTS made 10-10 (ICDD addressed; Johnson draft needs recipient) — Frank sends
 - [ ] P2 Tier B: Purdue measurement — DEFERRED until after apps + STS (Frank 10-10); G2 runs on Tier A/C + CSD check
