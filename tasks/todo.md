@@ -1,6 +1,6 @@
 # xrd-clip v2 continuation — 2026-10-10 (plan: docs/continuation-plan-2026-10.md)
 
-Status: PLAN ONLY — awaiting Frank's go on Phase 0–1 (free, CPU) and his answer on Purdue XRD access.
+Status: PLAN ONLY — awaiting Frank's go on Phase 0–1 (free, CPU) (Purdue XRD: not now, after apps + STS).
 
 - [ ] P0 B1 de Gelder WCC + zero-shift scan (l = 0.5/1/2°), validate vs CSD API WCC
 - [ ] P0 B2 ln-q lag scan + 2θ zero scan
@@ -12,7 +12,7 @@ Status: PLAN ONLY — awaiting Frank's go on Phase 0–1 (free, CPU) and his ans
 - [ ] P2 Tier A: opXRD CNRS organic filter + CSD refcode match; DASH + SDPD patterns
 - [ ] P2 CSD powder-study CIFs: check for raw profile loops
 - [ ] P2 Tier C: DRAFT emails (ICDD pdj@icdd.com, Johnson group) — Frank sends
-- [ ] P2 Tier B: Purdue measurement (Frank decision) → Gate G2
+- [ ] P2 Tier B: Purdue measurement — DEFERRED until after apps + STS (Frank 10-10); G2 runs on Tier A/C + CSD check
 - [ ] P3 retrain levers one at a time (≤8 Vast runs, ~$25 cap, Frank OK first) → Gate G3
 - [ ] P4 pattern↔pattern cross-encoder → Gate G4
 - [ ] P5 paper (Digital Discovery recommended)

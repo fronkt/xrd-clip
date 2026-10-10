@@ -170,7 +170,9 @@ becomes the largest pool by far.
   - the Johnson group for the 7-compound VC-xPWDF patterns and the ROY high-throughput patterns.
 - Scrape the IUCr Rietveld pdCIF supplements.
 
-**Tier B (Frank decides; needs a diffractometer):**
+**Tier B — DEFERRED (Frank, 2026-10-10): no Purdue diffractometer until after college apps and STS.** G2 must be met from Tier A + the CSD powder-study check + Tier C alone; if those give <100 patterns or <5 polymorph families, run G2 on what exists and report it as a pilot, then add Tier B later as the confirmatory set.
+
+**Tier B (later; needs a diffractometer):**
 - Self-measure 60–80 patterns of polymorph families at Purdue.
 - Candidates:
   - from Mayo 2023 (refcodes verified): acetaminophen HXACAN, D-mannitol DMANTL, caffeine NIWFEE,
@@ -277,7 +279,7 @@ set.
 
 ## 7. Decisions needed from Frank
 
-1. **Diffractometer access at Purdue** for Tier B. This is the biggest lever on G2.
+1. ~~Diffractometer access at Purdue~~ — answered 2026-10-10: not now; revisit after college apps + STS.
 2. **OK to run Phase 0–1 now.** Free, CPU-only, existing checkpoint.
 3. **GPU budget for Phase 3** (about $25 cap) once G0–G2 have read out.
 4. **Keep v2 separate from pxrd-flow.** My recommendation is yes. The combined "molecular XtalNet"
