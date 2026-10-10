@@ -1,3 +1,24 @@
+# xrd-clip v2 continuation — 2026-10-10 (plan: docs/continuation-plan-2026-10.md)
+
+Status: PLAN ONLY — awaiting Frank's go on Phase 0–1 (free, CPU) and his answer on Purdue XRD access.
+
+- [ ] P0 B1 de Gelder WCC + zero-shift scan (l = 0.5/1/2°), validate vs CSD API WCC
+- [ ] P0 B2 ln-q lag scan + 2θ zero scan
+- [ ] P0 B3 torch VC-GPWDF (6 strain + δ), validate vs critic2 COMPAREVC (WSL) on 20–50 pairs
+- [ ] P0 B4 hand-crafted peak-feature vector index
+- [ ] P0 rerun 08/09 sweeps for all methods incl. anisotropic strain + wall-clock → Gate G0
+- [ ] P1 recall@k ceiling (k 5–200) + rerank (B1/B2/B3/fusion GBDT) + accuracy-vs-time Pareto → Gate G1
+- [ ] P2 ibuprofen diagnosis (bkg subtraction, B1/B3, emb→B3)
+- [ ] P2 Tier A: opXRD CNRS organic filter + CSD refcode match; DASH + SDPD patterns
+- [ ] P2 CSD powder-study CIFs: check for raw profile loops
+- [ ] P2 Tier C: DRAFT emails (ICDD pdj@icdd.com, Johnson group) — Frank sends
+- [ ] P2 Tier B: Purdue measurement (Frank decision) → Gate G2
+- [ ] P3 retrain levers one at a time (≤8 Vast runs, ~$25 cap, Frank OK first) → Gate G3
+- [ ] P4 pattern↔pattern cross-encoder → Gate G4
+- [ ] P5 paper (Digital Discovery recommended)
+
+---
+
 # xrd-clip URTC paper + pxrd-flow Phase-B startup — 2026-07-18
 
 ## Track 1 — URTC 5-pager (priority; deadline ~Aug 3)
