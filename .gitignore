@@ -23,6 +23,8 @@
 !/results/strong_baselines.json
 !/results/strong_baselines.png
 !/results/g0_table.md
+!/results/real_eval_table.md
+!/results/real_eval_2k.json
 !/results/polymorph.json
 !/results/polymorph.png
 !/results/combined.json

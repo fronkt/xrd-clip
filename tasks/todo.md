@@ -1,6 +1,6 @@
 # xrd-clip v2 continuation — 2026-10-10 (plan: docs/continuation-plan-2026-10.md)
 
-Status: PLAN ONLY — awaiting Frank's go on Phase 0–1 (free, CPU) (Purdue XRD: not now, after apps + STS).
+Status (10-10): **G0 FAILED + real-data test FAILED → kill criterion met; learned-retrieval line STOPPED** (plan §10–11). Salvage = real organic benchmark + strong-baseline study.
 
 - [x] P0 B1 de Gelder WCC + zero-shift scan (l = 0.5/1/2°) — built + tested (CSD API cross-check still open)
 - [x] P0 B2 ln-q lag scan + 2θ zero scan — built + tested
@@ -9,12 +9,12 @@ Status: PLAN ONLY — awaiting Frank's go on Phase 0–1 (free, CPU) (Purdue XRD
 - [x] P0 full sweep (35 conditions, Vast 3090 ~$0.25, destroyed) → **G0: model loses everywhere, non-overlapping CIs; smallest gap = anisotropic thermal (−0.12)**. See plan §10 + results/g0_table.md
 - [ ] P1 recall@k ceiling (k 5–200) + rerank (B1/B2/B3/fusion GBDT) + accuracy-vs-time Pareto → Gate G1
 - [ ] P2 ibuprofen diagnosis (bkg subtraction, B1/B3, emb→B3)
-- [~] P2 Tier A: opXRD CNRS organic filter DONE (196 patterns; data in C:/Users/frank/xrd-clip-data/opxrd) → NEXT: CSD refcode match + real-query eval (decisive for kill criterion); DASH + SDPD still open
+- [x] P2 Tier A: 196 opXRD organics matched to CSD (95 in corpus) → real eval: model t1 0.09 vs cosine+zero-scan 0.81 (results/real_eval_table.md)
 - [x] P2 CSD powder-study CIFs: API CIFs carry NO raw profiles; 99 powder studies in test lib (36 in families, 93 DOIs) → refcodes/powder_study_test_refs.json = IUCr/SI scrape targets
 - [x] P2 Tier C: Gmail DRAFTS made 10-10 (ICDD addressed; Johnson draft needs recipient) — Frank sends
 - [ ] P2 Tier B: Purdue measurement — DEFERRED until after apps + STS (Frank 10-10); G2 runs on Tier A/C + CSD check
-- [ ] P3 retrain levers one at a time (≤8 Vast runs, ~$25 cap, Frank OK first) → Gate G3
-- [ ] P4 pattern↔pattern cross-encoder → Gate G4
+- [-] P3 retrain — CANCELLED (kill criterion)
+- [-] P4 cross-encoder — CANCELLED unless a new idea targets the discrimination ceiling
 - [ ] P5 paper (Digital Discovery recommended)
 
 ---

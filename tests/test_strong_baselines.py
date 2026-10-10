@@ -70,3 +70,11 @@ def test_vc_gpwdf_recovers_anisotropic_strain_and_offset():
     assert scores[0] > 0.85 * ceiling and scores[0] > scores[1] + 0.1
     assert np.allclose(prm[0, :3], (0.03, -0.01, 0.02), atol=0.005)
     assert abs(prm[0, 6] - 0.1) < 0.03
+
+
+def test_wcc_library_matches_pairwise():
+    ref = np.stack([A.render_sticks(TRUE), A.render_sticks(DECOY)])
+    q = A.render_sticks(TRUE, A.sweep_params(zero_offset=0.3))[None]
+    pair = SB.wcc_scores(q, ref, l_deg=1.0, shift_deg=0.5)
+    lib = SB.WCCLibrary(ref, l_deg=1.0, shift_deg=0.5, chunk=1).scores(q)
+    assert np.allclose(pair, lib, atol=1e-3)

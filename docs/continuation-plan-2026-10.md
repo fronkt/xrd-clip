@@ -341,3 +341,33 @@ Figure: `results/strong_baselines.png`. Raw: `results/sb_w{1..4}.json` + per-que
    - The one regime that trends the model's way is large anisotropic strain combined with a degraded profile, which is exactly what real low-temperature-CSD vs room-temperature-pattern queries look like.
    - Tier A data is in hand: **196 molecular-organic patterns in opXRD CNRS** (164 with H atoms, 32 with H omitted). About 100 are Cu Kα and the rest synchrotron, convertible through d-spacing. Extracted to `C:/Users/frank/xrd-clip-data/opxrd/opxrd_cnrs_organic.json`, outside git; CC BY 4.0.
    - **Next:** match these to CSD refcodes, then run model vs B1/B2 on real queries. The kill criterion in Section 5 applies directly. If the model's real recall is no better than WCC's, stop the learned-retrieval line and salvage the benchmark.
+
+## 11. Real-data readout (2026-10-10): the kill criterion is met
+
+**Test set.** 95 real measured patterns (92 distinct targets) from opXRD CNRS.
+- All 196 organic patterns matched a CSD entry by primitive Niggli reduced cell (CCDC defaults: 1.5 % lengths, 2°) with an identical non-H element set; 95 of those entries are in the xrd-clip corpus.
+- Library: the targets, every corpus polymorph-family member of a target, and 2,000 random corpus decoys (2,108 in total).
+- A 20,000-decoy run was stopped by Claude Code's low-memory protection and was not rerun. More decoys can only lower every method's rank, so the decision does not depend on it.
+- Files: `results/real_eval_table.md`, `results/real_eval_2k.json` (per-query ranks plus metadata). Scripts: `scripts/15_…` (cell reduction), `scripts/16_…` (CSD match), `scripts/17_real_eval.py`.
+
+**Result** (background-subtracted variant; the raw variant is the same story):
+
+| | top-1 | top-10 | within-family top-1 (n = 31) |
+|---|---|---|---|
+| model | **0.09** | 0.27 | 0.48 |
+| Pearson (URTC baseline) | 0.78 | 0.81 | 0.94 |
+| cosine + zero scan (B1, l = 0) | **0.81** | 0.86 | 1.00 |
+| ln q scan (B2) | 0.81 | 0.85 | 0.94 |
+| model top-1000 → ln q rerank | 0.77 | 0.82 | n/a |
+
+- **The model is worse than every classical method,** including the URTC fixed-grid Pearson, even though **85 of 95 targets are in its training split.** It was trained on these very structures.
+- **The hybrid only loses accuracy.** The model's shortlist drops targets that classical scoring would have found.
+- **On the 21 harder queries** (structure not refined from this pattern): classical 0.29–0.38, model 0.05. That is the realistic case, and it has a lot of headroom for *any* method.
+- Matches the literature: RealBind (correlation 82.8 % vs contrastive 34.4 % recall@10 on measured inorganic patterns) and our earlier ibuprofen spot check.
+
+**Decision (Section 5 kill criterion):** stop the learned-retrieval line. G0 failed on simulated data and the model's real recall is far below WCC/cosine. Phases 3–4 (retrain, cross-encoder) are cancelled unless a new idea addresses the discrimination ceiling directly.
+
+**What is worth salvaging:**
+1. **An open real organic PXRD retrieval benchmark.** 196 opXRD (CC BY) patterns matched to CSD refcodes, split by powder-study vs other-origin structure. The "other" split is where classical scores fall to about 0.33, so that is the open problem. Refcodes plus a matching script are shareable; CSD structures are not.
+2. **The strong-baseline study itself.** de Gelder WCC, ln q and VC on within-family polymorph sets, with anisotropic thermal strain. It is an honest, reusable result: simple shift-corrected profile matching is the bar any learned PXRD retrieval has to clear.
+3. The 99 powder-study refcodes and the two unsent Tier C request drafts still serve item 1.

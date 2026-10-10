@@ -278,3 +278,65 @@ def vc_gpwdf_scores(q_peaks: "list[tuple[np.ndarray, np.ndarray]]", cands: "list
             params_out[sel, 3:6] = (max_ang * torch.tanh(raw[:, 3:6])).cpu().numpy()
             params_out[sel, 6] = (max_zero * torch.tanh(raw[:, 6])).cpu().numpy()
     return (out, params_out) if return_params else out
+
+
+# ------------------------------------------------------------------------------------------
+# library-scale B1 / B2 (one query at a time, reference spectra cached)
+# ------------------------------------------------------------------------------------------
+
+class WCCLibrary:
+    """B1 against a large library without materialising (n_query, n_ref, n_lag) arrays.
+
+    The reference FFTs and triangle-weighted autocorrelations are computed once; each query costs one
+    batched complex multiply + irfft over the library, done in reference chunks.
+    """
+
+    def __init__(self, r_raw: np.ndarray, l_deg: float = 1.0, shift_deg: float = 0.5,
+                 chunk: int = 4000, lnq: bool = False, l_lnq: float = 0.01, max_strain: float = 0.03):
+        self.lnq = lnq
+        if lnq:
+            r_raw = np.stack([_to_lnq(y) for y in r_raw])
+            step = _LNQ_STEP
+            self.l_pts = max(1, int(round(l_lnq / step)))
+            self.s_pts = int(round(math.log1p(max_strain) / step))
+        else:
+            self.l_pts = int(round(l_deg / STEP))
+            self.s_pts = int(round(shift_deg / STEP))
+        r = (r_raw - r_raw.min(axis=1, keepdims=True)).astype(np.float32)
+        self.w = _triangle(self.l_pts)
+        self.L = len(self.w) // 2
+        self.max_lag = self.L + self.s_pts
+        n = r.shape[1]
+        self.nfft = 1 << int(math.ceil(math.log2(n + self.max_lag + 1)))
+        self.chunk = chunk
+        self.Fr = [np.fft.rfft(r[i:i + chunk], self.nfft).astype(np.complex64) for i in range(0, len(r), chunk)]
+        self.ar = (_autocorr(r, self.L) @ self.w).astype(np.float32)
+
+    def _score_one(self, q: np.ndarray) -> np.ndarray:
+        q = (q - q.min()).astype(np.float32)
+        Fq = np.conj(np.fft.rfft(q, self.nfft)).astype(np.complex64)
+        aq = float(_autocorr(q[None], self.L)[0] @ self.w)
+        out = []
+        for Fr in self.Fr:
+            full = np.fft.irfft(Fq[None, :] * Fr, self.nfft).astype(np.float32)
+            c = np.concatenate([full[:, self.nfft - self.max_lag:], full[:, : self.max_lag + 1]], axis=1)
+            # numerator for every shift = valid correlation of c with the triangle
+            win = np.lib.stride_tricks.sliding_window_view(c, len(self.w), axis=1)   # (nr, 2S+1, 2L+1)
+            num = (win @ self.w).max(axis=1)
+            out.append(num)
+        num = np.concatenate(out)
+        return (num / np.sqrt(np.maximum(aq * self.ar, 1e-12))).astype(np.float32)
+
+    def scores(self, q_raw: np.ndarray, shift_deg: float = 0.3, shift_step_deg: float = 0.04) -> np.ndarray:
+        """(n_query, n_ref). In ln-q mode the 2theta zero offset is scanned outside, as in B2."""
+        rows = []
+        for q in q_raw:
+            if not self.lnq:
+                rows.append(self._score_one(q))
+            else:
+                best = None
+                for delta in np.arange(-shift_deg, shift_deg + 1e-9, shift_step_deg):
+                    s = self._score_one(_to_lnq(q, delta))
+                    best = s if best is None else np.maximum(best, s)
+                rows.append(best)
+        return np.stack(rows)
