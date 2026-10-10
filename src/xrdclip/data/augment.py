@@ -35,6 +35,7 @@ N_POINTS = GRID.size  # 2251
 class Params:
     """A concrete degradation. Defaults are the CLEAN pattern: no shift, no texture, sharp peaks."""
     strain: float = 0.0            # fractional isotropic cell strain, d -> d(1+strain)
+    axis_strain: tuple = (0.0, 0.0, 0.0)  # per-axis a,b,c length strain (thermal expansion); angles kept
     zero_offset: float = 0.0       # deg 2theta, constant
     u: float = 0.002               # Caglioti U (deg^2)
     v: float = -0.001              # Caglioti V (deg^2)
@@ -113,6 +114,18 @@ def _shift_two_theta(two_theta: np.ndarray, d_hkl: np.ndarray, p: Params) -> np.
         sin_theta = np.clip(sin_theta, -1.0, 1.0)
         two_theta = np.degrees(2.0 * np.arcsin(sin_theta))
     return two_theta + p.zero_offset
+
+
+def _axis_strained_d(hkl: np.ndarray, recip: np.ndarray, axis_strain: tuple) -> np.ndarray:
+    """d-spacings after scaling the a, b, c lengths by (1 + e_a), (1 + e_b), (1 + e_c), angles fixed.
+
+    Scaling direct row a_i by (1 + e_i) scales reciprocal row b_i by 1 / (1 + e_i), so
+    g = sum_i h_i b_i / (1 + e_i). This is the anisotropic thermal-expansion case (Bond 2021): low-
+    temperature CSD structures vs room-temperature patterns, unequal per axis, sometimes negative.
+    """
+    scale = 1.0 / (1.0 + np.asarray(axis_strain, dtype=np.float64))
+    g = (hkl.astype(np.float64) * scale[None, :]) @ recip.astype(np.float64)
+    return (1.0 / np.maximum(np.linalg.norm(g, axis=1), 1e-12)).astype(np.float32)
 
 
 def _fwhm(two_theta: np.ndarray, p: Params) -> np.ndarray:
@@ -217,6 +230,9 @@ def render_sticks(sticks: dict, p: Params = CLEAN,
     d_hkl = np.asarray(sticks["d_hkl"], dtype=np.float32)
     recip = np.asarray(sticks["recip"], dtype=np.float32)
 
+    if any(e != 0.0 for e in p.axis_strain):
+        d_hkl = _axis_strained_d(hkl, recip, p.axis_strain)
+        two_theta = np.degrees(2.0 * np.arcsin(np.clip(WAVELENGTH / (2.0 * d_hkl), -1.0, 1.0)))
     tt = _shift_two_theta(two_theta, d_hkl, p)
     inten = inten * _march_dollase(hkl, recip, p)
     fwhm = _fwhm(tt, p)

@@ -1,0 +1,794 @@
+[
+ {
+  "refcode": "AFEQEJ",
+  "doi": "10.1039/C3SC51419F",
+  "journal": "Chemical Science",
+  "year": 2013,
+  "temperature": "293 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "BIYSEH05",
+  "doi": "10.1021/cg049757i",
+  "journal": "Crystal Growth and Design",
+  "year": 2005,
+  "temperature": null,
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "BIYSEH07",
+  "doi": "10.1002/jps.23287",
+  "journal": "Journal of Pharmaceutical Sciences",
+  "year": 2012,
+  "temperature": "at 298 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "BOKROM",
+  "doi": "10.1021/acs.cgd.3c01384",
+  "journal": "Crystal Growth and Design",
+  "year": 2024,
+  "temperature": "298 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "BUFPAV01",
+  "doi": "10.1017/S088571561500041X",
+  "journal": "Powder Diffraction",
+  "year": 2015,
+  "temperature": "295 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "BULYOY",
+  "doi": "10.1107/S2052252515010271",
+  "journal": "IUCrJ",
+  "year": 2015,
+  "temperature": "100 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "CANDUR03",
+  "doi": "10.1021/acs.cgd.2c00152",
+  "journal": "Crystal Growth and Design",
+  "year": 2022,
+  "temperature": "293 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "CAQYIE",
+  "doi": "10.1002/chem.201103508",
+  "journal": "Chemistry-A European Journal",
+  "year": 2012,
+  "temperature": "at 293 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "CIMYOP",
+  "doi": null,
+  "journal": "CSD Communication",
+  "year": 2018,
+  "temperature": "297 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "CIMYUV",
+  "doi": null,
+  "journal": "CSD Communication",
+  "year": 2018,
+  "temperature": "297 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "CUTCAW",
+  "doi": "10.1073/pnas.0915142107",
+  "journal": "Proceedings of the National Academy of Sciences of the United States of America",
+  "year": 2010,
+  "temperature": "at 298 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "DOCMEO",
+  "doi": "10.1021/cg070058q",
+  "journal": "Crystal Growth and Design",
+  "year": 2008,
+  "temperature": "at 293 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "ECITIU",
+  "doi": "10.1002/anie.200502468",
+  "journal": "Angewandte Chemie, International Edition",
+  "year": 2006,
+  "temperature": null,
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "ECITIU01",
+  "doi": "10.1002/anie.200502468",
+  "journal": "Angewandte Chemie, International Edition",
+  "year": 2006,
+  "temperature": null,
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "ECITOA",
+  "doi": "10.1002/anie.200502468",
+  "journal": "Angewandte Chemie, International Edition",
+  "year": 2006,
+  "temperature": null,
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "ECITUG",
+  "doi": "10.1002/anie.200502468",
+  "journal": "Angewandte Chemie, International Edition",
+  "year": 2006,
+  "temperature": null,
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "ECIVAO",
+  "doi": "10.1002/anie.200502468",
+  "journal": "Angewandte Chemie, International Edition",
+  "year": 2006,
+  "temperature": null,
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "EFAHOL",
+  "doi": "10.1021/acs.oprd.6b00435",
+  "journal": "Organic Process Research & Development",
+  "year": 2017,
+  "temperature": "298 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "EJIQEU",
+  "doi": "10.1039/c0ce00278j",
+  "journal": "CrystEngComm",
+  "year": 2011,
+  "temperature": "at 298 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "EJIQEU01",
+  "doi": "10.1039/c0ce00278j",
+  "journal": "CrystEngComm",
+  "year": 2011,
+  "temperature": "at 298 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "EJIQEU02",
+  "doi": "10.1039/c0ce00278j",
+  "journal": "CrystEngComm",
+  "year": 2011,
+  "temperature": "at 298 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "ELOQIH",
+  "doi": "10.1021/acs.cgd.5b01619",
+  "journal": "Crystal Growth and Design",
+  "year": 2016,
+  "temperature": "295 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "EMAQOA",
+  "doi": null,
+  "journal": "CSD Communication",
+  "year": 2016,
+  "temperature": "293 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "FABPAB",
+  "doi": "10.1039/b925795k",
+  "journal": "Soft Matter",
+  "year": 2010,
+  "temperature": "at 293 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "FEPJOB",
+  "doi": "10.1039/c2ce26534f",
+  "journal": "CrystEngComm",
+  "year": 2013,
+  "temperature": "at 293 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "FONZEP",
+  "doi": "10.1039/C4CC06938B",
+  "journal": "Chemical Communications",
+  "year": 2014,
+  "temperature": "293 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "GADSUD",
+  "doi": "10.37952/ROI-jbc-01/20-61-2-12",
+  "journal": "Butlerovskie soobshcheniya",
+  "year": 2020,
+  "temperature": "295 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "GAZCES",
+  "doi": "10.1002/chem.201702489",
+  "journal": "Chemistry-A European Journal",
+  "year": 2017,
+  "temperature": "293 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "GAZCES01",
+  "doi": "10.1002/chem.201702489",
+  "journal": "Chemistry-A European Journal",
+  "year": 2017,
+  "temperature": "293 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "GISCAN01",
+  "doi": "10.1002/slct.201800714",
+  "journal": "Chemistry Select",
+  "year": 2018,
+  "temperature": "298 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "GOKNOK",
+  "doi": "10.1016/j.molstruc.2008.02.005",
+  "journal": "Journal of Molecular Structure",
+  "year": 2008,
+  "temperature": "at 293 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "GUPWUN",
+  "doi": "10.1021/acs.cgd.5c00156",
+  "journal": "Crystal Growth and Design",
+  "year": 2025,
+  "temperature": "298 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "HAYBAO",
+  "doi": null,
+  "journal": "CSD Communication",
+  "year": 2022,
+  "temperature": "295 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "HAYBAO01",
+  "doi": "10.1039/D2CE00758D",
+  "journal": "CrystEngComm",
+  "year": 2022,
+  "temperature": "293 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "HCSBTZ01",
+  "doi": "10.1107/S1600536805023640",
+  "journal": "Acta Crystallographica Section E: Structure Reports Online",
+  "year": 2005,
+  "temperature": "at 298 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "HCSBTZ02",
+  "doi": "10.1107/S010876810705687X",
+  "journal": "Acta Crystallographica,Section B: Structural Science",
+  "year": 2008,
+  "temperature": "at 295 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "HONTAG01",
+  "doi": "10.1021/cg1009237",
+  "journal": "Crystal Growth and Design",
+  "year": 2010,
+  "temperature": "at 300 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "HONTUA01",
+  "doi": "10.1021/cg1009237",
+  "journal": "Crystal Growth and Design",
+  "year": 2010,
+  "temperature": "at 300 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "IGIREX",
+  "doi": "10.1039/C5RA02696B",
+  "journal": "RSC Advances",
+  "year": 2015,
+  "temperature": "298 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "INDMET07",
+  "doi": "10.1016/j.ijpharm.2021.121067",
+  "journal": "International Journal of Pharmaceutics",
+  "year": 2021,
+  "temperature": "295 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "IXIVAP",
+  "doi": "10.1021/acs.cgd.1c00413",
+  "journal": "Crystal Growth and Design",
+  "year": 2021,
+  "temperature": "293 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "KASMOH",
+  "doi": "10.1107/S1600536805025651",
+  "journal": "Acta Crystallographica Section E: Structure Reports Online",
+  "year": 2005,
+  "temperature": "at 298 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "KATVEJ",
+  "doi": "10.1021/acssuschemeng.6b01529",
+  "journal": "ACS Sustainable Chemistry and Engineering",
+  "year": 2016,
+  "temperature": "293 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "KIFBOU",
+  "doi": "10.1021/acs.cgd.2c01259",
+  "journal": "Crystal Growth and Design",
+  "year": 2023,
+  "temperature": "293 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "KUFPIK01",
+  "doi": "10.1039/d4ce01230e",
+  "journal": "CrystEngComm",
+  "year": 2025,
+  "temperature": "300 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "LAPSIG",
+  "doi": "10.1107/S160053681200637X",
+  "journal": "Acta Crystallographica Section E: Structure Reports Online",
+  "year": 2012,
+  "temperature": "at 298 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "LAQSON01",
+  "doi": "10.1107/S0108270112035536",
+  "journal": "Acta Crystallographica,Section C: Crystal Structure Communications",
+  "year": 2012,
+  "temperature": "at 298 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "LEPMID",
+  "doi": "10.1107/S0108768106020921",
+  "journal": "Acta Crystallographica,Section B: Structural Science",
+  "year": 2006,
+  "temperature": "at 293 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "LOGWOV",
+  "doi": "10.1007/s11172-014-0500-3",
+  "journal": "Izvestiya Akademii Nauk SSSR, Seriya Khimicheskaya",
+  "year": 2014,
+  "temperature": "295 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "LOPZEX",
+  "doi": "10.1039/C4CE01157K",
+  "journal": "CrystEngComm",
+  "year": 2014,
+  "temperature": "298 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "MATKIB",
+  "doi": "10.1107/S0108270100005357",
+  "journal": "Acta Crystallographica,Section C: Crystal Structure Communications",
+  "year": 2000,
+  "temperature": null,
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "MINWOZ",
+  "doi": "10.1002/ardp.202300116",
+  "journal": "Archiv der Pharmazie - Chemistry in Life Sciences",
+  "year": 2023,
+  "temperature": "293 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "MINWUF",
+  "doi": "10.1002/ardp.202300116",
+  "journal": "Archiv der Pharmazie - Chemistry in Life Sciences",
+  "year": 2023,
+  "temperature": "293 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "MOVYOO",
+  "doi": "10.1021/acs.cgd.9b01158",
+  "journal": "Crystal Growth and Design",
+  "year": 2019,
+  "temperature": "298 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "MOVYOO01",
+  "doi": "10.1021/acs.cgd.9b01158",
+  "journal": "Crystal Growth and Design",
+  "year": 2019,
+  "temperature": "298 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "MUWDOY",
+  "doi": "10.1055/s-0029-1217128",
+  "journal": "Synthesis",
+  "year": 2010,
+  "temperature": null,
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "NICOAM05",
+  "doi": "10.1021/cg200429j",
+  "journal": "Crystal Growth and Design",
+  "year": 2011,
+  "temperature": "at 295 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "NUNQAQ",
+  "doi": "10.1039/C4CE01077A",
+  "journal": "CrystEngComm",
+  "year": 2014,
+  "temperature": "293 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "OGAGUA01",
+  "doi": "10.1154/1.3478380",
+  "journal": "Powder Diffraction",
+  "year": 2010,
+  "temperature": "293 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "OPUKIV",
+  "doi": "10.1039/C6CE00293E",
+  "journal": "CrystEngComm",
+  "year": 2016,
+  "temperature": "293 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "OPUMAP",
+  "doi": "10.1039/C6CE00293E",
+  "journal": "CrystEngComm",
+  "year": 2016,
+  "temperature": "293 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "OQUPOG",
+  "doi": "10.1107/S0108270111010328",
+  "journal": "Acta Crystallographica,Section C: Crystal Structure Communications",
+  "year": 2011,
+  "temperature": "at 298 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "OSAGAR01",
+  "doi": "10.1021/ja106768z",
+  "journal": "Journal of the American Chemical Society",
+  "year": 2010,
+  "temperature": "at 293 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "OXEPAK",
+  "doi": "10.1134/S1070428016010152",
+  "journal": "Zhurnal Organicheskoi Khimii",
+  "year": 2016,
+  "temperature": "298 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "PAPTUX",
+  "doi": "10.1021/cg201203u",
+  "journal": "Crystal Growth and Design",
+  "year": 2011,
+  "temperature": "at 298 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "PELJOG",
+  "doi": "10.1107/S0108768106013887",
+  "journal": "Acta Crystallographica,Section B: Structural Science",
+  "year": 2006,
+  "temperature": "at 295 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "PEWYUO",
+  "doi": "10.1021/acs.cgd.7b01561",
+  "journal": "Crystal Growth and Design",
+  "year": 2018,
+  "temperature": "293 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "PEWYUO02",
+  "doi": "10.1021/acs.cgd.7b01561",
+  "journal": "Crystal Growth and Design",
+  "year": 2018,
+  "temperature": "293 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "PEWYUO06",
+  "doi": "10.1021/acs.cgd.9b00648",
+  "journal": "Crystal Growth and Design",
+  "year": 2019,
+  "temperature": "293 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "PEWYUO07",
+  "doi": "10.1021/acs.cgd.9b00648",
+  "journal": "Crystal Growth and Design",
+  "year": 2019,
+  "temperature": "293 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "PEWYUO09",
+  "doi": null,
+  "journal": "CSD Communication",
+  "year": 2020,
+  "temperature": "293 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "PEZLUE",
+  "doi": "10.1021/acs.cgd.7b01807",
+  "journal": "Crystal Growth and Design",
+  "year": 2018,
+  "temperature": "298 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "QEGTUT02",
+  "doi": "10.1021/acs.cgd.8b00683",
+  "journal": "Crystal Growth and Design",
+  "year": 2018,
+  "temperature": "298 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "QESLUY",
+  "doi": "10.1055/s-0036-1591835",
+  "journal": "Synthesis",
+  "year": 2018,
+  "temperature": "293 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "QEVHEH",
+  "doi": "10.1515/zkri-2016-2009",
+  "journal": "Zeitschrift fuer Kristallographie - Crystalline Materials",
+  "year": 2017,
+  "temperature": "293 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "QIBCIO",
+  "doi": "10.1016/j.tet.2007.02.031",
+  "journal": "Tetrahedron",
+  "year": 2007,
+  "temperature": null,
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "QIJWOV",
+  "doi": "10.1107/S0108270101000014",
+  "journal": "Acta Crystallographica,Section C: Crystal Structure Communications",
+  "year": 2001,
+  "temperature": null,
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "QIXDOR",
+  "doi": null,
+  "journal": "Izvestiya Akademii Nauk SSSR, Seriya Khimicheskaya",
+  "year": 2006,
+  "temperature": "at 295 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "QUYDAT",
+  "doi": "10.1017/S0885715624000411",
+  "journal": "Powder Diffraction",
+  "year": 2024,
+  "temperature": "298 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "RAGFOV01",
+  "doi": "10.1039/B409062B",
+  "journal": "New Journal of Chemistry",
+  "year": 2004,
+  "temperature": "at 293.0 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "ROKSOZ01",
+  "doi": "10.1524/zkri.2008.1125",
+  "journal": "Zeitschrift fuer Kristallographie - Crystalline Materials",
+  "year": 2008,
+  "temperature": "at 293K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "SILVAL06",
+  "doi": "10.1107/S010876810703652X",
+  "journal": "Acta Crystallographica,Section B: Structural Science",
+  "year": 2007,
+  "temperature": "at 200 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "SIZNOI",
+  "doi": "10.1016/j.jcat.2023.115101",
+  "journal": "Journal of Catalysis",
+  "year": 2023,
+  "temperature": "293 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "SUGWAV",
+  "doi": "10.1016/j.molstruc.2020.127765",
+  "journal": "Journal of Molecular Structure",
+  "year": 2020,
+  "temperature": "298 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "TUXPEJ",
+  "doi": "10.1002/jps.21902",
+  "journal": "Journal of Pharmaceutical Sciences",
+  "year": 2010,
+  "temperature": "at 295 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "ULAXAG01",
+  "doi": "10.1039/D2FD00115B",
+  "journal": "Faraday Discussions",
+  "year": 2022,
+  "temperature": "298 K",
+  "in_polymorph_family": true
+ },
+ {
+  "refcode": "VOLRIA",
+  "doi": "10.1039/C9CC03034D",
+  "journal": "Chemical Communications",
+  "year": 2019,
+  "temperature": "298 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "VOSREC",
+  "doi": "10.1016/j.ssnmr.2014.12.005",
+  "journal": "Solid State Nuclear Magnetic Resonance",
+  "year": 2015,
+  "temperature": "295 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "WARKAF",
+  "doi": "10.1016/j.jil.2021.100016",
+  "journal": "Journal of Ionic Liquids",
+  "year": 2021,
+  "temperature": "180 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "WAVXIE",
+  "doi": "10.1107/S2056989021013633",
+  "journal": "Acta Crystallographica Section E: Crystallographic Communications",
+  "year": 2022,
+  "temperature": "298 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "WUTZUI",
+  "doi": "10.1002/hlca.201500026",
+  "journal": "Helvetica Chimica Acta",
+  "year": 2015,
+  "temperature": "298 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "XOGMOX",
+  "doi": "10.1021/cg500181t",
+  "journal": "Crystal Growth and Design",
+  "year": 2014,
+  "temperature": "295 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "XOPXOP",
+  "doi": "10.1524/zkri.216.12.629.22491",
+  "journal": "Zeitschrift fuer Kristallographie - Crystalline Materials",
+  "year": 2001,
+  "temperature": "at 295 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "YAYREZ",
+  "doi": "10.3390/polym13183158",
+  "journal": "Polymers",
+  "year": 2021,
+  "temperature": "298 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "YEWLIW",
+  "doi": "10.1021/ja063706n",
+  "journal": "Journal of the American Chemical Society",
+  "year": 2006,
+  "temperature": "at 298 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "YOKQAQ",
+  "doi": "10.1107/S0108270101018224",
+  "journal": "Acta Crystallographica,Section C: Crystal Structure Communications",
+  "year": 2002,
+  "temperature": "at 295 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "YORLAT",
+  "doi": "10.1002/crat.200800503",
+  "journal": "Crystal Research and Technology",
+  "year": 2009,
+  "temperature": "at 298 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "YUXNOY",
+  "doi": "10.1038/s41467-024-52480-6",
+  "journal": "Nature Communications",
+  "year": 2024,
+  "temperature": "300 K",
+  "in_polymorph_family": false
+ },
+ {
+  "refcode": "ZEZVIM",
+  "doi": "10.1016/j.ejmech.2018.01.066",
+  "journal": "European Journal of Medicinal Chemistry",
+  "year": 2018,
+  "temperature": "298 K",
+  "in_polymorph_family": false
+ }
+]
