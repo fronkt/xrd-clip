@@ -25,6 +25,9 @@
 !/results/g0_table.md
 !/results/real_eval_table.md
 !/results/real_eval_2k.json
+# Real benchmark v2 (2026-10-11): aggregate metrics + per-query ids/stems/ranks only (refcodes, no structures).
+!/results/real_bench.json
+!/results/real_bench_table.md
 !/results/polymorph.json
 !/results/polymorph.png
 !/results/combined.json
