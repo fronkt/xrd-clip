@@ -344,6 +344,15 @@ Figure: `results/strong_baselines.png`. Raw: `results/sb_w{1..4}.json` + per-que
 
 ## 11. Real-data readout (2026-10-10): the kill criterion is met
 
+> **Correction (2026-10-11, Section 12).** The labels behind this section were checked by packing
+> similarity against each pattern's own opXRD structure. 12 of the 21 "other-origin" queries were
+> labelled with the WRONG compound (the matcher preferred corpus entries, and an unrelated
+> compound with the same element set and a similar cell won), 1 cannot be identified, and the 8
+> correct ones are powder studies under a different refcode. The "other-origin split is the open
+> problem (classical ~0.33)" reading below is therefore a labelling artefact, not a finding. The
+> model-vs-classical verdict stands: the powder-study labels were 73/74 right. The original text
+> is kept unchanged below.
+
 **Test set.** 95 real measured patterns (92 distinct targets) from opXRD CNRS.
 - All 196 organic patterns matched a CSD entry by primitive Niggli reduced cell (CCDC defaults: 1.5 % lengths, 2°) with an identical non-H element set; 95 of those entries are in the xrd-clip corpus.
 - Library: the targets, every corpus polymorph-family member of a target, and 2,000 random corpus decoys (2,108 in total).
@@ -371,3 +380,59 @@ Figure: `results/strong_baselines.png`. Raw: `results/sb_w{1..4}.json` + per-que
 1. **An open real organic PXRD retrieval benchmark.** 196 opXRD (CC BY) patterns matched to CSD refcodes, split by powder-study vs other-origin structure. The "other" split is where classical scores fall to about 0.33, so that is the open problem. Refcodes plus a matching script are shareable; CSD structures are not.
 2. **The strong-baseline study itself.** de Gelder WCC, ln q and VC on within-family polymorph sets, with anisotropic thermal strain. It is an honest, reusable result: simple shift-corrected profile matching is the bar any learned PXRD retrieval has to clear.
 3. The 99 powder-study refcodes and the two unsent Tier C request drafts still serve item 1.
+
+## 12. Benchmark hardening (2026-10-11): ground truth by packing similarity
+
+Frank chose the negative-result paper (strong-baseline study + real organic test set) over a
+benchmark-only release, parking, or a new learned method. Step 1 is making the real-data numbers
+benchmark-grade before drafting.
+
+**Ground truth (scripts/18_opxrd_truth_sets.py, CCDC interpreter).** opXRD ships each pattern's
+labelled phase as a full P1 atom basis, so identity is checked directly instead of trusted from a
+cell match.
+1. Reduced-cell search (CCDC defaults) with the element-set filter and no cap on the hit list (the
+   10-10 matcher kept 10, and 41 patterns had more).
+2. Anchors: CCDC PackingSimilarity (15-molecule shell, H positions ignored) of the opXRD structure
+   against every hit. Strict tier first. If nothing passes, a lenient tier ignores bond types and
+   counts, H counts and the smallest components. Structures rebuilt from bare P1 coordinates
+   perceive bonds differently from curated CSD molecules, so H-omitted refinements, salts and
+   hydrates only match there (strict 154, lenient 35). "Allow molecular differences" is not used:
+   it ran to 3.7 GB on one H-omitted pattern.
+3. Same-form set: anchors against their whole refcode family, CSD vs CSD, strict. 15/15 = same
+   form at any temperature or pressure (ibuprofen check: every redetermination from 25 K to 296 K
+   is 15/15; form II 1–2/15; S-ibuprofen 5/15). Entries that cannot be compared are ignored, never
+   scored as errors.
+
+**Outcome.** 189/196 identified. The 7 that are not: 3 Si frameworks or silsesquioxanes that passed
+the organic filter (NECTUN, ECOROH, RIXNES) and 4 others (INUFIH, OYALOR, ABEDUJ, IODYBZ01).
+pattern_706 is excluded separately because its 2θ axis runs 0.01–0.83 (probably radians); no unit
+guess is made. That leaves **188 queries**.
+- **13 of the 10-10 labels named the wrong compound.** All 13 were corpus entries chosen over the
+  true match.
+- **185 of 189 patterns are the very data their CSD structure was refined from** (a powder-study
+  anchor with RMSD < 0.05 Å against the opXRD structure). opXRD CNRS is a Rietveld collection, so
+  "find the entry" is mostly self-retrieval.
+- **The realistic hard test is single-crystal references only** ("sc": same-form powder-study
+  entries are ignored, so the answer must be an independent single-crystal determination). **59
+  patterns qualify**, against 21 (mostly mislabelled) "other-origin" queries before.
+
+**Library.** All 308,862 cached corpus sticks, plus 218 simulated family members of the targets
+(cache/sticks_extra; 246 extracted, 28 have no coordinates in the CSD) = 309,080. The stage-2
+simulator gained a fallback for Z′ < 1 entries: the CSD writes the whole molecule and symmetry
+regenerates half of it, so coincident sites are merged. It only fires when the strict parse fails,
+so corpus simulation is unchanged. Check: with a zero-offset scan, merged anchors score like
+normally parsed ones against their own patterns (median 0.72 vs 0.74).
+
+**Eval (scripts/19_real_bench.py).** Exact ranks over the full library.
+- A pre-pass scores every truth, distractor and ignored entry and fixes each query's threshold.
+- Library chunks stream through 4 workers, which store one bit per (query, entry): "scores above
+  the threshold". Library-size curves are popcounts over random subsets.
+- Model shortlist → classical rerank (hybrid) is recorded alongside.
+- Bootstrap CIs resample compounds (refcode stems).
+- Smoke test (3,218-entry library, `--verify`): streamed ranks equal brute-force ranks for all
+  11 methods × 2 truth definitions × 188 queries.
+- Smoke-scale read (not quotable; small library): single-crystal split, lnq 0.62 and cos + zero
+  scan 0.55 top-1 against the model's 0.02.
+
+Full run launched 2026-10-11 (4 workers, ~5 h, resumable per chunk, log `cache/real_bench/run.log`)
+→ `results/real_bench.json`.
