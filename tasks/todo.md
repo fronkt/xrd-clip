@@ -1,3 +1,32 @@
+# Negative-result paper — 2026-10-11 (Frank chose this path over benchmark-only / park / new idea)
+
+Story: simple shift-corrected profile matching is the bar learned PXRD retrieval has to clear.
+Evidence = the strong-baseline study (plan §10) + an open real organic test set (plan §11).
+Step 1 hardens the real-data numbers before any drafting. All CPU, no spend.
+
+### Step 1 — harden the real-data benchmark
+- [ ] 18 (CCDC interp): ground-truth sets. Per pattern, enumerate the CSD refcode family of every
+      cell-match candidate; CCDC PackingSimilarity vs the matched entry; 15/15 = same form
+      (probe 10-11: IBPRAC redeterminations 25–296 K all 15/15, form II 1–2/15, S-ibuprofen 5/15).
+      compare() = None → "unknown" → ignore list (never scored as an error). Extract CIFs of every
+      family member outside the stick cache (gitignored cache/).
+- [ ] simulate the extras with the existing stage-2 code → cache/sticks_extra
+- [ ] 19 (scripts/19_real_bench.py): full-library eval. Library = 308,862 cached sticks + extras. 196 patterns (not just the
+      95 in-corpus). Exact ranks via a pre-pass over family members (thresholds + within-family),
+      then chunked streaming counts with 4 un-throttled workers, resumable per chunk.
+      Splits: all / powder-study / independent; plus leave-own-refinement-out (LORO: powder-study
+      same-form entries ignored, only single-crystal same-form entries count as truth) — this
+      should grow the hard split well beyond n = 21.
+      Measured cost (1 core, 196 q × 310k): cos_zs 0.37 h, wcc_1 0.63 h, wcc_2 0.82 h, lnq 7.0 h
+      per variant → ~3–4 h wall on 4 workers.
+- [ ] compound-level (stem) bootstrap 95 % CIs; library-size curve (2k / 20k / full)
+- [ ] commit table + aggregate json; update plan §11
+
+### Step 2 — draft (after Step 1 numbers are in)
+- [ ] venue + outline check-in with Frank (Digital Discovery vs J. Appl. Cryst. vs AI4Mat workshop)
+
+---
+
 # xrd-clip v2 continuation — 2026-10-10 (plan: docs/continuation-plan-2026-10.md)
 
 Status (10-10): **G0 FAILED + real-data test FAILED → kill criterion met; learned-retrieval line STOPPED** (plan §10–11). Salvage = real organic benchmark + strong-baseline study.

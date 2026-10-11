@@ -51,7 +51,15 @@ def simulate_one(rec: dict) -> "dict | None":
     try:
         struct = Structure.from_str(rec["cif"], fmt="cif")
     except Exception:
-        return None
+        # Z' < 1 entries (outside the training corpus's Z' filter): the CSD writes the whole molecule
+        # and the symmetry operators regenerate half of it, so coincident sites sum to occupancy 2-4
+        # and the strict parse rejects the file. Merging them (rescale back to 1) is exact. Only
+        # reached when the strict parse fails, so corpus simulation is unchanged.
+        try:
+            from pymatgen.io.cif import CifParser
+            struct = CifParser.from_str(rec["cif"], occupancy_tolerance=8.01).parse_structures(primitive=False)[0]
+        except Exception:
+            return None
 
     try:
         calc = XRDCalculator(wavelength=WAVELENGTH)
