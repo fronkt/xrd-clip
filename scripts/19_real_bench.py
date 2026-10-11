@@ -182,6 +182,56 @@ def _run_chunk(job) -> "tuple[int, float]":
     return cid, time.time() - t0
 
 
+def chunk_jobs(shards, chunk: int) -> list:
+    jobs, cid = [], 0
+    for p, n, off in shards:
+        for lo in range(0, n, chunk):
+            jobs.append((cid, p, lo, min(n, lo + chunk), off + lo))
+            cid += 1
+    return jobs
+
+
+def run_chunks(jobs: list, ctx: dict, workers: int) -> None:
+    from multiprocessing import Pool
+    todo = [j for j in jobs if not os.path.exists(os.path.join(ctx["work"], "chunks", f"chunk_{j[0]:04d}.npz"))]
+    print(f"[bench] {len(jobs)} chunks, {len(todo)} to run on {workers} workers", flush=True)
+    if not todo:
+        return
+    t0 = time.time()
+    # maxtasksperchild=1: a fresh process per chunk, so nothing can accumulate across chunks
+    with Pool(workers, initializer=_init_worker, initargs=(ctx,), maxtasksperchild=1) as pool:
+        for done, (c, dt) in enumerate(pool.imap_unordered(_run_chunk, todo), 1):
+            el = time.time() - t0
+            print(f"[bench] chunk {c} {dt:.0f}s  ({done}/{len(todo)}, elapsed {el / 60:.1f} min, "
+                  f"eta {el / done * (len(todo) - done) / 60:.0f} min)", flush=True)
+
+
+def save_ctx(path: str, ctx: dict, n_library: int) -> None:
+    arrays = {"special": ctx["special"], "n_library": np.array(n_library)}
+    arrays.update({f"Q__{k}": v for k, v in ctx["Q"].items()})
+    arrays.update({f"topk__{k}": v for k, v in ctx["topk"].items()})
+    arrays.update({f"thr__{td}__{k}": v for td, d in ctx["thr"].items() for k, v in d.items()})
+    save_npz(path, **arrays)
+
+
+def box_main(args) -> int:
+    """Rented-box stage: only the classical chunks. Library order must match the local one exactly."""
+    with np.load(args.box_ctx) as z:
+        ctx = {"work": args.work, "special": z["special"],
+               "Q": {k[3:]: z[k] for k in z.files if k.startswith("Q__")},
+               "topk": {k[6:]: z[k] for k in z.files if k.startswith("topk__")},
+               "thr": {td: {k.split("__")[2]: z[k] for k in z.files if k.startswith(f"thr__{td}__")}
+                       for td in ("std", "sc")}}
+        n_expected = int(z["n_library"])
+    shards = shard_table(args.limit)
+    n = sum(s[1] for s in shards)
+    assert n == n_expected, f"library mismatch: box has {n:,} entries, context expects {n_expected:,}"
+    os.makedirs(os.path.join(args.work, "chunks"), exist_ok=True)
+    run_chunks(chunk_jobs(shards, args.chunk), ctx, args.workers)
+    print("[bench] BOX_DONE", flush=True)
+    return 0
+
+
 # ------------------------------------------------------------------------------------------------
 # main
 # ------------------------------------------------------------------------------------------------
@@ -197,7 +247,15 @@ def main() -> int:
     ap.add_argument("--limit", type=int, default=None, help="smoke test: first N entries of each cache shard")
     ap.add_argument("--verify", action="store_true", help="brute-force rank check (small libraries only)")
     ap.add_argument("--out", default="results/real_bench.json")
+    ap.add_argument("--prep_only", action="store_true",
+                    help="stop before the chunk pool and write <work>/box_ctx.npz for --box_ctx")
+    ap.add_argument("--box_ctx", default=None,
+                    help="rented-box mode: run only the classical chunks from a --prep_only context "
+                         "(needs just the stick fields used for rendering; no checkpoint, no atoms)")
     args = ap.parse_args()
+
+    if args.box_ctx:
+        return box_main(args)
 
     import torch
     from xrdclip.eval.real_patterns import query_patterns
@@ -339,24 +397,15 @@ def main() -> int:
         del model_S        # ~0.5 GB; the low-memory reaper has killed a run like this before
 
     # ---- classical: stream the library through workers ------------------------------------------
-    jobs, cid = [], 0
-    for p, n, off in shards:
-        for lo in range(0, n, args.chunk):
-            jobs.append((cid, p, lo, min(n, lo + args.chunk), off + lo))
-            cid += 1
     ctx = {"work": args.work, "Q": Q, "special": special, "topk": topk,
            "thr": {td: {k: thr[td][k] for k in CLASSICAL_KEYS} for td in thr}}
-    todo = [j for j in jobs if not os.path.exists(os.path.join(args.work, "chunks", f"chunk_{j[0]:04d}.npz"))]
-    print(f"[bench] {len(jobs)} chunks, {len(todo)} to run on {args.workers} workers", flush=True)
-    t0 = time.time()
-    if todo:
-        from multiprocessing import Pool
-        # maxtasksperchild=1: a fresh process per chunk, so nothing can accumulate across 39 chunks
-        with Pool(args.workers, initializer=_init_worker, initargs=(ctx,), maxtasksperchild=1) as pool:
-            for done, (c, dt) in enumerate(pool.imap_unordered(_run_chunk, todo), 1):
-                el = time.time() - t0
-                print(f"[bench] chunk {c} {dt:.0f}s  ({done}/{len(todo)}, elapsed {el / 60:.1f} min, "
-                      f"eta {el / done * (len(todo) - done) / 60:.0f} min)", flush=True)
+    if args.prep_only:
+        save_ctx(os.path.join(args.work, "box_ctx.npz"), ctx, N)
+        print(f"[bench] wrote {args.work}/box_ctx.npz (library {N:,}); run --box_ctx on the box, "
+              f"copy chunks/ back, then rerun without flags to merge", flush=True)
+        return 0
+    jobs = chunk_jobs(shards, args.chunk)
+    run_chunks(jobs, ctx, args.workers)
 
     # ---- merge ----------------------------------------------------------------------------------
     for td in ("std", "sc"):
