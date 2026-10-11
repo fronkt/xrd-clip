@@ -47,7 +47,7 @@ def fig_sweeps():
     chance = d["sweep"]["chance_top1"]
     axes_data = d["sweep"]["axes"]
 
-    fig, axs = plt.subplots(1, 3, figsize=(7.16, 2.1), sharey=True)
+    fig, axs = plt.subplots(1, 3, figsize=(7.16, 2.35), sharey=True)
 
     # (a) zero offset
     xs, ys = _axis_series(axes_data["zero_offset"])
@@ -77,9 +77,11 @@ def fig_sweeps():
         ax.set_ylim(0.0, 1.05)
         ax.grid(alpha=0.25, lw=0.5)
     axs[0].set_ylabel("within-family top-1")
-    axs[1].legend(loc="lower left", frameon=False, ncols=1, handlelength=2.2)
 
-    fig.tight_layout(pad=0.4)
+    fig.tight_layout(pad=0.4, rect=(0, 0.14, 1, 1))
+    fig.legend(*axs[0].get_legend_handles_labels(), loc="lower center",
+               bbox_to_anchor=(0.5, 0.0), ncol=4, frameon=False, handlelength=2.2,
+               columnspacing=1.4)
     fig.savefig(OUT / "fig_sweeps.pdf")
     print("wrote", OUT / "fig_sweeps.pdf")
 
@@ -87,7 +89,7 @@ def fig_sweeps():
 def fig_combined():
     d = json.loads((ROOT / "results" / "combined.json").read_text())
     chance = d["field"]["chance_top1"]
-    fig, axs = plt.subplots(1, 2, figsize=(7.16, 2.15))
+    fig, axs = plt.subplots(1, 2, figsize=(7.16, 2.4))
 
     # (a) field average bars
     levels = ["mild", "moderate", "harsh"]
@@ -115,9 +117,10 @@ def fig_combined():
         ax.axhline(chance, **CHANCE_KW)
         ax.set_ylim(0.0, 1.0)
         ax.grid(alpha=0.25, lw=0.5, axis="y")
-    axs[0].legend(loc="upper right", frameon=False)
 
-    fig.tight_layout(pad=0.4)
+    fig.tight_layout(pad=0.4, rect=(0, 0.14, 1, 1))
+    fig.legend(*axs[0].get_legend_handles_labels(), loc="lower center",
+               bbox_to_anchor=(0.5, 0.0), ncol=4, frameon=False)
     fig.savefig(OUT / "fig_combined.pdf")
     print("wrote", OUT / "fig_combined.pdf")
 

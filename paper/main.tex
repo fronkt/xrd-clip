@@ -12,7 +12,14 @@
 
 \begin{document}
 
-\title{Polymorph-Resolving Retrieval of Molecular Crystals\\ from Powder X-Ray Diffraction}
+\title{Polymorph-Resolving Retrieval of Molecular Crystals\\ from Powder X-Ray Diffraction%
+\thanks{This paper has been accepted for publication at the 2026 IEEE MIT
+Undergraduate Research Technology Conference (URTC). \textcopyright~2026 IEEE.
+Personal use of this material is permitted. Permission from IEEE must be
+obtained for all other uses, in any current or future media, including
+reprinting/republishing this material for advertising or promotional purposes,
+creating new collective works, for resale or redistribution to servers or
+lists, or reuse of any copyrighted component of this work in other works.}}
 
 \author{\IEEEauthorblockN{Frank Cai}
 \IEEEauthorblockA{\textit{Purdue University} \\
@@ -24,7 +31,7 @@ frankyc11223@gmail.com}}
 \begin{abstract}
 We show that a contrastive pattern--structure model retrieves the correct
 \emph{polymorph} of a molecular crystal from its powder X-ray diffraction (PXRD)
-pattern---a task on which composition- and symmetry-based methods are pinned at
+pattern, a task on which composition- and symmetry-based methods are pinned at
 chance by construction, because polymorphs share a formula and often a space
 group. Training a CLIP-style dual encoder (a 1D residual network over the
 diffractogram against an atom-set Transformer over the crystal graph) on
@@ -53,8 +60,8 @@ retrieval
 Powder X-ray diffraction is the workhorse for identifying which crystalline phase
 produced a sample. The classical solution is search-match: correlate the measured
 diffractogram against a library of reference patterns~\cite{gatesrector2019pdf}.
-This works when the discriminating signal is coarse---a different composition or a
-different space group moves peaks far apart---but it fails on the case that
+This works when the discriminating signal is coarse: a different composition or a
+different space group moves peaks far apart. It fails, however, on the case that
 matters most in pharmaceutical and materials manufacturing:
 \emph{polymorphs}. Polymorphs are distinct crystal packings of the same molecule;
 they share a chemical formula and frequently a space group, so the only signal
@@ -65,7 +72,7 @@ production~\cite{bauer2001ritonavir}, and polymorphism is pervasive across drug
 substances~\cite{cruzcabeza2015polymorph}.
 
 Recent contrastive models align PXRD patterns with crystal structures in a shared
-embedding for retrieval---XCCP on 155{,}003 inorganic Materials Project
+embedding for retrieval: XCCP on 155{,}003 inorganic Materials Project
 crystals~\cite{xu2025xccp} and XtalNet's CPCP module on hypothetical
 MOFs~\cite{lai2025xtalnet}. Both lean, implicitly or explicitly, on composition
 and space-group cues: XCCP reports 93.4\% space-group identification and uses a
@@ -117,8 +124,8 @@ displacement); an isotropic lattice strain (thermal/compositional); Caglioti
 angular broadening~\cite{caglioti1958} and a Scherrer crystallite-size term;
 March--Dollase preferred orientation~\cite{dollase1986}; a Chebyshev-plus-hump
 background; and Poisson counting noise. This augmentation is the defense against
-the central risk---that the conditioning pattern is simulated \emph{from} the
-target---and Sec.~\ref{sec:ablation} quantifies exactly how much of the model's
+the central risk that the conditioning pattern is simulated \emph{from} the
+target; Sec.~\ref{sec:ablation} quantifies exactly how much of the model's
 robustness it buys.
 
 \subsection{Polymorph-aware training}
@@ -145,12 +152,12 @@ collapse).
 \emph{Within-family retrieval}: the query is one polymorph's (augmented) pattern
 and the library is its sibling polymorphs only; the model must pick the packing
 that produced the pattern. This is precisely the query a composition- or
-space-group-based retriever cannot answer---every sibling has the same formula and
+space-group-based retriever cannot answer: every sibling has the same formula and
 often the same space group, so such a retriever scores at the family-size chance
 rate of \textbf{0.380}.
 
 On clean patterns the model reaches within-family top-1 \textbf{0.561}
-(top-2 0.843, top-5 0.949, MRR 0.738)---a $1.48\times$ lift over composition-only
+(top-2 0.843, top-5 0.949, MRR 0.738), a $1.48\times$ lift over composition-only
 chance. At \emph{zero} degradation, trivial baselines win (a clean query is a
 byte-identical self-match for full-profile correlation, top-1 $\to1.0$); that is
 the context, not the result. The result is what happens when the query carries
@@ -162,7 +169,7 @@ the realistic perturbations a reference library lacks.
   \includegraphics[width=\textwidth]{fig_sweeps.pdf}
   \caption{One-dial degradation of the query pattern (library stays
   clean-simulated). The learned embedding (blue) is flat under peak-position
-  degradations---(a) $2\theta$ zero offset and (b) lattice strain---where
+  degradations, (a) $2\theta$ zero offset and (b) lattice strain, where
   full-profile correlation (red) collapses; it concedes (c) severe Scherrer
   broadening, the one position-preserving axis, to correlation. Grey dashed line
   is composition-only chance.}
@@ -187,12 +194,12 @@ query. Under a $2\theta$ zero offset (sample displacement), the model is flat
 (0.561$\to$0.523) while full-profile correlation collapses (1.0$\to$0.298) and
 overtakes both classical methods beyond 0.15$^\circ$. Under lattice strain the
 model is again flat (0.561$\to$0.546) versus correlation (1.0$\to$0.323). These
-two axes---sample displacement, thermal expansion, and zero/wavelength error---are
+two axes (sample displacement, thermal expansion, and zero/wavelength error) are
 the real-world killers of search-match. The model's honest limitation is the one
 position-\emph{preserving} axis: at a 10\,nm crystallite size, Scherrer broadening
 smears peaks and correlation (0.884) beats the model (0.472).
 
-\textbf{A sign-cancellation control isolates a genuine invariance.} Stacking every
+\textbf{A sign-cancellation control isolates the underlying invariance.} Stacking every
 dial at fixed same-sign values would be misleading: a positive displacement pushes
 peaks up in $2\theta$ while cell expansion pushes them down, so at fixed
 magnitudes the two partially cancel and \emph{artificially rescue} the correlation
@@ -204,7 +211,7 @@ shift magnitudes and flipping only the relative sign, correlation drops from
 \textbf{0.807} (cancel) to \textbf{0.334} (add) and peak-list from 0.784 to 0.340,
 both at composition-only chance, while the model holds ($0.555\to0.534$). For the
 $\sim$50\% of real samples where the two shifts reinforce, classical search-match
-is no better than knowing the formula---and it cannot know in advance which half a
+is no better than knowing the formula; it cannot know in advance which half a
 sample falls in. The learned embedding's invariance is sign-independent; the
 baselines' apparent robustness is a coincidental cancellation.
 
@@ -234,9 +241,9 @@ Two ablations settle where the robustness comes from (Table~\ref{tab:ablation}).
 \emph{First}, zeroing the shift and strain augmentation ranges while keeping the
 rest (\textbf{no shift/strain aug}) changes nothing: the twin tracks the main
 model within 1\% on every axis, including pure shift and the sign-add regime. Peak
-position invariance is therefore \textbf{emergent}---a 1D CNN with global pooling
+position invariance is therefore \textbf{emergent}: a 1D CNN with global pooling
 is intrinsically tolerant to peak translation, and small strain is locally
-translation-like---not something the shift augmentation taught. \emph{Second},
+translation-like, not something the shift augmentation taught. \emph{Second},
 removing \emph{all} augmentation and training on perfectly clean patterns
 (\textbf{no aug}) is the decisive control. That twin still retrieves cleanly
 (0.557) and is still flat under a pure shift (0.552 at 0.1$^\circ$), but it
@@ -245,13 +252,13 @@ present}: full-field retrieval is $0.380/0.381/0.379$ (mild/moderate/harsh), and
 the crystallite-size sweep alone walks it down $0.557\to0.410\to0.395\to0.390$
 (100/50/20\,nm).
 
-This is the direct answer to the natural objection---``isn't within-family
+This is the direct answer to the natural objection: ``isn't within-family
 retrieval just simulated-fingerprint leakage, since the query is simulated from
 the target?'' If it were, the clean-trained twin would retrieve fine under
 realistic conditions. It does not: a clean-trained encoder cannot retrieve at all
 once broadening, texture, noise, and background appear. The physics-grounded
-augmentation is doing genuine simulation-to-realistic generalization;
-measurement-profile robustness is \textbf{learned}, while peak-position invariance
+augmentation is generalizing from simulation to realistic conditions, not
+memorizing; measurement-profile robustness is \textbf{learned}, while peak-position invariance
 is architectural.
 
 \section{A sim-to-real spot check}\label{sec:realcheck}
@@ -261,17 +268,17 @@ three \emph{real} experimental PXRD patterns against the full 30{,}887-structure
 test library, digitized point-by-point from the Rietveld powder-refinement data
 deposited as supporting information with the structures' original
 determination papers (Cu-K$\alpha_1$, matching our simulation exactly). For
-racemic ibuprofen (IBPRAC04)~\cite{derollez2010ibuprofen}---whose structure is a
+racemic ibuprofen (IBPRAC04)~\cite{derollez2010ibuprofen} (whose structure is a
 corpus entry, but whose \emph{real measured pattern} the model has never seen in
-any form---the true structure ranks \textbf{1{,}872 of 30{,}887} by cosine
+any form), the true structure ranks \textbf{1{,}872 of 30{,}887} by cosine
 similarity (top 6.1\%): well above the library midpoint on a single real query,
 though not top-1. For two real patterns of phenobarbital polymorphs Form
 I/II~\cite{platteau2005phenobarbital}, the specific determination is not itself a
 corpus structure (only sibling PHBARB polymorphs are), so no retrieval rank
 applies; nearest-neighbour inspection surfaced no chemically plausible match,
-underscoring that retrieval scoring requires the query's true structure to be a
-library candidate. This is a small-$N$ spot check, not a systematic real-data
-benchmark---scaling it to the tens of real molecular patterns available in the
+which confirms that retrieval scoring requires the query's true structure to be a
+library candidate. This remains a small-$N$ spot check, not a systematic real-data
+benchmark; scaling it to the tens of real molecular patterns available in the
 powder-diffraction literature is the natural next step.
 
 \section{Limitations}
@@ -280,7 +287,7 @@ benchmark; the bulk of our evaluation remains on the physics-grounded simulator,
 for which our augmentation and the sign-cancellation control are designed as
 diagnostics. The model concedes severe Scherrer broadening to full-profile
 correlation, and within-family top-1 of 0.561, while well above the 0.380 chance
-floor, leaves clear headroom---an explicit low-angle/wide-angle encoder
+floor, leaves clear headroom: an explicit low-angle/wide-angle encoder
 split~\cite{xu2025xccp} and light Rietveld reranking are natural next steps. Our
 benchmark is molecular (CSD); the inorganic and MOF regimes are already served by
 composition/symmetry-aware retrieval~\cite{xu2025xccp,lai2025xtalnet}.
@@ -291,7 +298,7 @@ symmetry-based PXRD retrieval is structurally blind, and it is exactly where a
 pattern$\leftrightarrow$packing contrastive model earns its keep. On a
 family-safe CSD benchmark the learned embedding resolves same-molecule siblings
 above chance and, more importantly, holds its accuracy under the peak-position
-perturbations that send classical search-match to chance---a sign-independent
+perturbations that send classical search-match to chance, a sign-independent
 invariance the classical methods cannot guarantee. Ablations show this robustness
 is part architectural and part learned from physics-grounded augmentation, and is
 not fingerprint leakage. The same contrastive retriever is the natural candidate

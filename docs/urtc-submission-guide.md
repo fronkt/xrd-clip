@@ -72,3 +72,53 @@ the grid/wavelength pipeline is correct. New paper section `\section{A sim-to-re
 added before Limitations; Limitations reworded to say "single-digit-N spot check" instead of "future
 work." **Remaining = Frank hand-reviews and submits** (AI does not write the submission; review
 only).
+
+## Draft portal fields (2026-08-05)
+
+Draft only — Frank reviews and pastes into the actual urtc.mit.edu portal form. Portal exact field
+limits (character/word caps) weren't captured verbatim from the pasted guidelines, so two abstract
+lengths are given; use whichever fits the form, or ask if the field visibly truncates.
+
+**Track:** Technical Paper (not poster/lightning talk — this is the only archival/Xplore option;
+see the table above).
+
+**Title:**
+> Polymorph-Resolving Retrieval of Molecular Crystals from Powder X-Ray Diffraction
+
+**Abstract — full length (matches `paper/main.tex`, ~230 words), plain text for the portal:**
+> We show that a contrastive pattern-structure model retrieves the correct polymorph of a molecular
+> crystal from its powder X-ray diffraction (PXRD) pattern — a task on which composition- and
+> symmetry-based methods are pinned at chance by construction, because polymorphs share a formula and
+> often a space group. Training a CLIP-style dual encoder (a 1D residual network over the diffractogram
+> against an atom-set Transformer over the crystal graph) on 247,089 molecular crystals from the
+> Cambridge Structural Database with physics-grounded on-the-fly augmentation, the model attains
+> within-family top-1 retrieval of 0.561 against a composition-only chance of 0.380 over 1,077 held-out
+> polymorph families (2,835 same-molecule siblings). The result that matters for deployment is
+> robustness: under the mid-angle regime where a sample-displacement shift and a thermal-strain shift
+> reinforce rather than cancel, both classical full-profile correlation and peak-list matching fall to
+> composition-only chance while the learned embedding is unmoved. Two ablations separate the mechanism:
+> zeroing shift/strain augmentation costs nothing (peak-position invariance is architectural), whereas
+> removing all augmentation collapses the model to chance under a realistic instrument profile
+> (measurement-profile robustness is learned, not a memorized fingerprint). A spot check against real
+> experimental PXRD patterns from the powder-diffraction literature shows this transfers beyond
+> simulation: a held-out real pattern for racemic ibuprofen retrieves its true structure in the top
+> 6.1% of a 30,887-structure library. The learned embedding is a genuine sign-independent invariance
+> that classical search-match cannot guarantee.
+
+**Abstract — short (~110 words), if the portal caps lower:**
+> Polymorphs of a molecular crystal share a formula and often a space group, so composition- and
+> symmetry-based search is pinned at chance by construction. We train a CLIP-style dual encoder (1D
+> residual network over the PXRD pattern, atom-set Transformer over the crystal graph) on 247,089
+> molecular crystals from the Cambridge Structural Database and retrieve the correct polymorph at
+> within-family top-1 0.561 against 0.380 chance over 1,077 held-out families. Under a measurement
+> regime where classical full-profile correlation and peak-list matching collapse to chance, the
+> learned embedding is unmoved — an invariance ablations show is learned, not memorized. A held-out
+> real experimental pattern for racemic ibuprofen retrieves its true structure in the top 6.1% of a
+> 30,887-structure library, confirming this transfers beyond simulation.
+
+**Keywords (suggested, adjust to whatever the portal's picklist offers):** powder X-ray diffraction,
+crystal structure retrieval, contrastive learning, polymorphism, molecular crystals.
+
+**Still Frank's to do:** verify the actual field limits on the live form, confirm eligibility
+category (high-school student in a collegiate research program), attach `paper/main.pdf`, and submit
+before Aug 9 11:59pm ET.
