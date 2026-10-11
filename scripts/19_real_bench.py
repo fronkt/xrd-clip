@@ -131,6 +131,29 @@ def _init_worker(ctx: dict) -> None:
     _W.update(ctx)
 
 
+def _embed_shard(job) -> "tuple[str, float]":
+    """Structure embeddings for one shard, saved to its own .npy. Runs in a throwaway process: the
+    first full run grew ~1.8 GB per embedded shard inside one long-lived process (6 GB after two)."""
+    path, n, ckpt, embed_dim, out_npy = job
+    if os.path.exists(out_npy):
+        return out_npy, 0.0
+    import torch
+    from xrdclip.eval.retrieve import embed_library
+    from xrdclip.models.clip import XRDClip
+    unthrottle()
+    torch.set_num_threads(4)
+    t0 = time.time()
+    model = XRDClip(embed_dim=embed_dim)
+    model.load_state_dict(torch.load(ckpt, map_location="cpu")["model"])
+    model.eval()
+    store = {str(i): r for i, r in enumerate(load_records(path, 0, n, EMBED_FIELDS))}
+    with torch.no_grad():
+        emb = embed_library(model, store, [str(i) for i in range(n)], "cpu", batch=128)
+    np.save(out_npy + ".tmp.npy", emb.astype(np.float32))
+    os.replace(out_npy + ".tmp.npy", out_npy)
+    return out_npy, time.time() - t0
+
+
 def _run_chunk(job) -> "tuple[int, float]":
     cid, path, lo, hi, g0 = job
     out_path = os.path.join(_W["work"], "chunks", f"chunk_{cid:04d}.npz")
@@ -178,7 +201,6 @@ def main() -> int:
 
     import torch
     from xrdclip.eval.real_patterns import query_patterns
-    from xrdclip.eval.retrieve import embed_library
     from xrdclip.models.clip import XRDClip
     from xrdclip.data import augment as A
 
@@ -236,19 +258,16 @@ def main() -> int:
     model = XRDClip(embed_dim=args.embed_dim)
     model.load_state_dict(torch.load(args.ckpt, map_location="cpu")["model"])
     model.eval()
-    emb_path = os.path.join(args.work, "lib_emb.npy")
-    if os.path.exists(emb_path) and np.load(emb_path, mmap_mode="r").shape[0] == N:
-        lib_emb = np.load(emb_path)
-    else:
-        t0, parts = time.time(), []
-        for p, n, _ in shards:
-            recs = load_records(p, 0, n, EMBED_FIELDS)
-            store = {str(i): r for i, r in enumerate(recs)}
-            with torch.no_grad():
-                parts.append(embed_library(model, store, [str(i) for i in range(n)], "cpu"))
-            print(f"[bench] embedded {p} ({n:,}) {time.time() - t0:.0f}s", flush=True)
-        lib_emb = np.concatenate(parts).astype(np.float32)
-        np.save(emb_path, lib_emb)
+    from multiprocessing import Pool
+    emb_jobs = [(p, n, args.ckpt, args.embed_dim,
+                 os.path.join(args.work, f"emb_{os.path.basename(os.path.dirname(p))}_{os.path.basename(p)[:-4]}"
+                                         f"_{n}.npy")) for p, n, _ in shards]
+    t0 = time.time()
+    with Pool(1, maxtasksperchild=1) as pool:          # one shard per fresh process (see _embed_shard)
+        for out_npy, dt in pool.imap(_embed_shard, emb_jobs):
+            print(f"[bench] embedded {out_npy} {dt:.0f}s (elapsed {time.time() - t0:.0f}s)", flush=True)
+    lib_emb = np.concatenate([np.load(j[-1]) for j in emb_jobs]).astype(np.float32)
+    assert lib_emb.shape[0] == N
     q_emb = {}
     with torch.no_grad():
         for v in ("raw", "bkg"):
@@ -332,7 +351,8 @@ def main() -> int:
     t0 = time.time()
     if todo:
         from multiprocessing import Pool
-        with Pool(args.workers, initializer=_init_worker, initargs=(ctx,)) as pool:
+        # maxtasksperchild=1: a fresh process per chunk, so nothing can accumulate across 39 chunks
+        with Pool(args.workers, initializer=_init_worker, initargs=(ctx,), maxtasksperchild=1) as pool:
             for done, (c, dt) in enumerate(pool.imap_unordered(_run_chunk, todo), 1):
                 el = time.time() - t0
                 print(f"[bench] chunk {c} {dt:.0f}s  ({done}/{len(todo)}, elapsed {el / 60:.1f} min, "
