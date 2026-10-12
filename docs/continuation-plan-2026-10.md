@@ -436,3 +436,39 @@ normally parsed ones against their own patterns (median 0.72 vs 0.74).
 
 Full run launched 2026-10-11 (4 workers, ~5 h, resumable per chunk, log `cache/real_bench/run.log`)
 → `results/real_bench.json`.
+
+### 12a. Full-library readout (2026-10-12)
+
+Run: the classical chunks ran on a rented 128-core Vast box (render-only sticks, no atoms or
+checkpoint; the CSD-derived upload was approved in manual mode). The model and pre-pass ran locally,
+then a local merge. 113/113 chunks, md5-verified, box destroyed. Cost ~$3.5: the job is
+memory-bandwidth-bound, so 118 workers were worth about 2 laptops (Vast lesson #22).
+Table: `results/real_bench_table.md`; numbers: `results/real_bench.json`.
+
+188 patterns vs 309,080 entries, top-1 [95 % compound-bootstrap CI]:
+
+| | std (n = 188) | single-crystal refs (n = 59, 30 compounds) | within-family (n = 51) |
+|---|---|---|---|
+| Pearson fixed grid [bkg] | 0.82 [0.75, 0.88] | 0.34 [0.15, 0.48] | 0.98 |
+| cos + zero scan [bkg] | 0.72 [0.56, 0.88] | 0.37 [0.17, 0.58] | 0.98 |
+| WCC l = 1° [bkg] | 0.68 [0.51, 0.85] | 0.44 [0.19, 0.71] | 0.96 |
+| ln q + zero scan [bkg] | 0.72 [0.55, 0.90] | 0.44 [0.20, 0.71] | 0.96 |
+| xrd-clip model [bkg] | 0.01 [0.00, 0.03] | 0.00 [0.00, 0.00] | 0.71 |
+| model top-1000 → ln q | 0.26 | 0.07 | n/a |
+
+Findings:
+1. **The learned model is unusable at library scale.** Top-1 0.01, median rank ~6,000 (std);
+   single-crystal 0.00, median rank ~15–19k. A model shortlist destroys the classical rerankers
+   (0.26 vs 0.72). Within-family it still discriminates partly (0.71 vs 0.96–0.98).
+2. **Background subtraction matters more than the choice of method.** WCC raw → bkg: 0.29 → 0.68
+   (l = 1°) and 0.21 → 0.57 (l = 2°).
+3. **Hubness drives the full-library drop.** cos + zero scan falls 0.86 → 0.72 between 100k decoys and
+   the full library, while Pearson falls 0.86 → 0.82. One decoy (GUSRIV) is the top-1 winner in 20 of
+   cos + zero scan's 52 misses; EFOXED in 10 of ln q's. Hubs are sparse patterns (~10 strong
+   reflections, one dominant peak at 22–23°) that a ±0.5° zero scan aligns to many queries' strongest
+   peak. A hubness correction is an open method point.
+4. **Independent-reference retrieval is the hard, open case:** best top-1 ≈ 0.44, top-10 ≈ 0.5.
+   Caveat: 59 patterns over 30 compounds, with ZZZIZM (11), NAPHTA (10) and MEHNIY (7) supplying
+   28; report compound-weighted numbers too.
+5. The library-size curve: every classical method loses 0.1–0.2 top-1 from 2k to 309k decoys. The
+   10-10 2k-library numbers overstated classical accuracy at realistic scale.

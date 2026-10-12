@@ -37,6 +37,10 @@ echo "[box] cgroup quota ${quota} cores -> ${W} workers, chunk ${CHUNK}"
 
 ulimit -n 65536
 export PYTHONPATH=src OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+# 2026-10-11: with numpy's default huge-page madvise, 118 workers churning ~46 MB FFT buffers spent 44 %
+# of CPU in the kernel (12.4 M THP faults); a 981-entry chunk took 66 min. Turn THP off for numpy
+# arrays and keep freed memory on the heap instead of mmap/munmap per array.
+export NUMPY_MADVISE_HUGEPAGE=0 MALLOC_MMAP_MAX_=0 MALLOC_TRIM_THRESHOLD_=68719476736
 python scripts/19_real_bench.py --box_ctx cache/real_bench/box_ctx.npz --work cache/real_bench \
   --chunk "$CHUNK" --workers "$W" < /dev/null
 rc=$?
