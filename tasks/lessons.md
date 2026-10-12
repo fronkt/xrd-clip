@@ -9,3 +9,16 @@
   repeats compounds. Use a compound-level bootstrap for paired differences.
 - **Rule:** fix the primary analysis in a commit before computing it (here 2a2ad8a). Sensitivity variants are
   reported, never selected.
+
+## 2026-10-12 — a mechanism written before its cheapest test was run
+- **What happened:** draft v0 explained two results with mechanisms I had not tested. (1) "The model fails on
+  discrimination at library scale": one script (scripts/26) showed the opposite, clean simulated patterns of the same
+  targets reach top-1 0.21 / median rank 5, so the failure is the measured-to-simulated step. (2) "ZZZUWK shows
+  texture along c": the referee pass showed the intensity ratios are not monotonic in the angle to c, which March-
+  Dollase texture requires; the own entries are disordered and simulated through a fallback. Both were caught by an
+  internal referee pass, not by me. Also: "35 conditions" counted a duplicate (clean == zero offset 0).
+- **Rule:** before writing why something fails, write the prediction the mechanism makes and run the cheapest test
+  of it (here: the same model on clean simulated versions of the same queries; intensity ratio vs the angle to the
+  texture axis). If it is not run, the sentence says "hypothesis".
+- **Rule:** count distinct conditions by comparing their results, not by counting names.
+- **Rule:** run the adversarial referee pass BEFORE showing a draft; it found ~10 must-fix items here.

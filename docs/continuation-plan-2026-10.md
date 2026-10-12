@@ -320,6 +320,9 @@ The original claim is kept next to each correction.
 
 ## 10. Gate G0 readout (2026-10-10)
 
+> **Correction (2026-10-12, Section 12c):** 35 condition rows, but `zero_offset=0.0` repeats `clean`, so 34 are
+> distinct. The verdict is unchanged.
+
 Full run: 1,077 families / 2,835 queries, 35 conditions, every method scoring identical rendered
 queries. Ran on a rented RTX 3090 box (~$0.25), destroyed after the pull. Table: `results/g0_table.md`.
 Figure: `results/strong_baselines.png`. Raw: `results/sb_w{1..4}.json` + per-query ranks `.npz`.
@@ -520,6 +523,8 @@ Findings:
    > the maximum vs 0.07 in the simulated own entry, (002) 0.13 vs 0.03, (110) 0.11 vs 0.53, consistent with
    > plates lying on c. So the own entry matches poorly (WCC l = 1° median 0.79 vs 0.97 for the other patterns),
    > and the more peak-tolerant the score, the more decoys pass it (1 decoy for cos, 7 for WCC l = 1°).
+   > **Corrected 10-12 (Section 12c): (2) is wrong -- the ratios are not monotonic in the angle to c, so not texture;
+   > the own entries are disordered and simulated through a fallback. Intensity mismatch, origin unresolved.**
 2. **Hubness in the probe population is real but depends on the method.** N10 skew with augmented probes:
    cos + zero scan 18.7, ln q 12.7, Pearson 8.0, WCC 3.6 (both l). The triangle weighting of WCC resists hubs.
 3. **CSLS removes the ZZZUWK confusion for cos + zero scan** (0/20 → 20/20). Per pattern that is 0.72 → 0.88
@@ -541,3 +546,29 @@ Findings:
 Paper consequences (for the outline check-in): headline = macro top-1 with per-pattern secondary;
 "hubness drives the drop" is out; CSLS is a cheap optional add-on with a small effect; ZZZUWK becomes a
 case study in what shift tolerance costs.
+
+### 12c. Draft and internal review (2026-10-12)
+
+Draft v1 of the Digital Discovery paper is `paper/dd/manuscript.md` (+ generated ESI, figures, `build.sh` -> .docx);
+every number is checked by `scripts/verify_claims.py` against `results/paper_numbers.json`. Two internal referee
+passes (powder diffraction, ML benchmarking) changed these readings of the data:
+
+1. **The model's failure is the measured-to-simulated step, not discrimination** (`scripts/26_model_probe_check.py`).
+   Clean simulated probes vs all 309,080 entries: top-1 0.42, top-10 0.84, median rank 2; degraded probes 0.28 /
+   0.67 / 4; clean renderings of the benchmark's own entries with the measured answer sets: 0.21 / 0.56 / 5; the
+   measured patterns themselves: 0.01 / 0.03 / ~6,000.
+2. **Shift/strain tolerance pays only for independent single-crystal references**: paired compound bootstrap,
+   ln q - Pearson +0.18 [0.02, 0.35], WCC 1° - Pearson +0.20 [0.03, 0.36]; on the any-same-form set no score
+   differs from fixed-grid Pearson except WCC 2° (-0.12). Single-crystal failures track cell agreement: largest
+   cell-length difference <= 1 %: ln q top-1 0.71 (34 patterns); > 1 %: 0.08 (25). Recorded temperatures differ by a
+   median of 3 K, so thermal expansion explains few.
+3. **ZZZUWK is not texture** (correction to 12b finding 1's 10-12 note): the measured/simulated intensity ratios are
+   not monotonic in the angle to c. All 20 own entries are disordered, H-omitted, lenient-tier. Disordered own
+   entries (28 patterns, 9 compounds) score 0.56-0.78 macro vs 0.71-0.88 for the rest.
+4. **G0 has 34 distinct conditions**, not 35 (clean == zero_offset 0.0). Every strong score alone beats the model:
+   WCC 0.5/1/2 and ln q in 34/34, Pearson + zero scan in 33/34.
+5. **Ground truth holds**: of 454 wrong top-1 entries, 1 is the same form under another refcode (GOFWUV,
+   pattern_100/QQQAUJ) (`scripts/27_wrong_top1_audit.py`).
+6. **ln q implementation flaw**: its 16 zero offsets skip 0 and its axis is coarse at high angle; it handicaps ln q.
+
+Open revision options R1-R6 (cost + scope) are listed in tasks/todo.md Step 2; none started without Frank.
