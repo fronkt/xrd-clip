@@ -102,6 +102,69 @@ def render(recs: "list[dict]") -> np.ndarray:
     return np.stack([A.render_sticks(r, A.CLEAN) for r in recs]).astype(np.float32)
 
 
+def build_queries(truth_path: str, patterns_path: str, gidx: dict) -> "tuple[list, dict, dict]":
+    """Identified opXRD patterns -> (qinfo, excluded, Q). Truth sets keep only refcodes in `gidx`."""
+    from xrdclip.data import augment as A
+    from xrdclip.eval.real_patterns import query_patterns, to_cu_grid
+    all_truth = json.load(open(truth_path))
+    pats = {o["id"]: o for o in json.load(open(patterns_path))["organic"]}
+    excluded = {t["id"]: "not identified by packing similarity" for t in all_truth if not t["true_stems"]}
+    for t in all_truth:
+        if t["true_stems"]:
+            o = pats[t["id"]]
+            _, m = to_cu_grid(o["two_theta"], o["intensity"], float(t["wavelength"] or A.WAVELENGTH))
+            if m.sum() * A.STEP < 10.0:       # pattern_706: 2theta axis runs 0.01-0.83 (radians?)
+                excluded[t["id"]] = f"covers {m.sum() * A.STEP:.1f} deg of the 5-50 deg grid (axis {o['tt_range']})"
+    truth = [t for t in all_truth if t["id"] not in excluded]
+    qinfo = []
+    for t in truth:
+        same = [x for x in t["same_form"] if x["refcode"] in gidx]
+        unk = [x["refcode"] for x in t["unknown"] if x["refcode"] in gidx]
+        sets = {
+            "std": ([x["refcode"] for x in same], unk),
+            "sc": ([x["refcode"] for x in same if not x["is_powder_study"]],
+                   unk + [x["refcode"] for x in same if x["is_powder_study"]]),
+        }
+        # the pattern's own Rietveld structure is in the CSD: an anchor that is a powder study and
+        # reproduces the opXRD structure (rmsd against it < 0.05 A)
+        own_powder = any(x["is_anchor"] and x["is_powder_study"] and x["rmsd"] < 0.05 for x in t["same_form"])
+        qinfo.append({"id": t["id"], "stem": t["true_stems"][0], "sets": sets, "own_powder": own_powder,
+                      "other": [x["refcode"] for x in t["other_form"] if x["refcode"] in gidx],
+                      "wavelength": t["wavelength"], "n_same_total": len(t["same_form"])})
+    Q = {}
+    for v in ("raw", "bkg"):
+        Q[f"raw_{v}"] = np.stack([query_patterns(pats[q["id"]], q["wavelength"], v) for q in qinfo])
+        Q[f"std_{v}"] = np.stack([A.standardize(y) for y in Q[f"raw_{v}"]])
+    return qinfo, excluded, Q
+
+
+def compound_bootstrap(stems, n: int = 2000, seed: int = 0) -> "list[np.ndarray]":
+    """Query-index resamples drawn by compound (stem), so repeat patterns of one compound move together."""
+    rng = np.random.default_rng(seed)
+    stems = np.asarray(stems)
+    uniq = np.unique(stems)
+    members = {s: np.nonzero(stems == s)[0] for s in uniq}
+    return [np.concatenate([members[s] for s in rng.choice(uniq, len(uniq))]) for _ in range(n)]
+
+
+def summarise(r: np.ndarray, sel: np.ndarray, boot: "list[np.ndarray]") -> dict:
+    """Rank summary (r = number of wrong entries above the best correct one; -1 = no truth in library)."""
+    ok = sel & (r >= 0)
+    if not ok.any():
+        return {"n": 0}
+    rv = r[ok]
+    d = {"n": int(ok.sum()), "median_rank": float(np.median(rv) + 1), "mrr": float((1 / (rv + 1)).mean())}
+    for kk in (1, 10, 100):
+        d[f"top{kk}"] = float((rv < kk).mean())
+        bs = []
+        for b in boot:
+            bb = b[ok[b]]
+            if len(bb):
+                bs.append(float((r[bb] < kk).mean()))
+        d[f"top{kk}_ci"] = [float(np.percentile(bs, 2.5)), float(np.percentile(bs, 97.5))]
+    return d
+
+
 def score_block(ref_raw: np.ndarray, Q: dict) -> "dict[str, np.ndarray]":
     """All classical scores of one reference block against every query. {key: (n_query, n_ref)}."""
     from xrdclip.data import augment as A
@@ -258,9 +321,7 @@ def main() -> int:
         return box_main(args)
 
     import torch
-    from xrdclip.eval.real_patterns import query_patterns
     from xrdclip.models.clip import XRDClip
-    from xrdclip.data import augment as A
 
     unthrottle()
     torch.set_num_threads(4)
@@ -277,36 +338,7 @@ def main() -> int:
     print(f"[bench] library {N:,} entries from {len(shards)} shards", flush=True)
 
     # ---- queries + truth sets -------------------------------------------------------------------
-    all_truth = json.load(open(args.truth))
-    pats = {o["id"]: o for o in json.load(open(args.patterns))["organic"]}
-    from xrdclip.eval.real_patterns import to_cu_grid
-    excluded = {t["id"]: "not identified by packing similarity" for t in all_truth if not t["true_stems"]}
-    for t in all_truth:
-        if t["true_stems"]:
-            o = pats[t["id"]]
-            _, m = to_cu_grid(o["two_theta"], o["intensity"], float(t["wavelength"] or A.WAVELENGTH))
-            if m.sum() * A.STEP < 10.0:       # pattern_706: 2theta axis runs 0.01-0.83 (radians?)
-                excluded[t["id"]] = f"covers {m.sum() * A.STEP:.1f} deg of the 5-50 deg grid (axis {o['tt_range']})"
-    truth = [t for t in all_truth if t["id"] not in excluded]
-    qinfo = []
-    for t in truth:
-        same = [x for x in t["same_form"] if x["refcode"] in gidx]
-        unk = [x["refcode"] for x in t["unknown"] if x["refcode"] in gidx]
-        sets = {
-            "std": ([x["refcode"] for x in same], unk),
-            "sc": ([x["refcode"] for x in same if not x["is_powder_study"]],
-                   unk + [x["refcode"] for x in same if x["is_powder_study"]]),
-        }
-        # the pattern's own Rietveld structure is in the CSD: an anchor that is a powder study and
-        # reproduces the opXRD structure (rmsd against it < 0.05 A)
-        own_powder = any(x["is_anchor"] and x["is_powder_study"] and x["rmsd"] < 0.05 for x in t["same_form"])
-        qinfo.append({"id": t["id"], "stem": t["true_stems"][0], "sets": sets, "own_powder": own_powder,
-                      "other": [x["refcode"] for x in t["other_form"] if x["refcode"] in gidx],
-                      "wavelength": t["wavelength"], "n_same_total": len(t["same_form"])})
-    Q = {}
-    for v in ("raw", "bkg"):
-        Q[f"raw_{v}"] = np.stack([query_patterns(pats[q["id"]], q["wavelength"], v) for q in qinfo])
-        Q[f"std_{v}"] = np.stack([A.standardize(y) for y in Q[f"raw_{v}"]])
+    qinfo, excluded, Q = build_queries(args.truth, args.patterns, gidx)
     nq = len(qinfo)
     print(f"[bench] {nq} identified patterns; std truth in library for "
           f"{sum(bool(q['sets']['std'][0]) for q in qinfo)}, sc truth for "
@@ -477,30 +509,10 @@ def main() -> int:
               f"({len(S_full)} keys x 2 truth defs x {nq} queries)", flush=True)
 
     # ---- summaries + bootstrap CIs ----------------------------------------------------------------
-    rng = np.random.default_rng(0)
-    stems = np.array([q["stem"] for q in qinfo])
-    uniq = np.unique(stems)
-    members = {s: np.nonzero(stems == s)[0] for s in uniq}
-    boot = [np.concatenate([members[s] for s in rng.choice(uniq, len(uniq))]) for _ in range(2000)]
+    boot = compound_bootstrap([q["stem"] for q in qinfo])
     split_of = {"all": np.ones(nq, bool),
                 "powder_study": np.array([q["own_powder"] for q in qinfo]),
                 "independent": np.array([not q["own_powder"] for q in qinfo])}
-
-    def summarise(r: np.ndarray, sel: np.ndarray) -> dict:
-        ok = sel & (r >= 0)
-        if not ok.any():
-            return {"n": 0}
-        rv = r[ok]
-        d = {"n": int(ok.sum()), "median_rank": float(np.median(rv) + 1), "mrr": float((1 / (rv + 1)).mean())}
-        for kk in (1, 10, 100):
-            d[f"top{kk}"] = float((rv < kk).mean())
-            bs = []
-            for b in boot:
-                bb = b[ok[b]]
-                if len(bb):
-                    bs.append(float((r[bb] < kk).mean()))
-            d[f"top{kk}_ci"] = [float(np.percentile(bs, 2.5)), float(np.percentile(bs, 97.5))]
-        return d
 
     res = {"n_library": N, "n_queries": nq, "excluded": excluded, "keys": list(ranks["std"]), "summary": {},
            "within_family": {},
@@ -513,7 +525,7 @@ def main() -> int:
             for sp, sel in split_of.items():
                 if td == "sc" and sp != "all":
                     continue
-                res["summary"][f"{td}|{sp}|{k}"] = summarise(r, sel)
+                res["summary"][f"{td}|{sp}|{k}"] = summarise(r, sel, boot)
     for k, w in wf.items():
         ok = w >= 0
         res["within_family"][k] = {"n": int(ok.sum()), "top1": float(w[ok].mean()) if ok.any() else None}

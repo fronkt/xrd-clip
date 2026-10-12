@@ -21,11 +21,35 @@ Step 1 hardens the real-data numbers before any drafting. All CPU, no spend.
       per variant → ~3–4 h wall on 4 workers.
 - [x] compound-level (stem) bootstrap 95 % CIs; library-size curve (2k / 20k / 100k / full)
 - [ ] compound-weighted (macro) metrics for the single-crystal split (59 patterns / 30 compounds)
-- [ ] hubness: diagnose + test a correction (GUSRIV wins 20/52 cos misses) — only after outline OK
+- [ ] hubness: diagnose + test a correction (GUSRIV wins 20/52 cos misses) — Frank 10-12: "do the hubness fix on Vast GPU first" (plan below)
 - [x] commit table + aggregate json; plan Section 11 corrected, 12/12a added
 
+### Step 1b — hubness correction (Frank 10-12: Digital Discovery; hubness fix on a Vast GPU before drafting)
+Why a rerun: 19 kept only rank bits, so any score correction needs the full score rows again.
+Design (pre-declared, so nothing is tuned on the 188 test patterns):
+- primary = CSLS (Conneau et al. 2018), library side only: s'(q,r) = s(q,r) − ½·h_k(r), h_k(r) = mean of r's
+  k = 10 highest scores against a PROBE set (the query-side term is constant per query, so ranks ignore it).
+- probes = library entries, never the test patterns: 4000 clean simulated ("sim") + 4000 augmented with the
+  training ranges and then bkg-preprocessed like the real queries ("aug"); sampled from entries whose stem is
+  not a query family; same-stem probe/entry pairs are masked out of h.
+- sensitivity (reported, not selected): k ∈ {1, 5, 20, 50}; library-side z-norm; mutual proximity (Gauss).
+- hubness diagnosis: k-occurrence skew (N_10 over probes), top hubs + their peak counts.
+- model gets the same correction locally (probe patterns → pattern encoder; library embeddings cached).
+Steps:
+- [ ] `src/xrdclip/eval/wcc_torch.py`: torch port of WCCLibrary + Pearson as lag-sliced GEMMs (triangle
+      folded into the reference, so 51 lags for cos/WCC, 16 × 63 for lnq); fp32, TF32 off
+- [ ] validate locally on CPU: torch vs `strong_baselines.WCCLibrary` and vs prepass.npz special-entry scores
+- [ ] `scripts/21_hubness.py prep | score | eval`; refactor 19's query/truth build into a shared function
+- [ ] smoke: `score --limit 200` on CPU, `eval` uncorrected ranks == cache/real_bench_smoke/ranks.npz
+- [ ] box runner `scripts/box/hub_box.sh` (md5, self-stop, watchdog); upload = existing box_upload.tar + small ctx
+- [ ] Frank switches to MANUAL mode (CSD-derived upload, memory #16/16b) → rent 1× RTX 4090/5090 → run → pull → destroy
+      est. GPU ~10 min, box ~45 min incl. transfer, ~$0.3–0.5
+- [ ] eval: uncorrected ranks reproduce ranks.npz; corrected table + CIs → results/real_bench_hub.json + table
+- [ ] plan Section 12b + commit/push
+
 ### Step 2 — draft (after Step 1 numbers are in)
-- [ ] venue + outline check-in with Frank (Digital Discovery vs J. Appl. Cryst. vs AI4Mat workshop)
+- [x] venue: Digital Discovery (Frank 10-12)
+- [ ] outline check-in with Frank
 
 ---
 
