@@ -11,7 +11,7 @@ Step 1 hardens the real-data numbers before any drafting. All CPU, no spend.
       compare() = None → "unknown" → ignore list (never scored as an error). Extract CIFs of every
       family member outside the stick cache (gitignored cache/).
 - [x] simulate the extras → cache/sticks_extra: 218/246 (28 have no CSD coordinates); Z′<1 duplicate-site merge fallback added
-- [x] 19 (scripts/19_real_bench.py): DONE 10-12 on Vast (box 55451580, destroyed; ~$3.5) + local merge with `--chunk 2800`. Readout in plan Section 12a; table results/real_bench_table.md.
+- [x] 19 (scripts/19_real_bench.py): DONE 10-12 on Vast (box 55451580, destroyed; $2.53) + local merge with `--chunk 2800`. Readout in plan Section 12a; table results/real_bench_table.md.
       95 in-corpus). Exact ranks via a pre-pass over family members (thresholds + within-family),
       then chunked streaming counts with 4 un-throttled workers, resumable per chunk.
       Splits: all / powder-study / independent; plus leave-own-refinement-out (LORO: powder-study

@@ -441,7 +441,7 @@ Full run launched 2026-10-11 (4 workers, ~5 h, resumable per chunk, log `cache/r
 
 Run: the classical chunks ran on a rented 128-core Vast box (render-only sticks, no atoms or
 checkpoint; the CSD-derived upload was approved in manual mode). The model and pre-pass ran locally,
-then a local merge. 113/113 chunks, md5-verified, box destroyed. Cost ~$3.5: the job is
+then a local merge. 113/113 chunks, md5-verified, box destroyed. Cost $2.53 (credit $10.09 -> $7.56): the job is
 memory-bandwidth-bound, so 118 workers were worth about 2 laptops (Vast lesson #22).
 Table: `results/real_bench_table.md`; numbers: `results/real_bench.json`.
 
