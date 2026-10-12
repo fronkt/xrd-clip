@@ -52,6 +52,50 @@ def save(fig, name):
     print(f"wrote {OUT}/{name}.pdf/.png")
 
 
+# ---- Fig. 1: benchmark construction (schematic) ------------------------------------------------------------
+def fig_schematic(pn: dict) -> None:
+    from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
+    d = pn["dataset"]
+    fig, ax = plt.subplots(figsize=(DOUBLE, 0.40 * DOUBLE))
+    ax.set_xlim(0, 100)
+    ax.set_ylim(0, 42)
+    ax.axis("off")
+
+    def box(x, y, w, h, text, fc="#F2F2F2", ec="0.35"):
+        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.3,rounding_size=1.2", fc=fc, ec=ec, lw=0.7))
+        ax.text(x + w / 2, y + h / 2, text, ha="center", va="center", fontsize=6, linespacing=1.35)
+
+    def arrow(x0, y0, x1, y1):
+        ax.add_patch(FancyArrowPatch((x0, y0), (x1, y1), arrowstyle="-|>", mutation_scale=7, lw=0.7, color="0.25"))
+
+    def note(x, y, text, ha="center"):
+        ax.text(x, y, text, ha=ha, va="bottom", fontsize=5.6, color="0.25", linespacing=1.25)
+
+    y, h = 24, 11
+    nl = "\n".join
+    box(0.5, y, 20, h, nl(["Rietveld structure of", "the measured pattern", "(opXRD CNRS, CC BY 4.0)"]))
+    box(27, y, 18, h, nl(["CSD candidates", "(same non-H", "element set)"]))
+    box(52, y, 17, h, "Anchor entry")
+    box(76, y, 23, h, nl(["Same-form set", "(15/15 vs the anchor,", "at any T or p)"]))
+    for x0, x1, t in ((21.1, 26.4, ["reduced-cell search", "(1.5 %, 2°)"]),
+                      (45.6, 51.4, ["packing similarity", "(15 molecules)"]),
+                      (69.6, 75.4, ["same test over the", "refcode family"])):
+        arrow(x0, y + h / 2, x1, y + h / 2)
+        note((x0 + x1) / 2, y + h + 1.2, nl(t))
+    y2 = 2
+    box(0.5, y2, 20, h, nl(["Measured pattern", "(Cu Kα1, 5–50° 2θ,", "background removed)"]), fc="#FFFFFF")
+    box(27, y2, 25, h, nl(["Score against", f"{d['n_library']:,} simulated", "CSD patterns"]), fc="#FBEFE6", ec="#D55E00")
+    box(59, y2, 40, h, nl(["Rank of the first correct entry",
+                           f"any same-form entry: {d['n_queries']} patterns, {d['n_compounds']} compounds",
+                           f"single-crystal entry only: {d['n_sc_patterns']} patterns, {d['n_sc_compounds']} compounds"]),
+        fc="#E3EEF8", ec="#0072B2")
+    arrow(21.1, y2 + h / 2, 26.4, y2 + h / 2)
+    arrow(52.6, y2 + h / 2, 58.4, y2 + h / 2)
+    arrow(87.5, y - 0.6, 87.5, y2 + h + 0.6)
+    note(88.5, 16.8, "correct entries", ha="left")
+    save(fig, "fig1_benchmark")
+
+
 # ---- Fig. 2: simulated sweep -----------------------------------------------------------------------------
 def fig_sweep(sb: dict) -> None:
     axes = {"zero_offset": ("2θ zero offset (°)", False), "strain": ("Isotropic lattice strain", False),
@@ -209,6 +253,7 @@ def fig_ranks(R) -> None:
 
 def main() -> int:
     pn = json.load(open("results/paper_numbers.json"))
+    fig_schematic(pn)
     fig_sweep(json.load(open("results/strong_baselines.json")))
     fig_real(pn)
     fig_case(pn, pn["case"], np.load("cache/real_bench/case_zzzuwk.npz"))

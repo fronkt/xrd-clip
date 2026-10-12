@@ -31,12 +31,12 @@ RUN_FACTS = {"bench_cost_usd": 2.53, "hub_cost_usd": 0.26, "hub_gpu": "RTX 4090"
              "g0_cost_usd": 0.25, "g0_gpu": "RTX 3090"}
 
 
-def r3(x):
-    return None if x is None else round(float(x), 3)
+def rd(x):          # 4 decimals: the manuscript rounds once, to 2
+    return None if x is None else round(float(x), 4)
 
 
 def ci(v):
-    return [r3(v[0]), r3(v[1])]
+    return [rd(v[0]), rd(v[1])]
 
 
 def per_compound(hit: np.ndarray, ok: np.ndarray, stems: np.ndarray, uniq: np.ndarray) -> np.ndarray:
@@ -50,8 +50,8 @@ def macro(r: np.ndarray, kk: int, stems: np.ndarray, cboot: np.ndarray) -> dict:
     ok = r >= 0
     p = per_compound((r < kk) & ok, ok, stems, uniq)
     bs = np.nanmean(p[cboot], axis=1)
-    return {"n_compounds": int(np.isfinite(p).sum()), "value": r3(np.nanmean(p)),
-            "ci": [r3(np.nanpercentile(bs, 2.5)), r3(np.nanpercentile(bs, 97.5))]}
+    return {"n_compounds": int(np.isfinite(p).sum()), "value": rd(np.nanmean(p)),
+            "ci": [rd(np.nanpercentile(bs, 2.5)), rd(np.nanpercentile(bs, 97.5))]}
 
 
 def main() -> int:
@@ -96,6 +96,12 @@ def main() -> int:
         "n_compounds_single_pattern": int(sum(v == 1 for v in cnt.values())),
         "n_library": rb["n_library"],
         "n_temp_given": int(sum(pats[m["id"]]["temp_K"] not in (None, "None") for m in meta)),
+        "n_wavelength_missing_assumed_cu": int(sum(truth[m["id"]]["wavelength"] in (None, "None", "") for m in meta)),
+        "n_cnrs_total": json.load(open(args.patterns))["stats"]["n_total"],
+        "anchor_tiers": dict(Counter(str(t["anchor_tier"]) for t in truth.values())),
+        "n_corpus": json.load(open("refcodes/splits_manifest.json"))["n_structures"],
+        "n_extra": rb["n_library"] - json.load(open("refcodes/splits_manifest.json"))["n_structures"],
+        "n_probe_per_set": hub["meta"]["n_probe"],
     }
 
     # ---- training-split overlap of the model (scaffold splits; extras were never in the corpus) ---------------
@@ -113,6 +119,11 @@ def main() -> int:
     out["model_training_overlap"] = {"patterns_with_same_form_entry_in": dict(qs),
                                      "compounds_with_same_form_entry_in_train": len(comp_train),
                                      "split_sizes": json.load(open("refcodes/splits_manifest.json"))["scaffold_counts"]}
+    qsa = np.array(q_split)
+    for sp in ("train", "none"):                  # model ranks for patterns whose structure it trained on, and not
+        r = R[f"none|std|model_bkg"][qsa == sp]
+        out["model_training_overlap"][f"model_bkg_{sp}"] = {"n": int(len(r)), "top1": rd((r == 0).mean()),
+                                                           "top10": rd((r < 10).mean()), "median_rank": float(np.median(r) + 1)}
 
     # ---- real benchmark, per pattern + macro, uncorrected and CSLS ---------------------------------------------
     bm = {}
@@ -125,42 +136,42 @@ def main() -> int:
                 for f in ("n", "top1", "top10", "median_rank"):
                     assert abs(s[f] - ref[f]) < 1e-9, (key, td, corr, f, s[f], ref[f])
                 m1, m10 = macro(r, 1, stems, cboot), macro(r, 10, stems, cboot)
-                assert abs(m1["value"] - round(hub["macro"][f"{corr}|{td}|{key}"]["top1"], 3)) < 1e-9
+                assert abs(m1["value"] - round(hub["macro"][f"{corr}|{td}|{key}"]["top1"], 4)) < 1e-9
                 ok = r >= 0
                 bm[f"{corr}|{td}|{key}"] = {
-                    "n": s["n"], "top1": r3(s["top1"]), "top1_ci": ci(s["top1_ci"]),
-                    "top10": r3(s["top10"]), "top10_ci": ci(s["top10_ci"]), "median_rank": s["median_rank"],
+                    "n": s["n"], "top1": rd(s["top1"]), "top1_ci": ci(s["top1_ci"]),
+                    "top10": rd(s["top10"]), "top10_ci": ci(s["top10_ci"]), "median_rank": s["median_rank"],
                     "macro_top1": m1["value"], "macro_top1_ci": m1["ci"], "n_compounds": m1["n_compounds"],
                     "macro_top10": m10["value"], "macro_top10_ci": m10["ci"],
-                    "frac_rank_gt_100": r3((r[ok] >= 100).mean()), "frac_rank_gt_1000": r3((r[ok] >= 1000).mean()),
+                    "frac_rank_gt_100": rd((r[ok] >= 100).mean()), "frac_rank_gt_1000": rd((r[ok] >= 1000).mean()),
                 }
                 # against 19's committed numbers (uncorrected): top-1 must be identical
                 if corr == "none":
                     assert abs(rb["summary"][f"{td}|all|{key}"]["top1"] - s["top1"]) < 1e-9, (key, td)
     out["bench"] = bm
-    out["paired_csls"] = {f"{td}|{k}": {kk: (r3(v) if isinstance(v, float) else ci(v) if kk.endswith("_ci") else v)
+    out["paired_csls"] = {f"{td}|{k}": {kk: (rd(v) if isinstance(v, float) else ci(v) if kk.endswith("_ci") else v)
                                         for kk, v in hub["paired"][f"csls_aug_k10|{td}|{k}"].items()}
                           for k in KEYS for td in ("std", "sc")}
-    out["within_family"] = {k: {"n": rb["within_family"][k]["n"], "top1": r3(rb["within_family"][k]["top1"])}
+    out["within_family"] = {k: {"n": rb["within_family"][k]["n"], "top1": rd(rb["within_family"][k]["top1"])}
                             for k in KEYS + RAW}
     for name in ("library_curve", "library_curve_macro"):     # {size: [mean, sd over 5 decoy subsets]}
         out[name] = {k: {n: ci(v) for n, v in cv.items()} for k, cv in hub[name].items()}
-    out["hybrid"] = {k: {td: {"top1": r3(rb["summary"][f"{td}|all|{k}"]["top1"]),
+    out["hybrid"] = {k: {td: {"top1": rd(rb["summary"][f"{td}|all|{k}"]["top1"]),
                               "top1_ci": ci(rb["summary"][f"{td}|all|{k}"]["top1_ci"])} for td in ("std", "sc")}
                      for k in rb["keys"] if "->" in k and k.endswith("_bkg")}
 
     # ---- sensitivity of the correction (std, per pattern + macro) -------------------------------------------
     corr_all = hub["meta"]["corrections"]
-    out["sensitivity"] = {f"{c}|{k}": {"top1": r3(hub["summary"][f"{c}|std|all|{k}"]["top1"]),
-                                        "macro_top1": r3(hub["macro"][f"{c}|std|{k}"]["top1"]),
-                                        "sc_macro_top1": r3(hub["macro"][f"{c}|sc|{k}"]["top1"])}
+    out["sensitivity"] = {f"{c}|{k}": {"top1": rd(hub["summary"][f"{c}|std|all|{k}"]["top1"]),
+                                        "macro_top1": rd(hub["macro"][f"{c}|std|{k}"]["top1"]),
+                                        "sc_macro_top1": rd(hub["macro"][f"{c}|sc|{k}"]["top1"])}
                           for c in corr_all for k in KEYS}
 
     # ---- hubness diagnosis + the case compound -----------------------------------------------------------------
     hz = {}
     for k in KEYS:
         h = hub["hubness"][k]
-        hz[k] = {"N10_skew_aug": r3(h["probe_aug"]["N10_skew"]), "N10_skew_sim": r3(h["probe_sim"]["N10_skew"]),
+        hz[k] = {"N10_skew_aug": rd(h["probe_aug"]["N10_skew"]), "N10_skew_sim": rd(h["probe_sim"]["N10_skew"]),
                  "N10_max_aug": h["probe_aug"]["N10_max"],
                  "wrong_top1_none": h["query_top1_wrong|none"]["most_common"][:3],
                  "wrong_top1_csls": h["query_top1_wrong|csls_aug_k10"]["most_common"][:3],
@@ -190,17 +201,17 @@ def main() -> int:
         best = max(STRONG, key=lambda k: res[k]["top1"])
         m, b = res["model"], res[best]
         wins += m["ci95"][0] > b["ci95"][1]
-        rows_g0.append({"condition": name, "model": r3(m["top1"]), "model_ci": ci(m["ci95"]), "best": best,
-                        "best_top1": r3(b["top1"]), "best_ci": ci(b["ci95"]), "delta": r3(m["top1"] - b["top1"]),
+        rows_g0.append({"condition": name, "model": rd(m["top1"]), "model_ci": ci(m["ci95"]), "best": best,
+                        "best_top1": rd(b["top1"]), "best_ci": ci(b["ci95"]), "delta": rd(m["top1"] - b["top1"]),
                         "ci_overlap": not (m["ci95"][1] < b["ci95"][0] or m["ci95"][0] > b["ci95"][1]),
-                        "pearson_fixed": r3(res["pearson"]["top1"])})
+                        "pearson_fixed": rd(res["pearson"]["top1"])})
     d = [x["delta"] for x in rows_g0]
-    out["g0"] = {"n_families": sb["n_families"], "n_queries": sb["n_queries"], "chance": r3(sb["chance_top1"]),
+    out["g0"] = {"n_families": sb["n_families"], "n_queries": sb["n_queries"], "chance": rd(sb["chance_top1"]),
                  "n_conditions": len(rows_g0), "n_model_wins": int(wins),
                  "n_ci_overlap": int(sum(x["ci_overlap"] for x in rows_g0)),
                  "delta_min_abs": min(d, key=abs), "delta_max_abs": max(d, key=abs),
                  "model_range": [min(x["model"] for x in rows_g0), max(x["model"] for x in rows_g0)],
-                 "us_per_pair_clean": {k: r3(sb["conditions"]["clean"][k]["us_per_pair"])
+                 "us_per_pair_clean": {k: rd(sb["conditions"]["clean"][k]["us_per_pair"])
                                        for k in ["model", "pearson", "pearson_zs", "wcc_1", "wcc_2", "lnq"]},
                  "rows": rows_g0}
 

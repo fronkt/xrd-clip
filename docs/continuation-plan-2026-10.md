@@ -511,6 +511,15 @@ Findings:
    share two strong low-angle reflections (GUSRIV: 23.45° and 28.56°; ZZZLWW01: 23.5° and 28.53°).
    Hypothesis, not tested: the ±0.5° zero scan lets such decoys line up with ZZZUWK's peaks, and the fixed
    grid does not.
+   > **Tested 10-12 (scripts/24_case_zzzuwk.py, results/case_zzzuwk.json): mostly wrong.** ZZZUWK is
+   > propan-1-aminium chloride (P4/nmm), a 303-398 K variable-temperature powder series, one pattern per CSD
+   > entry ZZZUWK01-20. The main decoys need no shift: GUSRIV, SOSBEK and ZZZLWW01 beat the own entry at zero
+   > offset in 20/20 patterns under WCC l = 1°, GUSRIV in 9/20 under cos. Only some (MITMOU -0.37°, CIQBIO and
+   > VOXSIO -0.2°) need the scan. The causes are (1) a sparse pattern: 24 reflections in 5-50° vs a median of
+   > 130 for the benchmark's entries (fewer than 99 % of them); (2) texture: measured (001) at 12.0° is 0.36 of
+   > the maximum vs 0.07 in the simulated own entry, (002) 0.13 vs 0.03, (110) 0.11 vs 0.53, consistent with
+   > plates lying on c. So the own entry matches poorly (WCC l = 1° median 0.79 vs 0.97 for the other patterns),
+   > and the more peak-tolerant the score, the more decoys pass it (1 decoy for cos, 7 for WCC l = 1°).
 2. **Hubness in the probe population is real but depends on the method.** N10 skew with augmented probes:
    cos + zero scan 18.7, ln q 12.7, Pearson 8.0, WCC 3.6 (both l). The triangle weighting of WCC resists hubs.
 3. **CSLS removes the ZZZUWK confusion for cos + zero scan** (0/20 → 20/20). Per pattern that is 0.72 → 0.88
