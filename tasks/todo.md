@@ -20,8 +20,8 @@ Step 1 hardens the real-data numbers before any drafting. All CPU, no spend.
       Measured cost (1 core, 196 q × 310k): cos_zs 0.37 h, wcc_1 0.63 h, wcc_2 0.82 h, lnq 7.0 h
       per variant → ~3–4 h wall on 4 workers.
 - [x] compound-level (stem) bootstrap 95 % CIs; library-size curve (2k / 20k / 100k / full)
-- [ ] compound-weighted (macro) metrics for the single-crystal split (59 patterns / 30 compounds)
-- [ ] hubness: diagnose + test a correction (GUSRIV wins 20/52 cos misses) — Frank 10-12: "do the hubness fix on Vast GPU first" (plan below)
+- [x] compound-weighted (macro) metrics: DONE 10-12 in 21 eval for std + sc, every correction (plan Section 12b)
+- [x] hubness: diagnose + test a correction — DONE 10-12 (Step 1b; plan Section 12b): the "hub" was one compound (ZZZUWK)
 - [x] commit table + aggregate json; plan Section 11 corrected, 12/12a added
 
 ### Step 1b — hubness correction (Frank 10-12: Digital Discovery; hubness fix on a Vast GPU before drafting)
@@ -36,16 +36,24 @@ Design (pre-declared, so nothing is tuned on the 188 test patterns):
 - hubness diagnosis: k-occurrence skew (N_10 over probes), top hubs + their peak counts.
 - model gets the same correction locally (probe patterns → pattern encoder; library embeddings cached).
 Steps:
-- [ ] `src/xrdclip/eval/wcc_torch.py`: torch port of WCCLibrary + Pearson as lag-sliced GEMMs (triangle
+- [x] `src/xrdclip/eval/wcc_torch.py`: torch port of WCCLibrary + Pearson as lag-sliced GEMMs (triangle
       folded into the reference, so 51 lags for cos/WCC, 16 × 63 for lnq); fp32, TF32 off
-- [ ] validate locally on CPU: torch vs `strong_baselines.WCCLibrary` and vs prepass.npz special-entry scores
-- [ ] `scripts/21_hubness.py prep | score | eval`; refactor 19's query/truth build into a shared function
-- [ ] smoke: `score --limit 200` on CPU, `eval` uncorrected ranks == cache/real_bench_smoke/ranks.npz
-- [ ] box runner `scripts/box/hub_box.sh` (md5, self-stop, watchdog); upload = existing box_upload.tar + small ctx
-- [ ] Frank switches to MANUAL mode (CSD-derived upload, memory #16/16b) → rent 1× RTX 4090/5090 → run → pull → destroy
-      est. GPU ~10 min, box ~45 min incl. transfer, ~$0.3–0.5
-- [ ] eval: uncorrected ranks reproduce ranks.npz; corrected table + CIs → results/real_bench_hub.json + table
-- [ ] plan Section 12b + commit/push
+- [x] validate locally on CPU (max |diff| 9.5e-7, 9 keys x 397 entries): torch vs `strong_baselines.WCCLibrary` and vs prepass.npz special-entry scores
+- [x] `scripts/21_hubness.py prep | score | eval | check`; 19's query/truth build + summary shared (19 smoke output identical after refactor)
+- [x] smoke: `score --limit 200` on CPU, `eval` uncorrected ranks == cache/real_bench_smoke/ranks.npz (0 mismatches, 11 keys x 2)
+- [x] box runner `scripts/box/hub_box.sh` (md5, self-stop, watchdog); upload = existing box_upload.tar + small ctx
+- [x] Frank switched to MANUAL mode → RTX 4090 box 55604630: upload 8 min, score 761 s, pull 9 min (md5 OK), destroyed; $0.26
+- [x] eval: uncorrected ranks reproduce ranks.npz (0 top-1 changes; 59 |Δrank| ≤ 3 near-ties); table + json written
+- [x] plan Section 12b (+ correction banner on 12a finding 3) + commit/push
+
+#### Review — Step 1b (2026-10-12)
+- Worked: folding the WCC triangle into the reference turns the zero scan into 51 GEMMs, so 8,188 rows x 309k
+  entries x 5 methods took 12 min on one 4090. CPU-equivalence was checked three times: prepass (≤ 1e-6), the
+  smoke run against 19's brute-force ranks (exact), and the full-library ranks (no top-1 change).
+- Finding that changes the paper: the 12a "hub" (GUSRIV x20) was ONE query compound, ZZZUWK, with 20 patterns.
+  The CSLS per-pattern gain for cos (+0.15) is mostly ZZZUWK; compound-weighted the gains are +0.01–0.04 and none
+  is significant. Lead the paper with macro top-1. On that measure ln q is best (0.87), not Pearson.
+- Lesson -> tasks/lessons.md (count distinct query compounds before calling a decoy a hub).
 
 ### Step 2 — draft (after Step 1 numbers are in)
 - [x] venue: Digital Discovery (Frank 10-12)

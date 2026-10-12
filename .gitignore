@@ -28,6 +28,9 @@
 # Real benchmark v2 (2026-10-11): aggregate metrics + per-query ids/stems/ranks only (refcodes, no structures).
 !/results/real_bench.json
 !/results/real_bench_table.md
+# Hubness pass (2026-10-12): same kind of aggregate metrics + hub refcodes/counts.
+!/results/real_bench_hub.json
+!/results/real_bench_hub_table.md
 !/results/polymorph.json
 !/results/polymorph.png
 !/results/combined.json

@@ -462,7 +462,11 @@ Findings:
    (0.26 vs 0.72). Within-family it still discriminates partly (0.71 vs 0.96–0.98).
 2. **Background subtraction matters more than the choice of method.** WCC raw → bkg: 0.29 → 0.68
    (l = 1°) and 0.21 → 0.57 (l = 2°).
-3. **Hubness drives the full-library drop.** cos + zero scan falls 0.86 → 0.72 between 100k decoys and
+3. > **Correction (2026-10-12, Section 12b): wrong as stated.** All 20 GUSRIV wins (and all of EFOXED's 10)
+   > are patterns of ONE query compound, ZZZUWK (20 of the 188 patterns). This is one confusable compound
+   > counted 20 times, not a decoy that beats many compounds. Original text kept below.
+
+   **Hubness drives the full-library drop.** cos + zero scan falls 0.86 → 0.72 between 100k decoys and
    the full library, while Pearson falls 0.86 → 0.82. One decoy (GUSRIV) is the top-1 winner in 20 of
    cos + zero scan's 52 misses; EFOXED in 10 of ln q's. Hubs are sparse patterns (~10 strong
    reflections, one dominant peak at 22–23°) that a ±0.5° zero scan aligns to many queries' strongest
@@ -472,3 +476,59 @@ Findings:
    28; report compound-weighted numbers too.
 5. The library-size curve: every classical method loses 0.1–0.2 top-1 from 2k to 309k decoys. The
    10-10 2k-library numbers overstated classical accuracy at realistic scale.
+
+### 12b. Hubness pass (2026-10-12)
+
+Frank 10-12: venue = Digital Discovery; run the hubness fix on a Vast GPU before drafting.
+
+**Method.** 19 kept only rank bits, so every classical score was recomputed in full on one RTX 4090
+(box 55604630, destroyed; 761 s wall; $0.26, credit $7.56 → $7.30). The scorer is a torch port of
+WCCLibrary/Pearson (`src/xrdclip/eval/wcc_torch.py`): the triangle weight is folded into the reference,
+so each zero-scan shift is one matrix product. It agrees with the CPU scorer to ≤ 4e-6 and reproduces
+19's uncorrected ranks with no top-1 change on any key: 59 rank mismatches over 9 classical keys × 2
+truth sets, all |Δrank| ≤ 3, smallest affected rank 68 (float32 near-ties). Probes: 4000 clean
+simulated + 4000 augmented-then-background-subtracted library patterns, drawn only from stems no query
+belongs to; same-stem pairs are masked. The corrections and the primary (CSLS, augmented probes,
+k = 10) were fixed in commit 2a2ad8a before any corrected number existed.
+Code: `scripts/21_hubness.py` (prep / score / eval / check). Table: `results/real_bench_hub_table.md`.
+
+Top-1, background-subtracted queries, 95 % compound-bootstrap CIs. Macro = mean over compounds.
+
+| | per pattern, none → CSLS (n = 188) | macro, none → CSLS (123 compounds) | macro paired diff | single-crystal macro, none → CSLS (30) |
+|---|---|---|---|---|
+| Pearson fixed grid | 0.82 → 0.87 | 0.83 → 0.85 | +0.02 [−0.02, +0.06] | 0.30 → 0.32 |
+| cos + zero scan | 0.72 → 0.88 | 0.84 → 0.88 | +0.04 [−0.01, +0.10] | 0.40 → 0.41 |
+| WCC l = 1° | 0.68 → 0.70 | 0.83 → 0.84 | +0.01 [−0.02, +0.05] | 0.50 → 0.52 |
+| WCC l = 2° | 0.57 → 0.63 | 0.71 → 0.74 | +0.03 [−0.01, +0.08] | 0.47 → 0.52 |
+| ln q + zero scan | 0.72 → 0.76 | 0.87 → 0.89 | +0.02 [−0.02, +0.05] | 0.49 → 0.55 |
+| xrd-clip model | 0.01 → 0.02 | 0.02 → 0.02 | +0.01 [0.00, +0.02] | 0.00 → 0.00 |
+
+Findings:
+1. **The full-library drop is one compound, not hubness.** ZZZUWK contributes 20 of 188 patterns. Every
+   dominant wrong top-1 entry wins only ZZZUWK patterns: GUSRIV x20 (cos + zero scan), ZZZLWW01 x18
+   (WCC l = 1°), SOSBEK/MITMOU x9 each (WCC l = 2°), EFOXED x10 and VOXSIO x5 (ln q). The same holds for the
+   model (CPRDCA x18). ZZZUWK top-1, uncorrected: Pearson 12/20, every zero-scan method 0/20. The confusers
+   share two strong low-angle reflections (GUSRIV: 23.45° and 28.56°; ZZZLWW01: 23.5° and 28.53°).
+   Hypothesis, not tested: the ±0.5° zero scan lets such decoys line up with ZZZUWK's peaks, and the fixed
+   grid does not.
+2. **Hubness in the probe population is real but depends on the method.** N10 skew with augmented probes:
+   cos + zero scan 18.7, ln q 12.7, Pearson 8.0, WCC 3.6 (both l). The triangle weighting of WCC resists hubs.
+3. **CSLS removes the ZZZUWK confusion for cos + zero scan** (0/20 → 20/20). Per pattern that is 0.72 → 0.88
+   (+0.15 [+0.01, +0.34]), and the library curve flattens (0.90 at 100k decoys, 0.88 at the full library).
+   Compound-weighted, the gain is small for every classical method (+0.01 to +0.04) and no CI excludes 0.
+   Fixed:broken patterns = 34:5 (cos), 11:2 (Pearson), 6:2 (WCC 1°), 12:2 (WCC 2°), 9:2 (ln q).
+   With WCC and ln q, CSLS only swaps which decoy wins ZZZUWK (CUMCEV x20; CIQBIO x17).
+4. **The probe domain matters.** Clean simulated probes give cos 0.79 per pattern (augmented: 0.88).
+   Library-side z-norm hurts WCC l = 2° (0.57 → 0.36). Mutual proximity is neutral to slightly positive.
+   No setting changes the conclusions.
+5. **Independent references are not a hubness problem.** Single-crystal macro top-1 is 0.30–0.50 uncorrected and 0.32–0.55 with CSLS; no paired CI excludes 0.
+   The strain-tolerant methods lead there (ln q, WCC ≈ 0.5 vs Pearson 0.30), as thermal-expansion
+   differences between determinations would predict.
+6. **The model's failure is not hubness:** 0.01 → 0.02 with CSLS.
+7. **Report compound-weighted numbers first.** Per-pattern averages mostly measure ZZZUWK (20), ZZZIZM (12)
+   and NAPHTA (10). Uncorrected macro order: ln q 0.87, cos 0.84, Pearson 0.83, WCC 1° 0.83, WCC 2° 0.71,
+   model 0.02. The per-pattern lead of Pearson (0.82) comes from ZZZUWK.
+
+Paper consequences (for the outline check-in): headline = macro top-1 with per-pattern secondary;
+"hubness drives the drop" is out; CSLS is a cheap optional add-on with a small effect; ZZZUWK becomes a
+case study in what shift tolerance costs.

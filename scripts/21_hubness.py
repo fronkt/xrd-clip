@@ -461,6 +461,17 @@ def cmd_eval(args) -> int:
         ok = w >= 0
         res["within_family"][f"{corr}|{key}"] = {"n": int(ok.sum()), "top1": float(w[ok].mean()) if ok.any() else None}
 
+    # ---- compound-weighted view: a few compounds contribute many patterns (ZZZUWK 20 of 188), so the
+    # per-pattern numbers mostly measure those compounds. Macro = mean over compounds of per-compound top-1.
+    stems_q = np.array([q["stem"] for q in qinfo])
+    res["patterns_per_compound"] = Counter(stems_q.tolist()).most_common(10)
+    res["macro"], res["paired"] = {}, {}
+    cboot = np.random.default_rng(0).integers(0, len(np.unique(stems_q)), (2000, len(np.unique(stems_q))))
+    for (corr, td, key), r in ranks.items():
+        res["macro"][f"{corr}|{td}|{key}"] = macro_top1(r, stems_q, cboot)
+        if corr != "none":
+            res["paired"][f"{corr}|{td}|{key}"] = paired_vs_none(ranks[("none", td, key)], r, stems_q, boot, cboot)
+
     # ---- hub diagnostics ---------------------------------------------------------------------------
     lens = {}
 
@@ -484,8 +495,13 @@ def cmd_eval(args) -> int:
         for corr in ("none", PRIMARY, "csls_sim_k10"):
             r, t1 = ranks[(corr, "std", key)], top1[(corr, key)]
             miss = (r > 0)
-            cnt = Counter(lib_rc[g] for g in t1[miss])
-            d[f"query_top1_wrong|{corr}"] = {"n_miss": int(miss.sum()), "most_common": cnt.most_common(5)}
+            wins = {}
+            for qi in np.nonzero(miss)[0]:
+                wins.setdefault(lib_rc[int(t1[qi])], []).append(qinfo[qi]["stem"])
+            top = sorted(wins.items(), key=lambda kv: -len(kv[1]))[:5]
+            # [winning entry, wins, distinct query compounds, top query compounds]
+            d[f"query_top1_wrong|{corr}"] = {"n_miss": int(miss.sum()), "most_common": [
+                [w, len(q), len(set(q)), Counter(q).most_common(3)] for w, q in top]}
         topk10 = {ps: (st_model[ps]["topk"] if method == "model" else hs[f"{method}__{ps}__topk"])[ks.index(10)]
                   for ps in PROBE_SETS}
         cnt = Counter(lib_rc[g] for g in top1[("none", key)][ranks[("none", "std", key)] > 0])
@@ -501,6 +517,35 @@ def cmd_eval(args) -> int:
     write_table(res, args.table)
     print(f"[eval] wrote {args.out} + {args.table} ({time.time() - t_start:.0f}s)", flush=True)
     return 0
+
+
+def _hits_by_compound(r: np.ndarray, stems: np.ndarray, uniq: np.ndarray) -> np.ndarray:
+    """Per-compound top-1 rate (NaN for compounds with no truth in the library)."""
+    ok = r >= 0
+    return np.array([((r == 0) & ok)[stems == s].sum() / (ok & (stems == s)).sum() if (ok & (stems == s)).any()
+                     else np.nan for s in uniq])
+
+
+def macro_top1(r: np.ndarray, stems: np.ndarray, cboot: np.ndarray) -> dict:
+    p = _hits_by_compound(r, stems, np.unique(stems))
+    bs = np.nanmean(p[cboot], axis=1)
+    return {"n_compounds": int(np.isfinite(p).sum()), "top1": float(np.nanmean(p)),
+            "top1_ci": [float(np.nanpercentile(bs, 2.5)), float(np.nanpercentile(bs, 97.5))]}
+
+
+def paired_vs_none(base: np.ndarray, r: np.ndarray, stems: np.ndarray, boot, cboot: np.ndarray) -> dict:
+    """Top-1 change vs the uncorrected score: per pattern and per compound, paired bootstrap CIs (by compound)."""
+    ok = base >= 0
+    a1, c1 = (base == 0) & ok, (r == 0) & ok
+    dp = [c1[b[ok[b]]].mean() - a1[b[ok[b]]].mean() for b in boot if ok[b].any()]
+    uniq = np.unique(stems)
+    pa, pc = _hits_by_compound(base, stems, uniq), _hits_by_compound(r, stems, uniq)
+    dm = np.nanmean(pc[cboot], axis=1) - np.nanmean(pa[cboot], axis=1)
+    return {"pattern_diff": float(c1[ok].mean() - a1[ok].mean()),
+            "pattern_diff_ci": [float(np.percentile(dp, 2.5)), float(np.percentile(dp, 97.5))],
+            "macro_diff": float(np.nanmean(pc) - np.nanmean(pa)),
+            "macro_diff_ci": [float(np.nanpercentile(dm, 2.5)), float(np.nanpercentile(dm, 97.5))],
+            "fixed": Counter(stems[c1 & ~a1].tolist()).most_common(), "broken": Counter(stems[a1 & ~c1].tolist()).most_common()}
 
 
 def write_table(res: dict, path: str) -> None:
@@ -530,6 +575,23 @@ def write_table(res: dict, path: str) -> None:
         p = m["primary"]
         lines.append(f"| {nm} | {cell(f'none|std|all|{k}')} | {cell(f'{p}|std|all|{k}')} | {cell(f'none|sc|all|{k}')} | "
                      f"{cell(f'{p}|sc|all|{k}')} | {wf(f'none|{k}')} | {wf(f'{p}|{k}')} |")
+    ppc = ", ".join(f"{c} {n}" for c, n in res["patterns_per_compound"][:6])
+    lines += ["", "## Compound-weighted view (the per-pattern numbers above mostly measure a few compounds)", "",
+              f"Patterns per compound, largest: {ppc}. Macro = mean over compounds of per-compound top-1. "
+              "Paired differences vs uncorrected, 95 % compound-bootstrap CIs.", "",
+              "| Method | truth | macro, none | macro, CSLS | macro diff | per-pattern diff | fixed (by compound) | broken |",
+              "|---|---|---|---|---|---|---|---|"]
+    p = m["primary"]
+    for k, nm in names.items():
+        for td in ("std", "sc"):
+            a0, a1, pd = res["macro"][f"none|{td}|{k}"], res["macro"][f"{p}|{td}|{k}"], res["paired"][f"{p}|{td}|{k}"]
+            fx = ", ".join(f"{c} {n}" for c, n in pd["fixed"][:3]) + (" ..." if len(pd["fixed"]) > 3 else "")
+            br = ", ".join(f"{c} {n}" for c, n in pd["broken"][:3]) + (" ..." if len(pd["broken"]) > 3 else "")
+            lines.append(f"| {nm} | {td} ({a0['n_compounds']} cpds) | {a0['top1']:.2f} [{a0['top1_ci'][0]:.2f}, {a0['top1_ci'][1]:.2f}] | "
+                         f"{a1['top1']:.2f} [{a1['top1_ci'][0]:.2f}, {a1['top1_ci'][1]:.2f}] | "
+                         f"{pd['macro_diff']:+.3f} [{pd['macro_diff_ci'][0]:+.3f}, {pd['macro_diff_ci'][1]:+.3f}] | "
+                         f"{pd['pattern_diff']:+.3f} [{pd['pattern_diff_ci'][0]:+.3f}, {pd['pattern_diff_ci'][1]:+.3f}] | "
+                         f"{sum(n for _, n in pd['fixed'])}: {fx} | {sum(n for _, n in pd['broken'])}: {br} |")
     lines += ["", "## Sensitivity (top-1, std truth, all patterns; not used to pick the primary)", "",
               "| Correction | " + " | ".join(names.values()) + " |", "|---|" + "---|" * len(names)]
     for c in m["corrections"]:
@@ -553,10 +615,11 @@ def write_table(res: dict, path: str) -> None:
             h = res["hubness"][k][f"probe_{ps}"]
             hubs = "; ".join(f"{a} {b} ({c}, {d:.2f})" for a, b, c, d in h["top_hubs"][:3])
             lines.append(f"| {nm} | {ps} | {h['N10_skew']:.1f} | {h['N10_max']} | {hubs} |")
-    lines += ["", "Most frequent wrong top-1 entries (std truth):", ""]
+    lines += ["", "Most frequent wrong top-1 entries (std truth), with the query compounds whose patterns they win:", ""]
     for k, nm in names.items():
         h = res["hubness"][k]
-        parts = [f"{c}: " + ", ".join(f"{a} x{b}" for a, b in h[f'query_top1_wrong|{c}']['most_common'][:3])
+        parts = [f"{c}: " + ", ".join(f"{w} x{n} ({nc} cpd: " + ", ".join(f"{s} {j}" for s, j in top) + ")"
+                                      for w, n, nc, top in h[f'query_top1_wrong|{c}']['most_common'][:3])
                  + f" (of {h[f'query_top1_wrong|{c}']['n_miss']} misses)" for c in ("none", m["primary"])]
         lines.append(f"- {nm}: " + "; ".join(parts))
     lines += ["", f"Uncorrected ranks vs scripts/19_...: {json.dumps(res['rank_check'])}", ""]
