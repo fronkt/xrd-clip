@@ -26,9 +26,15 @@ RAW = ["pearson_raw", "cos_zs_raw", "wcc_1_raw", "wcc_2_raw", "model_raw"]
 CORRS = ["none", "csls_aug_k10"]
 STRONG = ["pearson_zs", "wcc_0.5", "wcc_1", "wcc_2", "lnq"]   # G0 strong baselines; VC excluded (not validated)
 CASE = "ZZZUWK"
+CLS_KEYS = [k for k in KEYS if k != "model_bkg"]
 # Facts from run logs, not from a results file (plan Sections 12a-12b).
 RUN_FACTS = {"bench_cost_usd": 2.53, "hub_cost_usd": 0.26, "hub_gpu": "RTX 4090", "hub_wall_s": 761,
-             "g0_cost_usd": 0.25, "g0_gpu": "RTX 3090"}
+             "g0_cost_usd": 0.25, "g0_gpu": "RTX 3090",
+             "model_query_ms_cpu": 5,        # 309,080 x 256 float32 product for one query, numpy, laptop CPU (10-12)
+             "model_params_millions": 6.1, "model_epochs": 60, "model_batch": 512,
+             # 10-12: 300 random cache/csd entries re-simulated with simulate_one under pymatgen 2026.4.16;
+             # 296 were in the stick cache and all matched exactly (same reflections, |d2theta| = |dI| = 0)
+             "pymatgen_recheck_n": 296, "pymatgen_recheck_version": "2026.4.16"}
 
 
 def rd(x):          # 4 decimals: the manuscript rounds once, to 2
@@ -44,14 +50,37 @@ def per_compound(hit: np.ndarray, ok: np.ndarray, stems: np.ndarray, uniq: np.nd
     return np.array([hit[ok & (stems == s)].mean() if (ok & (stems == s)).any() else np.nan for s in uniq])
 
 
+def boot_idx(n: int, seed: int = 0, B: int = 2000) -> np.ndarray:
+    return np.random.default_rng(seed).integers(0, n, (B, n))
+
+
 def macro(r: np.ndarray, kk: int, stems: np.ndarray, cboot: np.ndarray) -> dict:
-    """Compound-weighted top-k with the same compound bootstrap as 21 eval (rng(0), 2000 resamples)."""
+    """Compound-weighted top-k. Any-same-form: the same compound bootstrap as 21 eval (rng(0), 2000 resamples).
+    Single-crystal: only the compounds that have a single-crystal entry are resampled (referee 10-12), so every
+    resample has exactly that many compounds."""
     uniq = np.unique(stems)
     ok = r >= 0
     p = per_compound((r < kk) & ok, ok, stems, uniq)
-    bs = np.nanmean(p[cboot], axis=1)
-    return {"n_compounds": int(np.isfinite(p).sum()), "value": rd(np.nanmean(p)),
-            "ci": [rd(np.nanpercentile(bs, 2.5)), rd(np.nanpercentile(bs, 97.5))]}
+    p = p[np.isfinite(p)]
+    if len(p) < len(uniq):
+        cboot = boot_idx(len(p))
+    bs = p[cboot].mean(axis=1)
+    return {"n_compounds": int(len(p)), "value": rd(p.mean()),
+            "ci": [rd(np.percentile(bs, 2.5)), rd(np.percentile(bs, 97.5))]}
+
+
+def paired_macro(ra: np.ndarray, rb_: np.ndarray, stems: np.ndarray, kk: int = 1) -> dict:
+    """Compound-weighted top-k of score a minus score b on the same patterns, compound-bootstrap CI over the
+    compounds that have a correct entry under both."""
+    uniq = np.unique(stems)
+    ok = (ra >= 0) & (rb_ >= 0)
+    pa = per_compound((ra < kk) & ok, ok, stems, uniq)
+    pb = per_compound((rb_ < kk) & ok, ok, stems, uniq)
+    keep = np.isfinite(pa) & np.isfinite(pb)
+    d = pa[keep] - pb[keep]
+    bs = d[boot_idx(len(d))].mean(axis=1)
+    return {"n_compounds": int(keep.sum()), "diff": rd(d.mean()),
+            "ci": [rd(np.percentile(bs, 2.5)), rd(np.percentile(bs, 97.5))]}
 
 
 def main() -> int:
@@ -152,6 +181,11 @@ def main() -> int:
     out["paired_csls"] = {f"{td}|{k}": {kk: (rd(v) if isinstance(v, float) else ci(v) if kk.endswith("_ci") else v)
                                         for kk, v in hub["paired"][f"csls_aug_k10|{td}|{k}"].items()}
                           for k in KEYS for td in ("std", "sc")}
+    for key, v in out["paired_csls"].items():     # macro diff: same compound-bootstrap rule as macro() above
+        td, k = key.split("|")
+        pm = paired_macro(R[f"csls_aug_k10|{td}|{k}"], R[f"none|{td}|{k}"], stems)
+        assert abs(pm["diff"] - v["macro_diff"]) < 1e-3, (key, pm, v["macro_diff"])
+        v["macro_diff"], v["macro_diff_ci"] = pm["diff"], pm["ci"]
     out["within_family"] = {k: {"n": rb["within_family"][k]["n"], "top1": rd(rb["within_family"][k]["top1"])}
                             for k in KEYS + RAW}
     for name in ("library_curve", "library_curve_macro"):     # {size: [mean, sd over 5 decoy subsets]}
@@ -215,10 +249,118 @@ def main() -> int:
                                        for k in ["model", "pearson", "pearson_zs", "wcc_1", "wcc_2", "lnq"]},
                  "rows": rows_g0}
 
+    # ---- referee-driven checks (10-12) -------------------------------------------------------------------------
+    ex = {}
+    # sweep: 'clean' and 'zero_offset=0.0' are the same condition; count distinct ones and per-score losses
+    rows_d = [r for r in rows_g0 if r["condition"] != "zero_offset=0.0"]
+    ex["g0_distinct"] = {"n_conditions": len(rows_d),
+                         "delta_range": [min((x["delta"] for x in rows_d), key=abs), max((x["delta"] for x in rows_d), key=abs)],
+                         "model_range": [min(x["model"] for x in rows_d), max(x["model"] for x in rows_d)],
+                         "best_range": [min(x["best_top1"] for x in rows_d), max(x["best_top1"] for x in rows_d)],
+                         "conditions_each_score_beats_model": {
+                             s: int(sum(sb["conditions"][x["condition"]][s]["ci95"][0] > sb["conditions"][x["condition"]]["model"]["ci95"][1]
+                                        for x in rows_d)) for s in STRONG + ["pearson"]}}
+    # paired method differences (macro top-1, compound bootstrap)
+    ex["paired_methods"] = {f"{td}|{a}-{b_}": paired_macro(R[f"none|{td}|{a}"], R[f"none|{td}|{b_}"], stems)
+                            for td in ("std", "sc") for a in ("lnq_bkg", "wcc_1_bkg", "cos_zs_bkg", "wcc_2_bkg")
+                            for b_ in ("pearson_bkg",)}
+    # per pattern without the case compound, and the Pearson-vs-cosine gap
+    nz = stems != CASE
+    hit = {k: R[f"none|std|{k}"] == 0 for k in CLS_KEYS}
+    ex["per_pattern_without_case"] = {k: {"hits": int(hit[k][nz].sum()), "n": int(nz.sum()),
+                                          "top1": rd(hit[k][nz].mean())} for k in CLS_KEYS}
+    g = hit["pearson_bkg"] & ~hit["cos_zs_bkg"]
+    ex["gap_pearson_vs_cos"] = {"pearson_only": int(g.sum()), "cos_only": int((hit["cos_zs_bkg"] & ~hit["pearson_bkg"]).sum()),
+                                "pearson_only_case": int((g & ~nz).sum()),
+                                "net": int(hit["pearson_bkg"].sum() - hit["cos_zs_bkg"].sum()),
+                                "net_case": int(hit["pearson_bkg"][~nz].sum() - hit["cos_zs_bkg"][~nz].sum())}
+    # by subgroup: anchor tier, whether a correct entry is a corpus entry, wavelength class
+    tier = np.array([str(truth[m["id"]]["anchor_tier"]) for m in meta])
+    in_corpus = np.array([q != "none" for q in q_split])
+    wlc = np.array(["Cu" if 1.53 < w < 1.55 else "Mo" if 0.70 < w < 0.72 else "Co" if 1.78 < w < 1.80
+                    else "synchrotron" if w < 1.3 else "other" for w in wl])
+    ex["wavelength_classes"] = dict(Counter(wlc.tolist()))
+    groups = {"tier_strict": tier == "strict", "tier_lenient": tier == "lenient",
+              "corpus_entry": in_corpus, "extra_only": ~in_corpus, "cu": wlc == "Cu", "non_cu": wlc != "Cu"}
+    ex["subgroups"] = {}
+    for gname, sel in groups.items():
+        d = {"n_patterns": int(sel.sum()), "n_compounds": int(len(set(stems[sel])))}
+        for k in KEYS:
+            r = np.where(sel, R[f"none|std|{k}"], -1)
+            d[k] = {"top1": rd((r[sel] == 0).mean()), "macro_top1": macro(r, 1, stems, cboot)["value"]}
+        ex["subgroups"][gname] = d
+    # set-aside ("cannot compare") entries and the own-powder RMSD check
+    ex["unknown_entries"] = {"patterns_with_any": int(sum(bool(truth[m["id"]]["unknown"]) for m in meta)),
+                             "total": int(sum(len(truth[m["id"]]["unknown"]) for m in meta))}
+    ex["own_powder_rmsd_lt_0p05"] = {t_: int(sum(m["own_powder"] for m, tt in zip(meta, tier) if tt == t_))
+                                     for t_ in ("strict", "lenient")}
+    # model recall at the shortlist sizes (upper bound of any rerank), CPU cost per query over the full library
+    rm = R["none|std|model_bkg"]
+    ex["model_recall"] = {str(k): rd((rm < k).mean()) for k in (100, 1000)}
+    us = sb["conditions"]["clean"]
+    ex["cpu_s_per_query_full_library"] = {k: rd(us[k]["us_per_pair"] * 1e-6 * rb["n_library"])
+                                          for k in ("pearson", "pearson_zs", "wcc_1", "wcc_2", "lnq", "model")}
+    # temperatures of the anchor vs the single-crystal entries (CSD strings like '323 K' / 'at 120 K')
+    def tK(s):
+        mm = __import__("re").search(r"([\d.]+)\s*K", str(s or ""))
+        return float(mm.group(1)) if mm else None
+    dts = []
+    for m, r in zip(meta, R["none|sc|lnq_bkg"]):
+        t = truth[m["id"]]
+        anc = [tK(x["temperature"]) for x in t["same_form"] if x["is_anchor"]]
+        scs = [tK(x["temperature"]) for x in t["same_form"] if not x["is_powder_study"]]
+        if r >= 0 and anc and anc[0] and any(scs):
+            dts.append((min(abs(anc[0] - s) for s in scs if s), int(r)))
+    if dts:
+        dt = np.array(dts)
+        ex["sc_temperature_gap"] = {"n": len(dts), "median_dT_K": float(np.median(dt[:, 0])),
+                                    "top1_dT_le_50": rd((dt[dt[:, 0] <= 50, 1] == 0).mean()) if (dt[:, 0] <= 50).any() else None,
+                                    "n_dT_le_50": int((dt[:, 0] <= 50).sum()),
+                                    "top1_dT_gt_50": rd((dt[dt[:, 0] > 50, 1] == 0).mean()) if (dt[:, 0] > 50).any() else None,
+                                    "n_dT_gt_50": int((dt[:, 0] > 50).sum())}
+    # own entry disordered (simulated through the occupancy fallback when the strict parse fails)
+    dis = np.array([any(x["has_disorder"] for x in truth[m["id"]]["same_form"] if x["is_anchor"]) for m in meta])
+    ex["own_entry_disordered"] = {"n_patterns": int(dis.sum()), "n_compounds": int(len(set(stems[dis])))}
+    for gname, sel in (("disordered", dis), ("ordered", ~dis)):
+        ex["subgroups"][gname] = {"n_patterns": int(sel.sum()), "n_compounds": int(len(set(stems[sel])))}
+        for k in KEYS:
+            r = np.where(sel, R[f"none|std|{k}"], -1)
+            ex["subgroups"][gname][k] = {"top1": rd((r[sel] == 0).mean()), "macro_top1": macro(r, 1, stems, cboot)["value"]}
+    # cell mismatch between the own (powder) entry and the closest single-crystal same-form entry
+    hubm = import_module("21_hubness")
+    shards = bench.shard_table(None)
+    lib_rc = hubm.library_refcodes(shards)
+    gidx = {rc: i for i, rc in enumerate(lib_rc)}
+    need, rows_c = set(), []
+    for m in meta:
+        t = truth[m["id"]]
+        anc = [x["refcode"] for x in t["same_form"] if x["is_anchor"] and x["refcode"] in gidx]
+        scs = [x["refcode"] for x in t["same_form"] if not x["is_powder_study"] and x["refcode"] in gidx]
+        rows_c.append((anc[:1], scs))
+        need |= set(anc[:1]) | set(scs)
+    need = sorted(need)
+    cell = {rc: np.asarray(r["cell"], float) for rc, r in zip(need, hubm.records_at(shards, [gidx[rc] for rc in need], ("cell",)))}
+    dcell, rk = [], []
+    for (anc, scs), r in zip(rows_c, R["none|sc|lnq_bkg"]):
+        if anc and scs and r >= 0:
+            a = cell[anc[0]]
+            dcell.append(min(float(np.max(np.abs(np.sort(cell[s][:3]) - np.sort(a[:3])) / np.sort(a[:3]))) for s in scs))
+            rk.append(int(r))
+    dcell, rk = np.array(dcell), np.array(rk)
+    ex["sc_cell_mismatch"] = {"n": int(len(dcell)), "median_max_axis_rel": rd(np.median(dcell)),
+                              "lnq_top1_small": rd((rk[dcell <= 0.01] == 0).mean()), "n_small": int((dcell <= 0.01).sum()),
+                              "lnq_top1_large": rd((rk[dcell > 0.01] == 0).mean()), "n_large": int((dcell > 0.01).sum())}
+    # chance level of the real within-family task: one random score per candidate
+    wf_rows = [m for m in meta if m["n_other"] > 0]
+    ex["within_family_chance"] = rd(np.mean([m["n_same_in_lib"] / (m["n_same_in_lib"] + m["n_other"]) for m in wf_rows]))
+    ex["model_probe_check"] = json.load(open("results/model_probe_check.json"))
+    ex["wrong_top1_audit"] = {k: v for k, v in json.load(open("results/wrong_top1_audit.json")).items()}
+    out["extra"] = ex
+
     with open(args.out, "w") as fh:
         json.dump(out, fh, indent=1)
     print(f"wrote {args.out}: {nq} queries, {n_uniq} compounds; GPU check {out['gpu_check']}; "
-          f"G0 model wins {wins}/{len(rows_g0)}")
+          f"G0 model wins {wins}/{len(rows_g0)} rows (34 distinct conditions)")
     return 0
 
 

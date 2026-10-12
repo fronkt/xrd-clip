@@ -86,3 +86,6 @@ paper/*.blg
 paper/*.bbl
 paper/*.out
 paper/*.synctex.gz
+# Referee checks (2026-10-12): model diagnostic on probes/own entries, wrong-top-1 packing audit (refcodes + counts only).
+!/results/model_probe_check.json
+!/results/wrong_top1_audit.json

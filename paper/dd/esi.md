@@ -61,16 +61,16 @@ opXRD CNRS patterns: 1,052; molecular-organic: 196; identified by packing simila
 
 | Score | query | macro top-1 | macro top-10 | per-pattern top-1 | per-pattern top-10 | median rank | fraction rank > 1,000 |
 |---|---|---|---|---|---|---|---|
-| ln q lag + zero scan | bkg | 0.49 [0.31, 0.67] | 0.59 [0.42, 0.76] | 0.44 [0.20, 0.71] | 0.53 [0.31, 0.76] | 6 | 0.34 |
-| Cosine + zero scan | bkg | 0.40 [0.23, 0.58] | 0.46 [0.29, 0.64] | 0.37 [0.17, 0.58] | 0.46 [0.25, 0.63] | 31 | 0.36 |
-| Pearson, fixed grid | bkg | 0.30 [0.15, 0.47] | 0.32 [0.17, 0.49] | 0.34 [0.15, 0.48] | 0.36 [0.16, 0.50] | 131 | 0.44 |
-| WCC, l = 1° + zero scan | bkg | 0.50 [0.33, 0.68] | 0.57 [0.39, 0.74] | 0.44 [0.19, 0.71] | 0.49 [0.25, 0.74] | 50 | 0.46 |
-| WCC, l = 2° + zero scan | bkg | 0.47 [0.30, 0.65] | 0.53 [0.36, 0.71] | 0.42 [0.18, 0.70] | 0.46 [0.21, 0.74] | 350 | 0.47 |
+| ln q lag + zero scan | bkg | 0.49 [0.31, 0.67] | 0.59 [0.43, 0.76] | 0.44 [0.20, 0.71] | 0.53 [0.31, 0.76] | 6 | 0.34 |
+| Cosine + zero scan | bkg | 0.40 [0.24, 0.57] | 0.46 [0.30, 0.63] | 0.37 [0.17, 0.58] | 0.46 [0.25, 0.63] | 31 | 0.36 |
+| Pearson, fixed grid | bkg | 0.30 [0.15, 0.48] | 0.32 [0.17, 0.49] | 0.34 [0.15, 0.48] | 0.36 [0.16, 0.50] | 131 | 0.44 |
+| WCC, l = 1° + zero scan | bkg | 0.50 [0.32, 0.67] | 0.57 [0.40, 0.73] | 0.44 [0.19, 0.71] | 0.49 [0.25, 0.74] | 50 | 0.46 |
+| WCC, l = 2° + zero scan | bkg | 0.47 [0.30, 0.63] | 0.53 [0.37, 0.70] | 0.42 [0.18, 0.70] | 0.46 [0.21, 0.74] | 350 | 0.47 |
 | Learned embedding | bkg | 0.00 [0.00, 0.00] | 0.00 [0.00, 0.00] | 0.00 [0.00, 0.00] | 0.00 [0.00, 0.00] | 18,725 | 0.81 |
 | Pearson, fixed grid | raw | 0.30 [0.15, 0.47] | 0.32 [0.17, 0.49] | 0.32 [0.14, 0.47] | 0.36 [0.16, 0.50] | 175 | 0.47 |
-| Cosine + zero scan | raw | 0.42 [0.25, 0.60] | 0.43 [0.25, 0.61] | 0.34 [0.14, 0.55] | 0.36 [0.14, 0.59] | 3,353 | 0.54 |
-| WCC, l = 1° + zero scan | raw | 0.27 [0.11, 0.44] | 0.30 [0.14, 0.47] | 0.14 [0.05, 0.30] | 0.15 [0.06, 0.33] | 11,215 | 0.56 |
-| WCC, l = 2° + zero scan | raw | 0.20 [0.07, 0.36] | 0.23 [0.09, 0.40] | 0.10 [0.03, 0.24] | 0.12 [0.04, 0.27] | 26,415 | 0.83 |
+| Cosine + zero scan | raw | 0.42 [0.27, 0.60] | 0.43 [0.27, 0.60] | 0.34 [0.14, 0.55] | 0.36 [0.14, 0.59] | 3,353 | 0.54 |
+| WCC, l = 1° + zero scan | raw | 0.27 [0.13, 0.43] | 0.30 [0.13, 0.47] | 0.14 [0.05, 0.30] | 0.15 [0.06, 0.33] | 11,215 | 0.56 |
+| WCC, l = 2° + zero scan | raw | 0.20 [0.07, 0.33] | 0.23 [0.10, 0.40] | 0.10 [0.03, 0.24] | 0.12 [0.04, 0.27] | 26,415 | 0.83 |
 | Learned embedding | raw | 0.00 [0.00, 0.00] | 0.00 [0.00, 0.00] | 0.00 [0.00, 0.00] | 0.00 [0.00, 0.00] | 14,506 | 0.78 |
 
 **Table S4** Within-family top-1 (rank among the compound's own forms in the library).
@@ -139,15 +139,15 @@ opXRD CNRS patterns: 1,052; molecular-organic: 196; identified by packing simila
 | Score | answer set | macro difference | per-pattern difference | fixed | broken |
 |---|---|---|---|---|---|
 | Pearson, fixed grid | any same-form | +0.020 [-0.018, +0.060] | +0.048 [+0.000, +0.097] | 11 | 2 |
-| Pearson, fixed grid | single-crystal | +0.017 [+0.000, +0.054] | +0.017 [+0.000, +0.062] | 1 | 0 |
+| Pearson, fixed grid | single-crystal | +0.017 [+0.000, +0.050] | +0.017 [+0.000, +0.062] | 1 | 0 |
 | Cosine + zero scan | any same-form | +0.043 [-0.010, +0.096] | +0.154 [+0.013, +0.337] | 34 | 5 |
-| Cosine + zero scan | single-crystal | +0.006 [+0.000, +0.017] | +0.034 [+0.000, +0.060] | 2 | 0 |
+| Cosine + zero scan | single-crystal | +0.006 [+0.000, +0.016] | +0.034 [+0.000, +0.060] | 2 | 0 |
 | WCC, l = 1° + zero scan | any same-form | +0.012 [-0.024, +0.049] | +0.021 [-0.013, +0.066] | 6 | 2 |
-| WCC, l = 1° + zero scan | single-crystal | +0.017 [-0.048, +0.098] | +0.000 [-0.054, +0.054] | 1 | 1 |
+| WCC, l = 1° + zero scan | single-crystal | +0.017 [-0.050, +0.100] | +0.000 [-0.054, +0.054] | 1 | 1 |
 | WCC, l = 2° + zero scan | any same-form | +0.033 [-0.011, +0.076] | +0.053 [+0.000, +0.118] | 12 | 2 |
-| WCC, l = 2° + zero scan | single-crystal | +0.050 [-0.033, +0.154] | +0.017 [-0.040, +0.088] | 2 | 1 |
+| WCC, l = 2° + zero scan | single-crystal | +0.050 [-0.033, +0.167] | +0.017 [-0.040, +0.088] | 2 | 1 |
 | ln q lag + zero scan | any same-form | +0.018 [-0.015, +0.051] | +0.037 [-0.006, +0.082] | 9 | 2 |
-| ln q lag + zero scan | single-crystal | +0.062 [-0.009, +0.167] | +0.017 [-0.032, +0.093] | 2 | 1 |
+| ln q lag + zero scan | single-crystal | +0.062 [-0.009, +0.162] | +0.017 [-0.032, +0.093] | 2 | 1 |
 | Learned embedding | any same-form | +0.008 [+0.000, +0.024] | +0.005 [+0.000, +0.018] | 1 | 0 |
 | Learned embedding | single-crystal | +0.000 [+0.000, +0.000] | +0.000 [+0.000, +0.000] | 0 | 0 |
 
@@ -260,3 +260,66 @@ Maximum |GPU − CPU| score over all benchmark patterns and their special entrie
 | field_thermal_harsh | 0.52 [0.49, 0.55] | wcc_1 | 0.64 [0.61, 0.68] | -0.12 | 0.51 |
 | sign_cancel | 0.55 [0.51, 0.58] | lnq | 0.91 [0.87, 0.93] | -0.36 | 0.81 |
 | sign_add | 0.54 [0.51, 0.57] | lnq | 0.91 [0.87, 0.93] | -0.36 | 0.34 |
+
+The condition zero_offset=0.0 repeats the clean condition, so 34 conditions are distinct. Score names: pearson_zs = Pearson + zero scan; wcc_0.5, wcc_1, wcc_2 = WCC with l = 0.5°, 1°, 2° + zero scan; lnq = ln q lag + zero scan. Conditions in which each score beats the model with non-overlapping CIs: pearson_zs 33, wcc_0.5 34, wcc_1 34, wcc_2 34, lnq 34, pearson 20.
+
+## S7 Learned model
+
+Model card: dual encoder (1D residual CNN over the 2,251-point pattern; Transformer over the atoms of the asymmetric unit with a lattice token), 256-dimensional unit embeddings, 6.1 million parameters. Symmetric InfoNCE with a learnable temperature, AdamW (learning rate 3 × 10⁻⁴, weight decay 0.05), batch 512, 60 epochs, one seed; polymorph hard-negative batches (sibling polymorphs in the same batch); scaffold- and polymorph-family split 247,089 / 30,887 / 30,886; checkpoint chosen by in-batch validation top-1 (0.914). Training patterns simulated on the fly with zero offset, isotropic strain, Caglioti and Scherrer broadening, March–Dollase texture, Chebyshev and amorphous background and Poisson noise; no Kα2.
+
+**Table S13** The model on simulated and measured queries against all 309,080 entries. Probes: library entries outside the benchmark compounds; their own refcode family is set aside. Own entries: the clean simulated pattern of each benchmark pattern's own entry, scored with the measured pattern's answer sets.
+
+| query | n | top-1 | top-10 | median rank |
+|---|---|---|---|---|
+| clean simulated probes | 4000 | 0.42 | 0.84 | 2.0 |
+| degraded simulated probes | 4000 | 0.28 | 0.67 | 4.0 |
+| own entries, clean simulated (any same-form) | 188 | 0.21 | 0.56 | 5.0 |
+| own entries, clean simulated (single-crystal) | 59 | 0.08 | 0.61 | 5.0 |
+| measured patterns (any same-form) | 188 | 0.01 | 0.03 | 5989.0 |
+| measured patterns (single-crystal) | 59 | 0.00 | 0.00 | 18725.0 |
+
+Training-split overlap (any same-form entry in): {'none': 101, 'train': 81, 'val': 1, 'test': 5} patterns; model top-1 / median rank for patterns with a same-form entry in the training split 0.01 / 6,396 (n = 81), with none in the corpus 0.00 / 5,617 (n = 101). Recall of the model's top 100 / 1,000: 0.09 / 0.28.
+
+**Table S14** Search cost per query over the full library. CPU: per-pair wall time of the simulated sweep (one core) times 309,080; the model's figure there includes encoding every pair and is not representative of a library search, which with precomputed embeddings takes about 5 ms per query.
+
+| score | CPU s per query (estimate) |
+|---|---|
+| pearson | 0.5 |
+| pearson_zs | 33.9 |
+| wcc_1 | 27.9 |
+| wcc_2 | 29.0 |
+| lnq | 492.4 |
+
+## S8 Subgroups, paired differences and ground-truth checks
+
+**Table S15** Paired differences in compound-weighted top-1 against fixed-grid Pearson (95 % compound-bootstrap CI).
+
+| score − Pearson | answer set | compounds | difference |
+|---|---|---|---|
+| ln q lag + zero scan | any same-form | 123 | +0.04 [-0.02, 0.12] |
+| WCC, l = 1° + zero scan | any same-form | 123 | -0.00 [-0.08, 0.08] |
+| Cosine + zero scan | any same-form | 123 | +0.01 [-0.05, 0.07] |
+| WCC, l = 2° + zero scan | any same-form | 123 | -0.12 [-0.21, -0.03] |
+| ln q lag + zero scan | single-crystal | 30 | +0.18 [0.02, 0.35] |
+| WCC, l = 1° + zero scan | single-crystal | 30 | +0.20 [0.03, 0.36] |
+| Cosine + zero scan | single-crystal | 30 | +0.10 [-0.05, 0.24] |
+| WCC, l = 2° + zero scan | single-crystal | 30 | +0.16 [-0.03, 0.35] |
+
+**Table S16** Subgroups (any same-form entry): per-pattern / compound-weighted top-1.
+
+| subgroup | patterns / compounds | ln q | cosine + zs | Pearson | WCC 1° | WCC 2° | model |
+|---|---|---|---|---|---|---|---|
+| strict anchors | 153 / 108 | 0.80 / 0.88 | 0.80 / 0.85 | 0.85 / 0.83 | 0.76 / 0.84 | 0.63 / 0.70 | 0.01 / 0.02 |
+| lenient anchors | 35 / 16 | 0.37 / 0.81 | 0.37 / 0.81 | 0.69 / 0.79 | 0.31 / 0.69 | 0.31 / 0.69 | 0.00 / 0.00 |
+| a correct entry in the corpus | 87 / 73 | 0.83 / 0.90 | 0.85 / 0.90 | 0.84 / 0.85 | 0.78 / 0.86 | 0.67 / 0.73 | 0.02 / 0.03 |
+| correct entries only among the added entries | 101 / 53 | 0.63 / 0.85 | 0.61 / 0.77 | 0.80 / 0.82 | 0.59 / 0.79 | 0.49 / 0.70 | 0.00 / 0.00 |
+| Cu Kα | 120 / 84 | 0.72 / 0.85 | 0.70 / 0.81 | 0.81 / 0.83 | 0.68 / 0.80 | 0.58 / 0.65 | 0.00 / 0.00 |
+| other wavelengths | 68 / 40 | 0.72 / 0.93 | 0.76 / 0.90 | 0.84 / 0.83 | 0.68 / 0.90 | 0.56 / 0.82 | 0.03 / 0.05 |
+| own entry ordered | 160 / 115 | 0.81 / 0.88 | 0.81 / 0.85 | 0.85 / 0.83 | 0.77 / 0.84 | 0.64 / 0.71 | 0.01 / 0.02 |
+| own entry disordered | 28 / 9 | 0.21 / 0.67 | 0.25 / 0.78 | 0.64 / 0.73 | 0.18 / 0.56 | 0.18 / 0.56 | 0.00 / 0.00 |
+
+Single-crystal set, cell agreement: largest relative cell-length difference between the own powder-study entry and the closest single-crystal same-form entry, median 0.65 %; ln q top-1 0.71 for ≤ 1 % (n = 34) and 0.08 for > 1 % (n = 25). Recorded temperatures known for both entries: n = 36, median |ΔT| 3 K; ln q top-1 0.48 for |ΔT| ≤ 50 K (n = 23) and 0.23 above (n = 13).
+
+Ground-truth audit: 454 wrong first-ranked entries (five classical scores, both answer sets) compared with the anchors by packing similarity (871 pairs); molecules matched (max over anchors): {'None': 441, '15': 5, '9': 2, '7': 1, '11': 2, '5': 2, '10': 1} (None = no comparable molecules). Same form: GOFWUV for pattern_100.json (QQQAUJ).
+
+Entries set aside as not comparable: 134 over 57 patterns. Own powder-study entry reproducing the deposited structure within 0.05 Å RMSD: 150 strict + 34 lenient anchors. Within-family chance: 0.40.

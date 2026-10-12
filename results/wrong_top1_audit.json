@@ -1,0 +1,57 @@
+{
+ "n_cases": 454,
+ "n_pairs": 871,
+ "matched_distribution": {
+  "None": 441,
+  "15": 5,
+  "9": 2,
+  "7": 1,
+  "11": 2,
+  "5": 2,
+  "10": 1
+ },
+ "same_form_by_key_td": {
+  "pearson_bkg|std": 1,
+  "cos_zs_bkg|std": 1,
+  "wcc_1_bkg|std": 1,
+  "wcc_2_bkg|std": 1,
+  "lnq_bkg|std": 1
+ },
+ "same_form_cases": [
+  {
+   "id": "pattern_100.json",
+   "stem": "QQQAUJ",
+   "key": "pearson_bkg",
+   "td": "std",
+   "wrong": "GOFWUV"
+  },
+  {
+   "id": "pattern_100.json",
+   "stem": "QQQAUJ",
+   "key": "cos_zs_bkg",
+   "td": "std",
+   "wrong": "GOFWUV"
+  },
+  {
+   "id": "pattern_100.json",
+   "stem": "QQQAUJ",
+   "key": "wcc_1_bkg",
+   "td": "std",
+   "wrong": "GOFWUV"
+  },
+  {
+   "id": "pattern_100.json",
+   "stem": "QQQAUJ",
+   "key": "wcc_2_bkg",
+   "td": "std",
+   "wrong": "GOFWUV"
+  },
+  {
+   "id": "pattern_100.json",
+   "stem": "QQQAUJ",
+   "key": "lnq_bkg",
+   "td": "std",
+   "wrong": "GOFWUV"
+  }
+ ]
+}

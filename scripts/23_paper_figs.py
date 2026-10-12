@@ -24,7 +24,8 @@ PANEL = "({})"                      # panel label format; one constant so the co
 plt.rcParams.update({"font.family": "sans-serif", "font.sans-serif": ["Arial", "DejaVu Sans"], "font.size": 7,
                      "axes.titlesize": 7, "axes.labelsize": 7, "legend.fontsize": 6, "xtick.labelsize": 6,
                      "ytick.labelsize": 6, "axes.linewidth": 0.6, "lines.linewidth": 1.0, "pdf.fonttype": 42,
-                     "axes.spines.top": False, "axes.spines.right": False})
+                     "axes.spines.top": False, "axes.spines.right": False,
+                     "mathtext.fontset": "stix"})   # serif math so that "ln" cannot read as "In"
 
 # Okabe-Ito colours, one per method across every figure
 STYLE = {
@@ -33,7 +34,7 @@ STYLE = {
     "zs":      dict(color="#0072B2", label="l = 0 + zero scan"),
     "wcc_1":   dict(color="#E69F00", label="WCC, l = 1° + zero scan"),
     "wcc_2":   dict(color="#56B4E9", label="WCC, l = 2° + zero scan"),
-    "lnq":     dict(color="#009E73", label="ln q lag + zero scan"),
+    "lnq":     dict(color="#009E73", label=r"$\ln q$ lag + zero scan"),
 }
 REAL = {"model_bkg": "model", "pearson_bkg": "pearson", "cos_zs_bkg": "zs", "wcc_1_bkg": "wcc_1",
         "wcc_2_bkg": "wcc_2", "lnq_bkg": "lnq"}
@@ -139,7 +140,7 @@ def fig_sweep(sb: dict) -> None:
 def fig_real(pn: dict) -> None:
     bm = pn["bench"]
     order = ["lnq_bkg", "cos_zs_bkg", "pearson_bkg", "wcc_1_bkg", "wcc_2_bkg", "model_bkg"]
-    names = {"lnq_bkg": "ln q lag + zero scan", "cos_zs_bkg": "Cosine + zero scan", "pearson_bkg": "Pearson, fixed grid",
+    names = {"lnq_bkg": r"$\ln q$ lag + zero scan", "cos_zs_bkg": "Cosine + zero scan", "pearson_bkg": "Pearson, fixed grid",
              "wcc_1_bkg": "WCC, l = 1°", "wcc_2_bkg": "WCC, l = 2°", "model_bkg": "Learned embedding"}
     fig, (a, b) = plt.subplots(1, 2, figsize=(DOUBLE, 0.36 * DOUBLE), gridspec_kw=dict(width_ratios=[1.25, 1]))
     y = np.arange(len(order))[::-1]
@@ -196,11 +197,15 @@ def fig_case(pn: dict, case_json: dict, z) -> None:
     dec = z["raw"][ents.index("GUSRIV")]
     fig, (a, b) = plt.subplots(1, 2, figsize=(DOUBLE, 0.34 * DOUBLE), gridspec_kw=dict(width_ratios=[1.6, 1]))
     sc = lambda v: (v - v.min()) / (v.max() - v.min())
-    for off, v, c, t in ((2.2, q, "k", "measured, 303 K (opXRD, background removed)"),
-                         (1.1, own, "#0072B2", "ZZZUWK01, its own Rietveld entry (simulated)"),
+    for off, v, c, t in ((2.7, q, "k", "measured (opXRD, background removed)"),
+                         (1.35, own, "#0072B2", "ZZZUWK01, its own powder-study entry (simulated)"),
                          (0.0, dec, "#D55E00", "GUSRIV, unrelated decoy (simulated)")):
         a.plot(grid, sc(v) + off, color=c, lw=0.6)
-        a.text(50, off + 0.75, t, ha="right", va="bottom", fontsize=6, color=c)
+        a.text(50, off + 0.98, t, ha="right", va="bottom", fontsize=6, color=c)
+    for hkl, tt in (("001", 12.0), ("101", 18.6), ("110", 20.1), ("111", 23.5), ("200", 28.6)):
+        for off, v in ((2.7, q), (1.35, own)):
+            win = np.abs(grid - tt) <= 0.3
+            a.text(tt, off + sc(v)[win].max() + 0.03, hkl, ha="center", va="bottom", fontsize=4.8, color="0.3")
     a.set_xlim(5, 50)
     a.set_yticks([])
     a.spines["left"].set_visible(False)
@@ -208,7 +213,7 @@ def fig_case(pn: dict, case_json: dict, z) -> None:
     label(a, 0, x=-0.03)
     t1 = case_json["top1_of_20"]
     keys = ["pearson_bkg", "cos_zs_bkg", "wcc_1_bkg", "wcc_2_bkg", "lnq_bkg"]
-    nm = ["Pearson,\nfixed", "Cosine +\nzero scan", "WCC\nl = 1°", "WCC\nl = 2°", "ln q +\nzero scan"]
+    nm = ["Pearson,\nfixed", "Cosine +\nzero scan", "WCC\nl = 1°", "WCC\nl = 2°", "$\\ln q$ +\nzero scan"]
     xs = np.arange(len(keys))
     b.bar(xs - 0.19, [t1[f"none|{k}"] for k in keys], 0.38, color=[STYLE[REAL[k]]["color"] for k in keys],
           label="uncorrected")

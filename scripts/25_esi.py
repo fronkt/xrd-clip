@@ -147,6 +147,78 @@ def main() -> int:
     L += table(["Condition", "model", "best classical", "best score", "Δ", "Pearson, fixed grid"],
                [[r["condition"], f"{r['model']:.2f} {ci(r['model_ci'])}", r["best"], f"{r['best_top1']:.2f} {ci(r['best_ci'])}",
                  f"{r['delta']:+.2f}", f"{r['pearson_fixed']:.2f}"] for r in P["g0"]["rows"]])
+    L += ["", "The condition zero_offset=0.0 repeats the clean condition, so 34 conditions are distinct. Score names: "
+          "pearson_zs = Pearson + zero scan; wcc_0.5, wcc_1, wcc_2 = WCC with l = 0.5°, 1°, 2° + zero scan; lnq = ln q lag + "
+          "zero scan. Conditions in which each score beats the model with non-overlapping CIs: " +
+          ", ".join(f"{k} {v}" for k, v in P["extra"]["g0_distinct"]["conditions_each_score_beats_model"].items()) + "."]
+
+    # S7 learned model
+    RF, ex = P["run_facts"], P["extra"]
+    mp = ex["model_probe_check"]
+    L += ["", "## S7 Learned model", "",
+          f"Model card: dual encoder (1D residual CNN over the 2,251-point pattern; Transformer over the atoms of the asymmetric "
+          f"unit with a lattice token), 256-dimensional unit embeddings, {RF['model_params_millions']} million parameters. "
+          f"Symmetric InfoNCE with a learnable temperature, AdamW (learning rate 3 × 10⁻⁴, weight decay 0.05), batch "
+          f"{RF['model_batch']}, {RF['model_epochs']} epochs, one seed; polymorph hard-negative batches (sibling polymorphs in "
+          "the same batch); scaffold- and polymorph-family split 247,089 / 30,887 / 30,886; checkpoint chosen by in-batch "
+          "validation top-1 (0.914). Training patterns simulated on the fly with zero offset, isotropic strain, Caglioti and "
+          "Scherrer broadening, March–Dollase texture, Chebyshev and amorphous background and Poisson noise; no Kα2.", "",
+          "**Table S13** The model on simulated and measured queries against all "
+          f"{mp['n_library']:,} entries. Probes: library entries outside the benchmark compounds; their own refcode family is "
+          "set aside. Own entries: the clean simulated pattern of each benchmark pattern's own entry, scored with the "
+          "measured pattern's answer sets.", ""]
+    rows = [["clean simulated probes", mp["sim"]["n"], f2(mp["sim"]["top1"]), f2(mp["sim"]["top10"]), mp["sim"]["median_rank"]],
+            ["degraded simulated probes", mp["aug"]["n"], f2(mp["aug"]["top1"]), f2(mp["aug"]["top10"]), mp["aug"]["median_rank"]]]
+    for nm_, k in (("own entries, clean simulated", "own_entry_clean"), ("measured patterns", "measured_bkg")):
+        for td in ("std", "sc"):
+            v = mp[f"{k}|{td}"]
+            rows.append([f"{nm_} ({'any same-form' if td == 'std' else 'single-crystal'})", v["n"], f2(v["top1"]),
+                         f2(v["top10"]), v["median_rank"]])
+    L += table(["query", "n", "top-1", "top-10", "median rank"], rows)
+    ov = P["model_training_overlap"]
+    L += ["", f"Training-split overlap (any same-form entry in): {ov['patterns_with_same_form_entry_in']} patterns; "
+          f"model top-1 / median rank for patterns with a same-form entry in the training split "
+          f"{f2(ov['model_bkg_train']['top1'])} / {ov['model_bkg_train']['median_rank']:,.0f} (n = {ov['model_bkg_train']['n']}), "
+          f"with none in the corpus {f2(ov['model_bkg_none']['top1'])} / {ov['model_bkg_none']['median_rank']:,.0f} "
+          f"(n = {ov['model_bkg_none']['n']}). Recall of the model's top 100 / 1,000: {f2(ex['model_recall']['100'])} / "
+          f"{f2(ex['model_recall']['1000'])}.", "",
+          "**Table S14** Search cost per query over the full library. CPU: per-pair wall time of the simulated sweep (one core) "
+          f"times {D['n_library']:,}; the model's figure there includes encoding every pair and is not representative of a "
+          f"library search, which with precomputed embeddings takes about {RF['model_query_ms_cpu']} ms per query.", ""]
+    L += table(["score", "CPU s per query (estimate)"],
+               [[k, f"{v:,.1f}"] for k, v in ex["cpu_s_per_query_full_library"].items() if k != "model"])
+
+    # S8 subgroups and paired differences
+    L += ["", "## S8 Subgroups, paired differences and ground-truth checks", "",
+          "**Table S15** Paired differences in compound-weighted top-1 against fixed-grid Pearson (95 % compound-bootstrap CI).", ""]
+    L += table(["score − Pearson", "answer set", "compounds", "difference"],
+               [[NAMES[k.split("|")[1].split("-")[0]], "any same-form" if k.startswith("std") else "single-crystal", v["n_compounds"],
+                 f"{v['diff']:+.2f} {ci(v['ci'])}"] for k, v in ex["paired_methods"].items()])
+    L += ["", "**Table S16** Subgroups (any same-form entry): per-pattern / compound-weighted top-1.", ""]
+    sub_names = {"tier_strict": "strict anchors", "tier_lenient": "lenient anchors", "corpus_entry": "a correct entry in the corpus",
+                 "extra_only": "correct entries only among the added entries", "cu": "Cu Kα", "non_cu": "other wavelengths",
+                 "ordered": "own entry ordered", "disordered": "own entry disordered"}
+    rows = []
+    for g, nm_ in sub_names.items():
+        d = ex["subgroups"][g]
+        rows.append([nm_, f"{d['n_patterns']} / {d['n_compounds']}"] +
+                    [f"{f2(d[k]['top1'])} / {f2(d[k]['macro_top1'])}" for k in
+                     ["lnq_bkg", "cos_zs_bkg", "pearson_bkg", "wcc_1_bkg", "wcc_2_bkg", "model_bkg"]])
+    L += table(["subgroup", "patterns / compounds", "ln q", "cosine + zs", "Pearson", "WCC 1°", "WCC 2°", "model"], rows)
+    cm, tg, au = ex["sc_cell_mismatch"], ex["sc_temperature_gap"], ex["wrong_top1_audit"]
+    L += ["", f"Single-crystal set, cell agreement: largest relative cell-length difference between the own powder-study entry and "
+          f"the closest single-crystal same-form entry, median {cm['median_max_axis_rel'] * 100:.2f} %; ln q top-1 "
+          f"{f2(cm['lnq_top1_small'])} for ≤ 1 % (n = {cm['n_small']}) and {f2(cm['lnq_top1_large'])} for > 1 % (n = {cm['n_large']}). "
+          f"Recorded temperatures known for both entries: n = {tg['n']}, median |ΔT| {tg['median_dT_K']:.0f} K; ln q top-1 "
+          f"{f2(tg['top1_dT_le_50'])} for |ΔT| ≤ 50 K (n = {tg['n_dT_le_50']}) and {f2(tg['top1_dT_gt_50'])} above (n = {tg['n_dT_gt_50']}).", "",
+          f"Ground-truth audit: {au['n_cases']} wrong first-ranked entries (five classical scores, both answer sets) compared with "
+          f"the anchors by packing similarity ({au['n_pairs']} pairs); molecules matched (max over anchors): "
+          f"{au['matched_distribution']} (None = no comparable molecules). Same form: " +
+          "; ".join(sorted({f"{c['wrong']} for {c['id']} ({c['stem']})" for c in au["same_form_cases"]})) + ".", "",
+          f"Entries set aside as not comparable: {ex['unknown_entries']['total']} over {ex['unknown_entries']['patterns_with_any']} "
+          f"patterns. Own powder-study entry reproducing the deposited structure within 0.05 Å RMSD: "
+          f"{ex['own_powder_rmsd_lt_0p05']['strict']} strict + {ex['own_powder_rmsd_lt_0p05']['lenient']} lenient anchors. "
+          f"Within-family chance: {f2(ex['within_family_chance'])}."]
     with open("paper/dd/esi.md", "w", encoding="utf-8") as fh:
         fh.write("\n".join(L) + "\n")
     print(f"wrote paper/dd/esi.md ({len(L)} lines)")
