@@ -387,6 +387,7 @@ def cmd_eval(args) -> int:
     wf = {}
     top1 = {}
     curve = {}
+    curve_macro = {}
     rank_check = {}
     for key in keys:
         method = key.rsplit("_", 1)[0]
@@ -433,6 +434,13 @@ def cmd_eval(args) -> int:
                                  float(np.std([(cu[size][rep][ok] < 1).mean() for rep in range(5)]))] for size in subsets}
                 c["full"] = [float((r["std"][ok] < 1).mean()), 0.0]
                 curve[f"{corr}|{key}"] = c
+                # compound-weighted version of the same subsets (one compound has 20 of the 188 patterns)
+                sq = np.array([q["stem"] for q in qinfo])
+                mac = lambda rk: float(np.nanmean(_hits_by_compound(np.where(ok, rk, -1), sq, np.unique(sq))))
+                cm = {str(size): [float(np.mean([mac(cu[size][rep]) for rep in range(5)])),
+                                  float(np.std([mac(cu[size][rep]) for rep in range(5)]))] for size in subsets}
+                cm["full"] = [mac(r["std"]), 0.0]
+                curve_macro[f"{corr}|{key}"] = cm
         if ref_ranks is not None:
             for td in ("std", "sc"):
                 rk = f"{td}|{key}"
@@ -451,7 +459,8 @@ def cmd_eval(args) -> int:
     res = {"meta": {"n_library": N, "n_queries": nq, "n_probe": int(hub["n_probe"]), "ks": ks, "primary": PRIMARY,
                     "corrections": CORRECTIONS, "excluded": excluded,
                     "score_log": open(os.path.join(full, "DONE")).read().strip()},
-           "rank_check": rank_check, "summary": {}, "within_family": {}, "library_curve": curve, "hubness": {}}
+           "rank_check": rank_check, "summary": {}, "within_family": {}, "library_curve": curve,
+           "library_curve_macro": curve_macro, "hubness": {}}
     for (corr, td, key), r in ranks.items():
         for sp, sel in split_of.items():
             if td == "sc" and sp != "all":
@@ -605,6 +614,13 @@ def write_table(res: dict, path: str) -> None:
     for k, nm in names.items():
         for c in ("none", m["primary"]):
             cv = res["library_curve"].get(f"{c}|{k}", {})
+            lines.append(f"| {nm} | {c} | " + " | ".join(f"{cv[s][0]:.2f}" if s in cv else "n/a"
+                                                          for s in ("2000", "20000", "100000", "full")) + " |")
+    lines += ["", "## Library-size curve, compound-weighted (macro top-1, std truth; same subsets)", "",
+              "| Method | Correction | 2k | 20k | 100k | full |", "|---|---|---|---|---|---|"]
+    for k, nm in names.items():
+        for c in ("none", m["primary"]):
+            cv = res.get("library_curve_macro", {}).get(f"{c}|{k}", {})
             lines.append(f"| {nm} | {c} | " + " | ".join(f"{cv[s][0]:.2f}" if s in cv else "n/a"
                                                           for s in ("2000", "20000", "100000", "full")) + " |")
     lines += ["", "## Hubness (k-occurrence over the probes, N10 = number of probes with the entry in their top 10)", "",

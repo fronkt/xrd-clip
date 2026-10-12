@@ -91,6 +91,23 @@ Patterns per compound, largest: ZZZUWK 20, ZZZIZM 12, NAPHTA 10, MEHNIY 7, COUMA
 | xrd-clip model | none | 0.06 | 0.03 | 0.02 | 0.01 |
 | xrd-clip model | csls_aug_k10 | 0.06 | 0.03 | 0.02 | 0.02 |
 
+## Library-size curve, compound-weighted (macro top-1, std truth; same subsets)
+
+| Method | Correction | 2k | 20k | 100k | full |
+|---|---|---|---|---|---|
+| Pearson, fixed grid | none | 0.93 | 0.88 | 0.85 | 0.83 |
+| Pearson, fixed grid | csls_aug_k10 | 0.93 | 0.89 | 0.86 | 0.85 |
+| cosine + zero scan | none | 0.93 | 0.90 | 0.87 | 0.84 |
+| cosine + zero scan | csls_aug_k10 | 0.95 | 0.93 | 0.91 | 0.88 |
+| WCC, l = 1 deg | none | 0.90 | 0.87 | 0.84 | 0.83 |
+| WCC, l = 1 deg | csls_aug_k10 | 0.92 | 0.89 | 0.86 | 0.84 |
+| WCC, l = 2 deg | none | 0.83 | 0.77 | 0.74 | 0.71 |
+| WCC, l = 2 deg | csls_aug_k10 | 0.84 | 0.81 | 0.78 | 0.74 |
+| ln q + zero scan | none | 0.94 | 0.91 | 0.89 | 0.87 |
+| ln q + zero scan | csls_aug_k10 | 0.94 | 0.93 | 0.91 | 0.89 |
+| xrd-clip model | none | 0.07 | 0.04 | 0.02 | 0.02 |
+| xrd-clip model | csls_aug_k10 | 0.07 | 0.04 | 0.03 | 0.02 |
+
 ## Hubness (k-occurrence over the probes, N10 = number of probes with the entry in their top 10)
 
 | Method | probes | N10 skew | N10 max | top hubs (refcode, N10, reflections, strongest-peak share) |

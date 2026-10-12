@@ -43,7 +43,7 @@ Steps:
 - [x] smoke: `score --limit 200` on CPU, `eval` uncorrected ranks == cache/real_bench_smoke/ranks.npz (0 mismatches, 11 keys x 2)
 - [x] box runner `scripts/box/hub_box.sh` (md5, self-stop, watchdog); upload = existing box_upload.tar + small ctx
 - [x] Frank switched to MANUAL mode → RTX 4090 box 55604630: upload 8 min, score 761 s, pull 9 min (md5 OK), destroyed; $0.26
-- [x] eval: uncorrected ranks reproduce ranks.npz (0 top-1 changes; 59 |Δrank| ≤ 3 near-ties); table + json written
+- [x] eval: uncorrected ranks reproduce ranks.npz (0 top-1 changes; 118 |Δrank| ≤ 3 near-ties; first written as 59, a miscount); table + json written
 - [x] plan Section 12b (+ correction banner on 12a finding 3) + commit/push
 
 #### Review — Step 1b (2026-10-12)
@@ -57,7 +57,42 @@ Steps:
 
 ### Step 2 — draft (after Step 1 numbers are in)
 - [x] venue: Digital Discovery (Frank 10-12)
-- [ ] outline check-in with Frank
+- [x] outline check-in with Frank (10-12: "its good"; outline = plan 12b consequences + the 5-part outline sent 10-12)
+
+Format: RSC markdown like mlip-dynstab (`paper/dd/manuscript.md` -> .docx via the journal-submission skill).
+`paper/main.tex` stays the URTC paper. The URTC paper's copyright is IEEE's: cite it and reuse no text or figures from it.
+Headline metric = compound-weighted (macro) top-1; per-pattern is secondary (lessons.md 10-12).
+- [x] A1 Digital Discovery guidelines (rsc.org pages 403 -> many items search-snippet only; re-check before upload):
+      Full paper, no page limit; abstract ~50-250 words; TOC graphic at revision; "Fig. 1"; ESI cited with a dagger;
+      refs numbered superscripts, "Notes and references"; DAS + conflicts required, CRediT encouraged; AI use declared
+      in Acknowledgements; code needs a DOI (Zenodo) and a DATA REVIEWER checks it reproduces the findings;
+      **restricted data: "a representative dataset that enables similar conclusions ... must be made publicly
+      available" -> refcode lists alone may not pass (Frank decision: open stand-in library, e.g. COD decoys + the
+      opXRD structures)**; preprints OK; URTC proceedings: no explicit RSC wording -> disclose + cite in cover letter;
+      APC GBP 2,200; Purdue RSC agreement runs to 2026-12-31 (Purdue e-mail, CC BY) -> acceptance likely after;
+      first decision ~46 days
+- [ ] A2 reference ledger `docs/lit-2026-10/refs_dd_verified.md` + 60-day recency sweep -> subagent
+- [ ] B1 `scripts/22_paper_numbers.py` -> `results/paper_numbers.json`: every manuscript number comes from
+      results/*.json or hub_ranks.npz (macro top-1/top-10 with compound CIs, per-pattern, median ranks, model
+      rank distribution, ZZZUWK case, compound counts, training-split overlap of the query compounds)
+- [ ] B2 `scripts/23_paper_figs.py` -> `paper/dd/figs/` (vector PDF + 300 dpi PNG):
+      Fig 1 benchmark construction (schematic); Fig 2 simulated sweep, model vs best classical over 35 conditions;
+      Fig 3 real benchmark, macro top-1 std + single-crystal with CIs, plus the library-size curve;
+      Fig 4 ZZZUWK case (measured pattern vs its own entry vs the winning decoys); Fig 5 rank distributions, model vs classical
+- [ ] C1 `paper/dd/manuscript.md`: Abstract; 1 Introduction; 2 Benchmark; 3 Methods; 4 Results (simulated sweep;
+      full library; single-crystal references; ZZZUWK + CSLS; why the model fails); 5 Discussion (what a learned
+      method has to beat; limits); 6 Conclusions; Data and code availability; Author contributions; Conflicts;
+      Acknowledgements; References
+- [ ] C2 `paper/dd/esi.md`: full tables (real_bench, hub, G0), ground-truth pipeline, GPU equivalence checks,
+      CSLS sensitivity (k, probe set, z-norm, MP), per-compound list
+- [ ] D1 `scripts/verify_claims.py`: assert every manuscript number against paper_numbers.json
+- [ ] D2 adversarial referee pass (powder-diffraction + ML-benchmark referees) -> fixes; refute pass on citation claims
+- [ ] D3 build .docx + check in with Frank
+
+Open decisions for Frank (flagged in the draft, not blocking):
+- corresponding e-mail cai485@purdue.edu? (Purdue's RSC OA agreement is applied at acceptance and ends 2026-12-31; otherwise there is an APC)
+- release: public code + Zenodo (refcode lists, opXRD pattern IDs, per-query ranks); the CSD-trained checkpoint is NOT released
+- AI-use statement wording (his own, as in mlip-dynstab); title; ChemRxiv preprint or not
 
 ---
 

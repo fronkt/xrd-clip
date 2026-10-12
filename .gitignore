@@ -31,6 +31,9 @@
 # Hubness pass (2026-10-12): same kind of aggregate metrics + hub refcodes/counts.
 !/results/real_bench_hub.json
 !/results/real_bench_hub_table.md
+# Paper numbers + ZZZUWK case study (2026-10-12): aggregate metrics, scores and peak heights; refcodes, no structures.
+!/results/paper_numbers.json
+!/results/case_zzzuwk.json
 !/results/polymorph.json
 !/results/polymorph.png
 !/results/combined.json

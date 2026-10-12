@@ -485,7 +485,7 @@ Frank 10-12: venue = Digital Discovery; run the hubness fix on a Vast GPU before
 (box 55604630, destroyed; 761 s wall; $0.26, credit $7.56 → $7.30). The scorer is a torch port of
 WCCLibrary/Pearson (`src/xrdclip/eval/wcc_torch.py`): the triangle weight is folded into the reference,
 so each zero-scan shift is one matrix product. It agrees with the CPU scorer to ≤ 4e-6 and reproduces
-19's uncorrected ranks with no top-1 change on any key: 59 rank mismatches over 9 classical keys × 2
+19's uncorrected ranks with no top-1 change on any key: 118 rank mismatches (first written as 59, a miscount; corrected 10-12) over 9 classical keys × 2
 truth sets, all |Δrank| ≤ 3, smallest affected rank 68 (float32 near-ties). Probes: 4000 clean
 simulated + 4000 augmented-then-background-subtracted library patterns, drawn only from stems no query
 belongs to; same-stem pairs are masked. The corrections and the primary (CSLS, augmented probes,
