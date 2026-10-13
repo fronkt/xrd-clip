@@ -231,3 +231,19 @@ def test_standardize():
     z = A.standardize(y)
     assert abs(z.mean()) < 1e-5
     assert abs(z.std() - 1.0) < 1e-4
+
+
+def test_realism_adds_ka2_and_keeps_shape():
+    import numpy as np
+    from xrdclip.data import augment as A
+    st = {"two_theta": np.array([20.0, 40.0], np.float32), "intensity": np.array([100.0, 50.0], np.float32),
+          "hkl": np.array([[1, 0, 0], [2, 0, 0]]), "d_hkl": np.array([4.4361, 2.2520], np.float32),
+          "recip": np.eye(3, dtype=np.float32)}
+    R = A.Realism(p_ka2=1.0, B=(0.0, 0.0), jitter=(0.0, 0.0))
+    out = A.realism_sticks(st, np.random.default_rng(0), R)
+    assert len(out["two_theta"]) == 4 and np.allclose(out["intensity"][2:], [50.0, 25.0])
+    # K-alpha2 sits at higher angle, by ~0.05 deg at 20 deg and ~0.1 deg at 40 deg
+    d = out["two_theta"][2:] - out["two_theta"][:2]
+    assert 0.04 < d[0] < 0.07 and 0.09 < d[1] < 0.13
+    m = A.realism_mask(np.random.default_rng(1), A.Realism(p_crop=1.0))
+    assert m.dtype == bool and 0 < m.sum() < A.N_POINTS

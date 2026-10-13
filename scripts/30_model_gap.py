@@ -42,6 +42,11 @@ WORK = "cache/real_bench"
 LIB = os.path.join(WORK, "lib_clean_f16.npy")
 PEMB = os.path.join(WORK, "lib_pattern_emb.npy")
 EFFECTS = ("mask", "width", "ka2", "bkg", "noise", "zero")
+# Follow-up rungs (added after the first ladder, 10-12): on top of "all", an overall Debye-Waller factor
+# (B = 4.45 A^2, results/r2_bvalue.json) or log-normal per-reflection intensity jitter. They test whether the
+# model's remaining gap to the measured patterns is intensity mismatch, which the classical scores tolerate.
+EXTRA = {"all_dw": dict(B=4.45), "all_int30": dict(jitter=0.3), "all_int50": dict(jitter=0.5),
+         "all_dw_int30": dict(B=4.45, jitter=0.3)}
 
 
 def _render_job(job):
@@ -167,10 +172,17 @@ def zero_of(meas: np.ndarray, own: np.ndarray, max_deg: float = 0.5) -> float:
     return arg * A.STEP
 
 
-def variant(rec: dict, eff: "set[str]", est: dict, rng) -> np.ndarray:
+def variant(rec: dict, eff: "set[str]", est: dict, rng, B: float = 0.0, jitter: float = 0.0) -> np.ndarray:
     """Own-entry rendering with the chosen measured effects, preprocessed like the bkg queries."""
     from xrdclip.data import augment as A
     from xrdclip.eval.real_patterns import preprocess
+    if B or jitter:
+        inten = np.asarray(rec["intensity"], np.float64)
+        if B:
+            inten = inten * np.exp(-B / (2 * np.asarray(rec["d_hkl"], np.float64) ** 2))
+        if jitter:
+            inten = inten * rng.lognormal(0.0, jitter, inten.shape)
+        rec = {**rec, "intensity": inten}
     p = A.CLEAN
     if "width" in eff and est["fwhm"]:
         p = A.sweep_params(u=0.0, v=0.0, w=est["fwhm"] ** 2)
@@ -220,11 +232,14 @@ def cmd_eval(args) -> int:
         meas = Q["raw_bkg"][qi]
         ests.append({"mask": m, "tube": rs.tube(q["wavelength"]), "fwhm": fwhm_of(meas), "bkg": bkg,
                      "noise": noise_of(meas, m), "zero": zero_of(meas, own_clean[qi])})
-    variants = {"clean": set(), **{e: {e} for e in EFFECTS}, "all": set(EFFECTS)}
-    X = {"measured": Q["raw_bkg"]}
-    for name, eff in variants.items():
+    variants = {"clean": (set(), {}), **{e: ({e}, {}) for e in EFFECTS}, "all": (set(EFFECTS), {}),
+                **{k: (set(EFFECTS), kw) for k, kw in EXTRA.items()}}
+    if args.variants:
+        variants = {k: v for k, v in variants.items() if k in args.variants.split(",")}
+    X = {} if args.variants else {"measured": Q["raw_bkg"]}
+    for name, (eff, kw) in variants.items():
         rng = np.random.default_rng(1)
-        X[f"own_{name}"] = np.stack([variant(recs[qi], eff, ests[qi], rng) for qi in range(nq)])
+        X[f"own_{name}"] = np.stack([variant(recs[qi], eff, ests[qi], rng, **kw) for qi in range(nq)])
 
     model = load_model(args)
     lib_emb = torch.from_numpy(np.concatenate([np.load(os.path.join(WORK, f"emb_{os.path.basename(os.path.dirname(p))}_"
@@ -253,7 +268,7 @@ def cmd_eval(args) -> int:
                          "zero_deg_abs_median": float(np.median([abs(e["zero"]) for e in ests])),
                          "n_partial_coverage": int(sum((~e["mask"]).any() for e in ests)),
                          "n_cu_lab": int(sum(e["tube"] == "cu" for e in ests))},
-           "results": {}}
+           "results": json.load(open(args.out))["results"] if (args.variants and os.path.exists(args.out)) else {}}
     for name, x in X.items():
         e = encode(model, x)
         scorers = {"model": (e @ lib_emb.T).numpy()}
@@ -286,6 +301,7 @@ def main() -> int:
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--threads", type=int, default=4)
     ap.add_argument("--out", default="results/model_gap.json")
+    ap.add_argument("--variants", default="", help="comma-separated variant names to (re)run; merged into --out")
     args = ap.parse_args()
     return {"render": cmd_render, "pemb": cmd_pemb, "eval": cmd_eval}[args.cmd](args)
 

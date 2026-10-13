@@ -271,6 +271,53 @@ def standardize(y: np.ndarray) -> np.ndarray:
     return ((y - mu) / sd).astype(np.float32) if sd > 1e-8 else (y - mu).astype(np.float32)
 
 
+@dataclass
+class Realism:
+    """Measured-pattern effects for the revision retrain (tasks/todo.md Step 3, R4c), on top of `Ranges`.
+
+    Chosen from the R4a ladder (scripts/30_model_gap.py): K-alpha2 and the queries' background removal were the
+    two effects that cost the model most on its own entries; the follow-up rungs test intensity mismatch.
+    Ranges cover the 188 measured queries (120 lab Cu; 46 do not span 5-50 deg; B from library CIFs 4.45 A^2).
+    """
+    p_ka2: float = 0.6                 # Cu K-alpha2 doublet, lambda2/lambda1 = 1.0024889, I2/I1 = 0.5
+    ka2_rho: float = 1.5444274 / 1.5405929
+    ka2_ratio: float = 0.5
+    B: tuple = (0.0, 8.0)              # overall Debye-Waller B (A^2), uniform
+    jitter: tuple = (0.0, 0.5)         # log-normal sigma of per-reflection intensity factors, uniform
+    p_crop: float = 0.25               # measured range shorter than 5-50 deg
+    crop_lo: tuple = (5.0, 12.0)
+    crop_hi: tuple = (30.0, 50.0)
+
+
+def realism_sticks(sticks: dict, rng: np.random.Generator, R: Realism) -> dict:
+    """Intensity effects (Debye-Waller, per-reflection jitter) and a K-alpha2 copy of every reflection."""
+    tt = np.asarray(sticks["two_theta"], np.float64)
+    inten = np.asarray(sticks["intensity"], np.float64)
+    d = np.asarray(sticks["d_hkl"], np.float64)
+    hkl = np.asarray(sticks["hkl"])
+    B = rng.uniform(*R.B)
+    if B > 0:
+        inten = inten * np.exp(-B / (2 * d ** 2))                 # exp(-2 B s^2), s = 1/(2d)
+    sig = rng.uniform(*R.jitter)
+    if sig > 0:
+        inten = inten * rng.lognormal(0.0, sig, inten.shape)
+    if rng.random() < R.p_ka2:
+        s2 = np.sin(np.radians(tt / 2)) * R.ka2_rho
+        ok = s2 < 1
+        tt = np.r_[tt, np.degrees(2 * np.arcsin(s2[ok]))]
+        inten = np.r_[inten, R.ka2_ratio * inten[ok]]
+        d = np.r_[d, d[ok]]
+        hkl = np.r_[hkl, hkl[ok]]
+    return {**sticks, "two_theta": tt, "intensity": inten, "d_hkl": d, "hkl": hkl}
+
+
+def realism_mask(rng: np.random.Generator, R: Realism, grid: np.ndarray = GRID) -> np.ndarray:
+    """Measured 2theta coverage: the full grid, or a shorter range with probability p_crop."""
+    if rng.random() >= R.p_crop:
+        return np.ones(grid.size, bool)
+    return (grid >= rng.uniform(*R.crop_lo)) & (grid <= rng.uniform(*R.crop_hi))
+
+
 # Convenience for the robustness sweep: clean everywhere, one dial turned.
 def sweep_params(**kwargs) -> Params:
     """`sweep_params(zero_offset=0.2)` -> otherwise-clean pattern with a 0.2 deg shift."""

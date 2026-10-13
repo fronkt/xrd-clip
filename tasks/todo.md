@@ -165,9 +165,22 @@ R4 learned side
       add ONE measured effect at a time (coverage mask, query background removal, K-alpha2, wavelength
       conversion, measured-like profile width, noise) -> which step takes the model to 0.01
 - [ ] R4b pattern-to-pattern retrieval with the existing pattern encoder (library rendered clean, local)
-- [ ] R4c realism retrain (box session B): same split, architecture and schedule; augmentation adds the effects
-      R4a names (written here before training) -> measured top-1 / median rank
-- Prediction for R4c is written after R4a and before training.
+- [x] R4a ladder DONE 10-12 (results/model_gap.json). Model, std per-pattern top-1 / median rank: own clean 0.21/5;
+      one effect: mask 0.20/6, width 0.22/7, K-alpha2 0.14/33, bkg removal 0.18/130, noise 0.17/11, zero 0.21/6;
+      all six 0.11/176; + Debye-Waller B 4.45 0.04/744; + jitter 0.3 0.10/162; + DW + jitter 0.03/746; measured
+      0.01/5,988. Fixed-grid Pearson: all + DW + jitter 0.78 vs measured 0.82 (the modelled effects reproduce its
+      measured level; for the model they explain about a third of the log-rank gap). p2p measured 0.09/1,622.
+- [x] R4b pattern-to-pattern with the existing encoder: measured std top-1 0.09 (macro 0.13), sc 0.03
+- [ ] R4c realism retrain (box A), DESIGN FIXED 10-12 before training: same split, architecture, hyperparameters,
+      60 epochs, polymorph batches, checkpoint = best clean val in-batch top-1, one seed (all as the original).
+      `--realism` (augment.Realism): K-alpha2 copy p 0.6 (I2/I1 0.5); overall B ~ U(0, 8) A^2; per-reflection
+      log-normal intensity jitter sigma ~ U(0, 0.5); 2theta range crop p 0.25 (start U(5, 12), end U(30, 50));
+      input = the queries' own background removal (eval.real_patterns.preprocess), on top of the original Ranges.
+      Eval: measured std/sc (macro + per pattern, median rank), the R4a ladder, p2p with the new pattern encoder.
+- Prediction R4c (written before training): measured std per-pattern top-1 rises from 0.01 to 0.05-0.20 and the
+  median rank falls from ~6,000 to 50-1,000; macro top-1 stays <= 0.3, far below every classical score
+  (0.83-0.87); own entries with all effects + DW + jitter recover to about the clean level (~0.2). If measured
+  top-1 stays < 0.03, the remaining gap is not the modelled effects.
 
 R5 open stand-in (Digital Discovery restricted-data clause)
 - [ ] COD route (research agent) -> COD organic CIFs + metadata (open data, CC0: a rented box is fine)

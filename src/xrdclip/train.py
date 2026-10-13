@@ -27,8 +27,8 @@ def load_refcodes(path: str) -> "list[str]":
 
 
 def build_loader(store, refcodes, batch_size, augment, workers, shuffle=True, ranges=A.Ranges(),
-                 batch_sampler=None):
-    ds = ContrastiveXRDDataset(store, refcodes, augment=augment, ranges=ranges)
+                 batch_sampler=None, realism=None):
+    ds = ContrastiveXRDDataset(store, refcodes, augment=augment, ranges=ranges, realism=realism)
     if batch_sampler is not None:
         # batch_sampler already fixes batch composition + size; batch_size/shuffle/drop_last are
         # mutually exclusive with it.
@@ -64,6 +64,9 @@ def main() -> int:
                     help="ablation: keep broadening/texture/noise/bkg but ZERO the shift+strain ranges, "
                          "to test whether the shift/strain degradation-robustness is learned from "
                          "augmentation (the main claim) rather than emergent from contrastive training")
+    ap.add_argument("--realism", action="store_true",
+                    help="R4c (revision): add measured-pattern effects (K-alpha2, Debye-Waller, per-reflection "
+                         "intensity jitter, range crops) and train on the queries' background-removed input")
     args = ap.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -80,6 +83,9 @@ def main() -> int:
     if args.no_shift_aug:
         # keep every other physical effect, but the model never sees a shifted/strained pattern
         train_ranges = dataclasses.replace(train_ranges, strain=(0.0, 0.0), zero_offset=(0.0, 0.0))
+    realism = A.Realism() if args.realism else None
+    if realism is not None:
+        print(f"[train] REALISM: {realism}")
     if args.no_aug:
         print("[train] ABLATION --no_aug: training on CLEAN patterns (no augmentation)")
     elif args.no_shift_aug:
@@ -109,10 +115,10 @@ def main() -> int:
                   f"{train_sampler.n_family_structs:,} structs, {len(train_sampler):,} batches/epoch")
             train_loader, _ = build_loader(store, train_refs, args.batch_size, train_augment,
                                            args.workers, ranges=train_ranges,
-                                           batch_sampler=train_sampler)
+                                           batch_sampler=train_sampler, realism=realism)
         else:
             train_loader, _ = build_loader(store, train_refs, args.batch_size, train_augment,
-                                           args.workers, ranges=train_ranges)
+                                           args.workers, ranges=train_ranges, realism=realism)
         val_loader, _ = build_loader(store, val_refs, min(args.batch_size, len(val_refs)),
                                      False, args.workers, shuffle=False)
         print(f"[train] {len(train_refs):,} train / {len(val_refs):,} val on {device}")

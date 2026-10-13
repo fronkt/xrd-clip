@@ -92,12 +92,13 @@ class ContrastiveXRDDataset(Dataset):
     """Yields (pattern, structure_feats, index) triples. Index is the contrastive label."""
 
     def __init__(self, store: StickStore, refcodes: "list[str]", augment: bool = True,
-                 ranges: A.Ranges = A.Ranges(), seed: int = 0):
+                 ranges: A.Ranges = A.Ranges(), seed: int = 0, realism: "A.Realism | None" = None):
         self.store = store
         self.refcodes = [rc for rc in refcodes if rc in store.records]
         self.augment = augment
         self.ranges = ranges
         self.seed = seed
+        self.realism = realism          # R4c: measured effects + the queries' background removal
         self._feat_cache: dict[str, np.ndarray] = {}
 
     def __len__(self) -> int:
@@ -114,7 +115,14 @@ class ContrastiveXRDDataset(Dataset):
         )
 
         p = A.sample_params(rng, self.ranges) if self.augment else A.CLEAN
-        y = A.render_sticks(rec, p, rng=rng)
+        if self.augment and self.realism is not None:
+            from xrdclip.eval.real_patterns import preprocess
+            y = A.render_sticks(A.realism_sticks(rec, rng, self.realism), p, rng=rng)
+            m = A.realism_mask(rng, self.realism)
+            # the exact preprocessing of the measured queries (rolling-minimum background removal, range mask)
+            y = preprocess(np.where(m, y, 0).astype(np.float32), m, bkg=True)
+        else:
+            y = A.render_sticks(rec, p, rng=rng)
         y = A.standardize(y)
 
         if rc not in self._feat_cache:
