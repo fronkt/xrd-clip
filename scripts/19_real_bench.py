@@ -35,7 +35,8 @@ import time
 import numpy as np
 
 DATA = "C:/Users/frank/xrd-clip-data"
-STICK_DIRS = ("cache/sticks", "cache/sticks_extra")
+# XRD_STICK_DIRS (comma-separated) swaps the library, e.g. cod/sticks for the open COD stand-in (R5)
+STICK_DIRS = tuple(os.environ.get("XRD_STICK_DIRS", "cache/sticks,cache/sticks_extra").split(","))
 RENDER_FIELDS = ("two_theta", "intensity", "hkl", "d_hkl", "recip")
 EMBED_FIELDS = ("atom_z", "atom_frac", "cell", "n_atoms")
 SPECS = {"cos_zs": dict(l_deg=0.0), "wcc_1": dict(l_deg=1.0), "wcc_2": dict(l_deg=2.0), "lnq": dict(lnq=True)}

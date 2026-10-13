@@ -42,6 +42,7 @@ KA2_RATIO = 0.5
 CONFIGS = {
     "v1":        dict(lnq=1, B=False, lp=False, ka2=False, mask=False, keys=KEYS),
     "r1":        dict(lnq=2, B=False, lp=False, ka2=False, mask=False, keys=("lnq_bkg",)),
+    "main":      dict(lnq=2, B=False, lp=False, ka2=False, mask=False, keys=KEYS),   # revised primary (R5 replica)
     "r2":        dict(lnq=2, B=True,  lp=True,  ka2=True,  mask=True,  keys=KEYS),
     "r2_noB":    dict(lnq=2, B=False, lp=True,  ka2=True,  mask=True,  keys=KEYS),
     "r2_nolp":   dict(lnq=2, B=True,  lp=False, ka2=True,  mask=True,  keys=KEYS),

@@ -16,6 +16,8 @@
 # The *.cif rule does NOT catch CIFs embedded in a .gz, so the whole cache is blocked explicitly.
 /cache/
 /runs/
+# R5 open stand-in: COD CIFs, shards and simulated sticks (CC0, but large; released on Zenodo, not in git)
+/cod/
 # Block results/ wholesale, EXCEPT the headline metrics + figure: these are aggregate retrieval
 # numbers and a matplotlib line-plot only — no coordinates, no refcodes — so they are safe to track.
 /results/*

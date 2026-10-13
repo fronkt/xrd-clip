@@ -187,6 +187,14 @@ R5 open stand-in (Digital Discovery restricted-data clause)
 - [ ] same organic filter + simulator as the CSD corpus -> COD sticks
 - [ ] truth: per opXRD pattern, COD cell + element search, packing similarity (CCDC API, local) -> same-form
       sets; powder vs single-crystal from CIF tags
+      - [x] 2,631 candidate CIFs fetched (10-13); scripts/32 running
+      - Fixed 10-13 before any replica number: 18's "unknown = ignored" assumed family-built sets (all 134 CSD
+        unknowns share the stem); COD candidates include OTHER compounds that PackingSimilarity cannot compare
+        (partial: 273 of 281 unknowns have another formula). Rule (31 `truth`): candidate whose reduced non-H COD
+        sum formula matches none of the same-form entries' = ordinary library entry (an error when it ranks
+        above); same-formula non-comparable = unknown (ignored, as in 18). Compound labels for the bootstrap/
+        macro = the main benchmark's CSD stems (formula labels merge isomers: 114 vs 124 groups); COD-only ->
+        'cod:<id>'. Scored with 28 `--tag main` (ln q v2, other scores as v1, no R2 switches) + the model.
 - [ ] classical + model scores -> open-replica table; release COD IDs, simulated library, truth sets, ranks
 - Prediction: same ordering (classical >> model); absolute numbers differ.
 

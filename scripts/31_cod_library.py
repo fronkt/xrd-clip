@@ -6,8 +6,11 @@ arXiv:2503.05577), so COD (CC0) can host the whole benchmark: the same queries a
 
   meta    COD metadata of every carbon-containing entry (REST CSV, volume bins)   -> <data>/cod/meta/*.csv
   select  corpus filter mirroring the CSD corpus (stage 1) -> <data>/cod/library_ids.txt (+ filter counts)
-The rest of the pipeline (CIF download, simulation, truth, scoring) is in the functions below this header's
-commands, added as they are built.
+  cands / fetch_cifs   candidate COD entries per opXRD pattern and their CIFs (for scripts/32's truth)
+  paths / shards       (box) rsync list, then CIFs -> stage-1 records for the unchanged stick simulator
+  truth                scripts/32's same-form sets -> 19's truth schema (<data>/cod/opxrd_truth_cod.json)
+Scoring: XRD_STICK_DIRS=cod/sticks python scripts/28_rescore.py score|eval --tag main --work cache/real_bench_cod
+  --truth <data>/cod/opxrd_truth_cod.json --base ""   (model column: library embeddings in the same --work)
 """
 from __future__ import annotations
 
@@ -291,16 +294,77 @@ def cmd_shards(args) -> int:
     return 0
 
 
+# ------------------------------------------------------------------------------------------------
+# local: scripts/32's COD truth -> 19's truth schema (refcode = COD id), so 19/28 score the replica unchanged
+# ------------------------------------------------------------------------------------------------
+def reduced_formula(counts: dict) -> str:
+    """Non-H element counts reduced by their gcd, e.g. {'C': 40, 'N': 8, 'O': 8} -> 'C5N1O1'."""
+    from functools import reduce
+    from math import gcd
+    n = {k: round(v) for k, v in counts.items() if k not in ("H", "D") and round(v) > 0}
+    g = reduce(gcd, n.values()) if n else 1
+    return "".join(f"{k}{n[k] // g}" for k in sorted(n))
+
+
+def cod_formula(s: str) -> str:
+    """COD sum formula ('- C20 H10 N4 O4 -') -> reduced non-H formula."""
+    counts: dict = {}
+    for el, k in re.findall(r"([A-Z][a-z]?)(\d*\.?\d*)", s or ""):
+        counts[el] = counts.get(el, 0) + (float(k) if k else 1.0)
+    return reduced_formula(counts)
+
+
+def cmd_truth(args) -> int:
+    """scripts/32 output -> 19's schema. Two adaptations, both because COD has no refcode families:
+    * scripts/18 builds each query's sets from the CSD family of its compound, so its 'unknown' entries are all
+      the same compound (134/134 share the stem). COD candidates come from an element + cell search and include
+      other compounds, which PackingSimilarity (molecular differences not allowed) cannot compare. A candidate whose
+      reduced non-H COD sum formula matches none of the same-form entries' is another compound: it stays an
+      ordinary library entry (counted when it ranks above the truth). Same-formula entries with no comparison stay
+      unknown, as in 18. (The opXRD basis is no formula source: its P1 expansion over-counts some sites, e.g.
+      pattern_98 C9ClN vs COD C3ClN.)
+    * Compound labels (the compound bootstrap and macro weights) are the main benchmark's CSD stems, so the replica
+      weights compounds exactly as the main table does (formula labels merge isomers: 114 vs 124 groups). They are
+      plain strings in the released file; patterns identified only in COD get 'cod:<smallest same-form id>'."""
+    cod = json.load(open(os.path.join(DATA, "cod_truth.json")))
+    csd = {t["id"]: t for t in json.load(open(args.csd_truth))}
+    out, n_cod_only, moved, kept_unk = [], 0, 0, 0
+    rc = lambda xs: [{**{k: v for k, v in x.items() if k != "cod_id"}, "refcode": x["cod_id"]} for x in xs]
+    for t in cod:
+        same = t["same_form"]
+        stems = csd.get(t["id"], {}).get("true_stems") or []
+        if same and not stems:
+            stems, n_cod_only = [f"cod:{min(x['cod_id'] for x in same)}"], n_cod_only + 1
+        fr = sorted({cod_formula(x["formula"]) for x in same})
+        unk = [x for x in t["unknown"] if cod_formula(x["formula"]) in fr]
+        moved += len(t["unknown"]) - len(unk)
+        kept_unk += len(unk)
+        out.append({"id": t["id"], "h_omitted": t["h_omitted"], "wavelength": t["wavelength"], "formulas": fr,
+                    "n_candidates": t["n_candidates"], "anchor_tier": t["anchor_tier"], "anchors": t["anchors"],
+                    "true_stems": stems if same else [], "same_form": rc(same), "other_form": rc(t["other_form"]),
+                    "unknown": rc(unk), "n_other_compound": len(t["unknown"]) - len(unk)})
+    path = os.path.join(DATA, "opxrd_truth_cod.json")
+    with open(path, "w") as fh:
+        json.dump(out, fh, indent=1)
+    both = sum(1 for t in out if t["true_stems"] and csd.get(t["id"], {}).get("true_stems"))
+    print(f"[truth] {sum(1 for t in out if t['true_stems'])} of {len(out)} patterns identified in COD "
+          f"({both} also in the CSD, {n_cod_only} COD only); unknown: {moved} other-compound candidates returned "
+          f"to the library, {kept_unk} same-formula kept; same-form sets with > 1 formula: "
+          f"{[t['id'] for t in out if len(t['formulas']) > 1]} -> {path}")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=("meta", "select", "cands", "fetch_cifs", "paths", "shards"))
+    ap.add_argument("cmd", choices=("meta", "select", "cands", "fetch_cifs", "paths", "shards", "truth"))
+    ap.add_argument("--csd_truth", default="C:/Users/frank/xrd-clip-data/opxrd/opxrd_truth.json")
     ap.add_argument("--meta", default="cod/library_meta.json")
     ap.add_argument("--cif_root", default="cod/cif")
     ap.add_argument("--out", default="cod/shards")
     ap.add_argument("--n_shards", type=int, default=6)
     args = ap.parse_args()
     return {"meta": cmd_meta, "select": cmd_select, "cands": cmd_cands, "fetch_cifs": cmd_fetch_cifs,
-            "paths": cmd_paths, "shards": cmd_shards}[args.cmd](args)
+            "paths": cmd_paths, "shards": cmd_shards, "truth": cmd_truth}[args.cmd](args)
 
 
 if __name__ == "__main__":
