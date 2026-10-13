@@ -49,7 +49,7 @@ python scripts/29_critic2_rerank.py run --procs "$C2" > logs/c2_run.log 2>&1
 echo "EXIT $?" >> logs/c2_run.log
 wait
 echo "[box] all workers done $(date -u +%FT%TZ)"
-tar -cf /workspace/out.tar logs cache/critic2/diffs.jsonl $(ls cache/critic2/*/expt-bg.peaks 2>/dev/null)
+tar -cf /workspace/out.tar logs cache/critic2/diffs.jsonl $(ls cache/critic2/*/fit.peaks 2>/dev/null)
 md5sum /workspace/out.tar > /workspace/out.tar.md5
 touch /workspace/RUN_DONE
 echo "[box] RUN_DONE $(du -h /workspace/out.tar | cut -f1)"

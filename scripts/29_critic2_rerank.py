@@ -45,14 +45,24 @@ CIF_SOURCES = [f"cache/csd/shard_{i:03d}.jsonl.gz" for i in range(6)] + ["cache/
 D_MIN = 1.54056 / (2 * np.sin(np.radians(25.0)))     # Cu K-alpha1 2theta 50 deg
 D_MAX = 1.54056 / (2 * np.sin(np.radians(2.5)))      # Cu K-alpha1 2theta 5 deg
 DIFF_RE = re.compile(r"DIFF\s*=\s*([-+0-9.eE]+)")
+# critic2 1.4.155 names the fitted peak list after the .cri input (fit.cri -> fit.peaks), on Linux and Windows
+# alike (checked 10-13: box B's run found 0 comparisons because the code looked for expt-bg.peaks)
+PEAKS = "fit.peaks"
 
 
 def critic2(cri_path: str, cwd: str, timeout: int = 3600) -> str:
     """Run critic2 on an input file (single-threaded); returns the output text."""
     out = cri_path[:-4] + ".cro"
     env = {**os.environ, "OMP_NUM_THREADS": "1"}
-    subprocess.run([CRITIC2, os.path.basename(cri_path), os.path.basename(out)], cwd=cwd, env=env,
-                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=timeout, check=False)
+    proc = subprocess.Popen([CRITIC2, os.path.basename(cri_path), os.path.basename(out)], cwd=cwd, env=env,
+                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    bench.unthrottle(proc.pid)        # local Windows runs: keep the windowless child off the E-cores only
+    try:
+        proc.wait(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        proc.wait()
+        raise
     p = os.path.join(cwd, os.path.basename(out))
     return open(p, encoding="utf-8", errors="replace").read() if os.path.exists(p) else ""
 
@@ -110,16 +120,19 @@ def cmd_prep(args) -> int:
 
 
 def cmd_fit(args) -> int:
-    """critic2 background + peak fit, one per pattern (named after the input file: expt-bg.peaks)."""
+    """critic2 background + peak fit, one per pattern (-> fit.peaks)."""
     plan = json.load(open(os.path.join(ROOT, "plan.json")))
 
     def fit(pid):
         d = os.path.join(ROOT, pid)
-        if os.path.exists(os.path.join(d, "expt-bg.peaks")):
+        if os.path.exists(os.path.join(d, PEAKS)):
             return pid, "cached"
         with open(os.path.join(d, "fit.cri"), "w") as fh:
             fh.write("xrpd background expt.xy expt-bg.xy\nxrpd fit expt-bg.xy\n")
-        txt = critic2(os.path.join(d, "fit.cri"), d)
+        try:
+            txt = critic2(os.path.join(d, "fit.cri"), d, timeout=args.fit_timeout)
+        except subprocess.TimeoutExpired:      # one slow fit must not take the pool down (box B, 10-13)
+            return pid, f"TIMEOUT after {args.fit_timeout} s"
         m = re.search(r"RMS of the fit \(final\)\s*=\s*([0-9.eE+-]+)", txt)
         return pid, m.group(1) if m else "FAILED"
     with ThreadPoolExecutor(args.procs) as ex:
@@ -137,7 +150,7 @@ def cmd_run(args) -> int:
             r = json.loads(line)
             done.add((r["pid"], r["cand"]))
     jobs = [(pid, c) for pid, p in plan.items() for c in p["shortlist"][:args.k] if (pid, c) not in done
-            and os.path.exists(os.path.join(ROOT, pid, "expt-bg.peaks"))]
+            and os.path.exists(os.path.join(ROOT, pid, PEAKS))]
     print(f"[run] {len(jobs)} comparisons to run ({len(done)} done) on {args.procs} processes", flush=True)
 
     def one(job):
@@ -146,7 +159,7 @@ def cmd_run(args) -> int:
         tag = f"cmp_{cand}"
         cif = os.path.relpath(os.path.join(ROOT, "cif", cand + ".cif"), d).replace("\\", "/")
         with open(os.path.join(d, tag + ".cri"), "w") as fh:
-            fh.write(f"comparevc {cif} expt-bg.peaks global quick alpha 1 lambda {plan[pid]['wavelength']:.6f}\n")
+            fh.write(f"comparevc {cif} {PEAKS} global quick alpha 1 lambda {plan[pid]['wavelength']:.6f}\n")
         t0 = time.time()
         try:
             txt = critic2(os.path.join(d, tag + ".cri"), d, timeout=args.timeout)
@@ -231,7 +244,8 @@ def main() -> int:
     # ln q v2's single-crystal recall is the same at 50 and 100 (0.61); disclosed in the paper
     ap.add_argument("--k", type=int, default=50)
     ap.add_argument("--procs", type=int, default=6)
-    ap.add_argument("--timeout", type=int, default=3600)
+    ap.add_argument("--timeout", type=int, default=3600, help="per comparison (s); a timeout counts as DIFF = 1")
+    ap.add_argument("--fit_timeout", type=int, default=3600, help="per peak fit (s)")
     ap.add_argument("--out", default="results/critic2_rerank.json")
     args = ap.parse_args()
     return {"prep": cmd_prep, "fit": cmd_fit, "run": cmd_run, "eval": cmd_eval}[args.cmd](args)

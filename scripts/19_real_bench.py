@@ -51,8 +51,8 @@ K_HYBRID = (100, 1000)
 # ------------------------------------------------------------------------------------------------
 # helpers
 # ------------------------------------------------------------------------------------------------
-def unthrottle() -> None:
-    """Windows parks windowless background processes on the E-cores; opt this process out."""
+def unthrottle(pid: "int | None" = None) -> None:
+    """Windows parks windowless background processes on the E-cores; opt this process (or child `pid`) out."""
     if os.name != "nt":
         return
 
@@ -61,9 +61,15 @@ def unthrottle() -> None:
 
     k32 = ctypes.WinDLL("kernel32", use_last_error=True)
     k32.GetCurrentProcess.restype = ctypes.c_void_p
+    k32.OpenProcess.restype = ctypes.c_void_p
+    k32.CloseHandle.argtypes = [ctypes.c_void_p]
     k32.SetProcessInformation.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_ulong]
     state = _State(1, 1, 0)       # PROCESS_POWER_THROTTLING_EXECUTION_SPEED off
-    k32.SetProcessInformation(k32.GetCurrentProcess(), 4, ctypes.byref(state), ctypes.sizeof(state))
+    h = k32.GetCurrentProcess() if pid is None else k32.OpenProcess(0x0600, False, pid)   # QUERY|SET_INFORMATION
+    if h:
+        k32.SetProcessInformation(h, 4, ctypes.byref(state), ctypes.sizeof(state))
+        if pid is not None:
+            k32.CloseHandle(h)
 
 
 def save_npz(path: str, **arrays) -> None:
