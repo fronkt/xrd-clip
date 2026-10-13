@@ -199,6 +199,25 @@ R5 open stand-in (Digital Discovery restricted-data clause)
 - Prediction: same ordering (classical >> model); absolute numbers differ.
 
 B. Box session (manual mode, one CSD-derived upload): R4c training; ln q CSLS rescore; R2 ablations if not done.
+   Bundles cache/box_rev/rev_A.tar (md5 c72e83e9...) + rev_B.tar (md5 4972cdac...); A = rev_gpu_box.sh,
+   B = rev_cpu_box.sh then cod_box.sh. After the pull (all local, PYTHONPATH=src):
+   - [ ] A out.tar -> logs, results/sbv2_*.json, runs/xrdclip_realism, cache/real_bench_realism,
+         cache/real_bench/full_lnq2, cache/real_bench/rescore_r2_*/ranks.npz; touch PULLED; destroy A
+   - [ ] sweep merge: sbv2_w*.json -> results/strong_baselines_v2.json (+ ranks); v1 column must equal the old
+         sweep's ln q only where seeds agree (crc32 now; old = salted hash, irreproducible - disclosed)
+   - [ ] CSLS ln q v2: mkdir cache/real_bench_lnq2; copy hub_ctx.npz + ranks.npz; full_lnq2 -> full;
+         LNQ_VERSION=2 python scripts/21_hubness.py eval --work cache/real_bench_lnq2 --emb_dir cache/real_bench
+         --out results/real_bench_hub_lnq2.json --table results/real_bench_hub_lnq2_table.md
+         CHECK: its none|*|lnq_bkg top-1 == rescore_r1 (same v2 scores, GPU vs CPU torch)
+   - [ ] R2 ablations: results/rescore_r2_no*.json; 22 computes paired diffs vs r2
+   - [ ] R4c: 30 pemb + eval with --ckpt runs/xrdclip_realism/best.pt --emb_dir cache/real_bench_realism
+         -> results/model_gap_realism.json; check train.log best epoch / clean val vs the original run
+   - [ ] B out.tar -> cache/critic2/diffs.jsonl; python scripts/29_critic2_rerank.py eval -> results/critic2_rerank.json
+   - [ ] B cod_out.tar -> cod/sticks; touch PULLED + COD_PULLED; destroy B
+   - [ ] R5: 31 truth; 19's _embed_shard over shard_table (orig ckpt; the rev_gpu_box.sh snippet) with
+         XRD_STICK_DIRS=cod/sticks into cache/real_bench_cod; XRD_STICK_DIRS=cod/sticks
+         28 score + eval --tag main --work cache/real_bench_cod --truth <data>/cod/opxrd_truth_cod.json --base ""
+         --out results/rescore_main_cod.json
 C. Paper: paper_numbers.json -> manuscript/ESI/figs -> verify_claims -> internal referee pass -> build -> check-in.
 After C (not R1-R5): R6 decisions, Zenodo deposit (code + open data; DD's data reviewer needs a DOI), cover
 letter, TOC graphic (at revision), Frank submits.
