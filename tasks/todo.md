@@ -187,7 +187,11 @@ R5 open stand-in (Digital Discovery restricted-data clause)
 - [ ] same organic filter + simulator as the CSD corpus -> COD sticks
 - [ ] truth: per opXRD pattern, COD cell + element search, packing similarity (CCDC API, local) -> same-form
       sets; powder vs single-crystal from CIF tags
-      - [x] 2,631 candidate CIFs fetched (10-13); scripts/32 running
+      - [x] 2,631 candidate CIFs fetched (10-13); scripts/32 done (1,312 s) -> 31 truth: 191/196 identified
+        (all 189 CSD-identified + pattern_53, pattern_466 COD only); anchors strict 187, lenient 4, none 5;
+        own powder entry reproduced (rmsd < 0.05) 170; single-crystal same-form 35 patterns (CSD 59);
+        other_form 17 (CSD 315: COD polymorphs fall outside the 5 % cell search and stay library entries);
+        2,670 other-compound candidates back in the library, 23 same-formula unknowns ignored
       - Fixed 10-13 before any replica number: 18's "unknown = ignored" assumed family-built sets (all 134 CSD
         unknowns share the stem); COD candidates include OTHER compounds that PackingSimilarity cannot compare
         (partial: 273 of 281 unknowns have another formula). Rule (31 `truth`): candidate whose reduced non-H COD
@@ -203,8 +207,9 @@ B. Box session (manual mode, one CSD-derived upload): R4c training; ln q CSLS re
    B = rev_cpu_box.sh then cod_box.sh. After the pull (all local, PYTHONPATH=src):
    - [ ] A out.tar -> logs, results/sbv2_*.json, runs/xrdclip_realism, cache/real_bench_realism,
          cache/real_bench/full_lnq2, cache/real_bench/rescore_r2_*/ranks.npz; touch PULLED; destroy A
-   - [ ] sweep merge: sbv2_w*.json -> results/strong_baselines_v2.json (+ ranks); v1 column must equal the old
-         sweep's ln q only where seeds agree (crc32 now; old = salted hash, irreproducible - disclosed)
+   - [ ] sweep merge: G0_STEM=results/strong_baselines_v2 python scripts/13_g0_report.py results/sbv2_w*.json
+         (-> _v2.json/_ranks.npz/.png + g0_table_v2.md; v1 files untouched). Draws differ from v1 (crc32 seeds;
+         v1 used salted hash, irreproducible - disclosed), so compare v2 to its own lnq_v1 column, not to v1
    - [ ] CSLS ln q v2: mkdir cache/real_bench_lnq2; copy hub_ctx.npz + ranks.npz; full_lnq2 -> full;
          LNQ_VERSION=2 python scripts/21_hubness.py eval --work cache/real_bench_lnq2 --emb_dir cache/real_bench
          --out results/real_bench_hub_lnq2.json --table results/real_bench_hub_lnq2_table.md
