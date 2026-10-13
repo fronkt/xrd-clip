@@ -103,7 +103,8 @@ def revision(stems: np.ndarray) -> dict:
                                                                      "groups") if k in r})
     rev = {"r1_real": slim(load("results/rescore_r1.json")), "r2": slim(load("results/rescore_r2.json")),
            "r2_ablations": {}, "r3_critic2": rnd(load("results/critic2_rerank.json")),
-           "r4_gap": rnd(load("results/model_gap.json")), "r5_cod": slim(load("results/rescore_main_cod.json"))}
+           "r4_gap": rnd(load("results/model_gap.json")), "r4c_realism": rnd(load("results/model_gap_realism.json")),
+           "r5_cod": slim(load("results/rescore_main_cod.json"))}
     full = "cache/real_bench/rescore_r2/ranks.npz"
     for tag in ("r2_noB", "r2_nolp", "r2_noka2", "r2_nomask"):
         res, rk = load(f"results/rescore_{tag}.json"), f"cache/real_bench/rescore_{tag}/ranks.npz"

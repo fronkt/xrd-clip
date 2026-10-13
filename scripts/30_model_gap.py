@@ -20,6 +20,9 @@ pattern-to-pattern in the learned space (no structure encoder).
   PYTHONPATH=src python scripts/30_model_gap.py render     # clean library -> cache/real_bench/lib_clean_f16.npy
   PYTHONPATH=src python scripts/30_model_gap.py pemb       # pattern embeddings of the library
   PYTHONPATH=src python scripts/30_model_gap.py eval       # -> results/model_gap.json
+R4c (retrained with --realism; structure embeddings from box A in cache/real_bench_realism):
+  ... pemb --ckpt runs/xrdclip_realism/best.pt --emb_dir cache/real_bench_realism
+  ... eval --ckpt runs/xrdclip_realism/best.pt --emb_dir cache/real_bench_realism --out results/model_gap_realism.json
 """
 from __future__ import annotations
 
@@ -39,8 +42,8 @@ pn = import_module("22_paper_numbers")
 rs = import_module("28_rescore")
 
 WORK = "cache/real_bench"
-LIB = os.path.join(WORK, "lib_clean_f16.npy")
-PEMB = os.path.join(WORK, "lib_pattern_emb.npy")
+LIB = os.path.join(WORK, "lib_clean_f16.npy")      # shared; the embeddings follow --emb_dir (R4c: retrained model)
+PEMB = "lib_pattern_emb.npy"
 EFFECTS = ("mask", "width", "ka2", "bkg", "noise", "zero")
 # Follow-up rungs (added after the first ladder, 10-12): on top of "all", an overall Debye-Waller factor
 # (B = 4.45 A^2, results/r2_bvalue.json) or log-normal per-reflection intensity jitter. They test whether the
@@ -99,7 +102,8 @@ def encode(model, x: np.ndarray, batch: int = 256):
 def cmd_pemb(args) -> int:
     lib = np.load(LIB, mmap_mode="r")
     model = load_model(args)
-    out = np.lib.format.open_memmap(PEMB + ".tmp.npy", mode="w+", dtype=np.float32, shape=(lib.shape[0], 256))
+    path = os.path.join(args.emb_dir, PEMB)
+    out = np.lib.format.open_memmap(path + ".tmp.npy", mode="w+", dtype=np.float32, shape=(lib.shape[0], 256))
     t0 = time.time()
     step = 8192
     for i in range(0, lib.shape[0], step):
@@ -107,7 +111,7 @@ def cmd_pemb(args) -> int:
         print(f"[pemb] {min(i + step, lib.shape[0]):,}/{lib.shape[0]:,} {(time.time() - t0) / 60:.1f} min", flush=True)
     out.flush()
     del out
-    os.replace(PEMB + ".tmp.npy", PEMB)
+    os.replace(path + ".tmp.npy", path)
     return 0
 
 
@@ -242,9 +246,10 @@ def cmd_eval(args) -> int:
         X[f"own_{name}"] = np.stack([variant(recs[qi], eff, ests[qi], rng, **kw) for qi in range(nq)])
 
     model = load_model(args)
-    lib_emb = torch.from_numpy(np.concatenate([np.load(os.path.join(WORK, f"emb_{os.path.basename(os.path.dirname(p))}_"
+    lib_emb = torch.from_numpy(np.concatenate([np.load(os.path.join(args.emb_dir, f"emb_{os.path.basename(os.path.dirname(p))}_"
                                                                           f"{os.path.basename(p)[:-4]}_{n}.npy")) for p, n, _ in shards]).astype(np.float32))
-    pemb = torch.from_numpy(np.load(PEMB, mmap_mode="r")[:]) if os.path.exists(PEMB) else None
+    pp_path = os.path.join(args.emb_dir, PEMB)
+    pemb = torch.from_numpy(np.load(pp_path, mmap_mode="r")[:]) if os.path.exists(pp_path) else None
     lib = np.load(LIB, mmap_mode="r") if os.path.exists(LIB) else None
     sets = {td: [(np.array([gidx[rc] for rc in q["sets"][td][0]], dtype=np.int64),
                   np.array([gidx[rc] for rc in q["sets"][td][1]], dtype=np.int64)) for q in qinfo] for td in ("std", "sc")}
@@ -298,6 +303,8 @@ def main() -> int:
     ap.add_argument("--truth", default=f"{bench.DATA}/opxrd/opxrd_truth.json")
     ap.add_argument("--patterns", default=f"{bench.DATA}/opxrd/opxrd_cnrs_organic.json")
     ap.add_argument("--ckpt", default="runs/xrdclip_poly/best.pt")
+    ap.add_argument("--emb_dir", default=WORK, help="structure + library pattern embeddings of --ckpt "
+                                                     "(R4c: cache/real_bench_realism)")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--threads", type=int, default=4)
     ap.add_argument("--out", default="results/model_gap.json")
