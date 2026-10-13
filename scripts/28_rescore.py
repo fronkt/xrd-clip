@@ -230,8 +230,8 @@ def pearson_scores(qt, M, r: np.ndarray):
     import torch
     from xrdclip.eval import wcc_torch as WT
     if M is None:
-        return WT.pearson(qt, torch.from_numpy(WT.standardize_rows(r)))
-    rt = torch.from_numpy(r)
+        return WT.pearson(qt, torch.from_numpy(WT.standardize_rows(r)).to(qt.device))
+    rt = torch.from_numpy(r).to(qt.device)
     num = qt @ rt.T
     s1, s2 = M @ rt.T, M @ (rt * rt).T
     var = torch.clamp(s2 - s1 * s1 / M.sum(1, keepdim=True), min=1e-12)
@@ -244,7 +244,7 @@ def wcc_scores(sc, rows, r: np.ndarray, M):
     from xrdclip.eval import wcc_torch as WT
     if M is None:
         return sc.scores(rows, sc.prep_refs(r, already_lnq=sc.lnq))
-    t = torch.from_numpy((r - r.min(axis=1, keepdims=True)).astype(np.float32))
+    t = torch.from_numpy((r - r.min(axis=1, keepdims=True)).astype(np.float32)).to(sc.device)
     S_, n = sc.s_pts, t.shape[1]
     rw = WT._smooth(t, sc.w, S_)
     ar = torch.clamp(M @ (t * rw[:, S_:S_ + n]).T, min=1e-12)                 # (rows, refs)
@@ -270,6 +270,7 @@ def cmd_score(args) -> int:
     cfg = CONFIGS[args.tag]
     WT.full_precision()
     bench.unthrottle()
+    dev = args.device if args.device != "auto" else ("cuda" if torch.cuda.is_available() else "cpu")
     torch.set_num_threads(args.threads)
     pool = Pool(args.workers, initializer=bench._init_worker, initargs=({},))
     shards = bench.shard_table(args.limit)
@@ -291,16 +292,17 @@ def cmd_score(args) -> int:
     for key in keys:
         m = key.rsplit("_", 1)[0]
         if m == "pearson":
-            rows[key], Mx[key] = pearson_rows(raw, masks if use_mask else None)
+            qt, M = pearson_rows(raw, masks if use_mask else None)
+            rows[key], Mx[key] = qt.to(dev), (None if M is None else M.to(dev))
             continue
         spec = dict(bench.SPECS[m])
         if m == "lnq":
             spec["version"] = cfg["lnq"]
-        scorers[key] = WT.TorchWCC(**spec)
+        scorers[key] = WT.TorchWCC(**spec, device=dev)
         rows[key] = scorers[key].prep_rows(raw)
         if use_mask:
             mm = np.stack([lnq_mask(x) for x in masks]) if m == "lnq" else masks
-            Mx[key] = torch.from_numpy(mm.astype(np.float32))
+            Mx[key] = torch.from_numpy(mm.astype(np.float32)).to(dev)
         else:
             Mx[key] = None
     need_lnq = "lnq_bkg" in keys
@@ -335,17 +337,17 @@ def cmd_score(args) -> int:
                 if m == "pearson":
                     s = pearson_scores(rows[key], Mx[key], lib["k1"])
                     for g, idx in groups.items():
-                        ti = torch.from_numpy(idx)
+                        ti = torch.from_numpy(idx).to(dev)
                         s2 = pearson_scores(rows[key][ti], None if Mx[key] is None else Mx[key][ti], lib[g])
                         s[ti] = torch.maximum(s[ti], s2)
                 else:
                     sc = scorers[key]
                     s = wcc_scores(sc, rows[key], lib["k1"], Mx[key])
                     for g, idx in groups.items():
-                        ti = torch.from_numpy(idx)
+                        ti = torch.from_numpy(idx).to(dev)
                         s2 = wcc_scores(sc, sub_rows(rows[key], ti), lib[g], None if Mx[key] is None else Mx[key][ti])
                         s[ti] = torch.maximum(s[ti], s2)
-                S[key][:, g0:g0 + C] = s.numpy()
+                S[key][:, g0:g0 + C] = s.cpu().numpy()
             for a in S.values():
                 a.flush()
             with open(done_path, "a") as fh:
@@ -429,10 +431,12 @@ def cmd_eval(args) -> int:
         S_cls[key] = np.load(os.path.join(out, f"S_{key}.npy"), mmap_mode="r")
         for td, r in ranks_from_scores(S_cls[key], sets, nq).items():
             ranks[f"{td}|{key}"] = r
-    s_model = model_scores(args, shards, raw)
-    for td, r in ranks_from_scores(s_model, sets, nq).items():
-        ranks[f"{td}|model_bkg"] = r
-    for key in cfg["keys"]:
+    keys_h = [] if args.no_model else cfg["keys"]
+    if not args.no_model:
+        s_model = model_scores(args, shards, raw)
+        for td, r in ranks_from_scores(s_model, sets, nq).items():
+            ranks[f"{td}|model_bkg"] = r
+    for key in keys_h:
         for K in bench.K_HYBRID:
             for td in ("std", "sc"):
                 ranks[f"{td}|model@{K}->{key}"] = np.array(
@@ -497,6 +501,8 @@ def main() -> int:
     ap.add_argument("--n", type=int, default=5000, help="bvalue: entries to sample")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--device", default="cpu", help="cpu | cuda | auto (score)")
+    ap.add_argument("--no_model", action="store_true", help="eval: classical keys only (rented box: no checkpoint)")
     args = ap.parse_args()
     return {"bvalue": cmd_bvalue, "score": cmd_score, "eval": cmd_eval}[args.cmd](args)
 

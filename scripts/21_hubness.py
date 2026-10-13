@@ -55,6 +55,7 @@ CORRECTIONS = (["none", PRIMARY, "csls_sim_k10"]
                + [f"csls_{ps}_k{k}" for ps in PROBE_SETS for k in KS if k != 10]
                + [f"znorm_{ps}" for ps in PROBE_SETS] + [f"mp_{ps}" for ps in PROBE_SETS])
 DATA = bench.DATA
+LNQ_VERSION = int(os.environ.get("LNQ_VERSION", "1"))    # 2 = R1 fix (tasks/todo.md Step 3); env so render workers see it
 
 
 def library_refcodes(shards) -> "list[str]":
@@ -189,7 +190,7 @@ def _render_job(job):
     from xrdclip.eval import wcc_torch as WT
     cid, path, lo, hi, g0 = job
     raw = bench.render(bench.load_records(path, lo, hi, bench.RENDER_FIELDS))
-    return cid, g0, raw, WT.standardize_rows(raw), np.stack([SB._to_lnq(y) for y in raw]).astype(np.float32)
+    return cid, g0, raw, WT.standardize_rows(raw), np.stack([SB._to_lnq(y, 0.0, LNQ_VERSION) for y in raw]).astype(np.float32)
 
 
 def cmd_score(args) -> int:
@@ -221,7 +222,7 @@ def cmd_score(args) -> int:
     layout = {"pearson": {"pearson_raw": slice(0, nq), "pearson_bkg": slice(nq, 2 * nq)}}
     scorers = {}
     for m, spec in bench.SPECS.items():
-        scorers[m] = WT.TorchWCC(**spec, device=dev)
+        scorers[m] = WT.TorchWCC(**spec, device=dev, **({"version": LNQ_VERSION} if m == "lnq" else {}))
         vs = bench.VARIANTS[m]
         rows[m] = scorers[m].prep_rows(np.concatenate([Q[f"raw_{v}"] for v in vs] + [probes]))
         layout[m] = {f"{m}_{v}": slice(i * nq, (i + 1) * nq) for i, v in enumerate(vs)}

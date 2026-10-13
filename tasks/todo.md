@@ -145,8 +145,16 @@ R2 measured-aware library and comparison (one pre-declared package + one-off abl
 - Prediction: classical sc macro top-1 rises for every score; (b) helps the 68 non-Cu patterns most; (a) small;
   the classical-vs-model gap is unchanged in sign and size.
 
-R3 critic2 VC-xPWDF re-rank (the published variable-cell method)
-- [ ] critic2 on Windows (route from the research agent); validate on 5 own-entry + 5 wrong pairs; time each
+R3 critic2 VC-GPWDF re-rank (the published variable-cell method)
+- Method fixed 10-12 after the research + refute pass: critic2 1.4.155 (official Windows build, NLopt on) ships
+  VC-GPWDF (Otero-de-la-Roza, J. Appl. Cryst. 57, 1401, 2024), which supersedes VC-xPWDF (needs indexing; not
+  in 1.4 for experimental patterns). Pipeline as published: XRPD BACKGROUND (20 knots) -> XRPD FIT (defaults)
+  -> COMPAREVC cand.cif pattern.peaks GLOBAL QUICK ALPHA 1 (the paper's alpha; code default 0.5) LAMBDA =
+  measurement wavelength. No zero-offset correction (none in COMPAREVC; the paper used none). One added
+  step: each measured pattern is cut to the benchmark's d-spacing window (Cu K-alpha1 5-50 deg, d = 1.82-17.7 A),
+  which every other score sees too (first test: synchrotron naphthalene fit RMS 1644 -> 29 after the cut).
+- [x] critic2 on Windows: release 1.4 zip, SHA256 OK, features line lists NLopt
+- [ ] validate on own-entry + wrong pairs; time each
 - [ ] shortlist = top-100 of fixed ln q for the 59 sc patterns (truth outside the shortlist = miss; report
       recall@100); critic2 score for each (pattern, candidate) locally; re-rank
 - Prediction: lifts the > 1 % cell-mismatch group (ln q 0.08) but is capped by recall@100; may promote sibling

@@ -29,6 +29,7 @@ import argparse
 import json
 import os
 import time
+import zlib
 from dataclasses import replace
 
 import numpy as np
@@ -122,6 +123,8 @@ def main() -> int:
     ap.add_argument("--max_families", type=int, default=0)
     ap.add_argument("--only", default="", help="comma-separated condition-name prefixes to run")
     ap.add_argument("--no_vc", action="store_true", help="skip B3 (the slow one)")
+    ap.add_argument("--lnq_version", type=int, default=1, help="2 = R1 fix (offset grid with 0, bin-averaged ln q)")
+    ap.add_argument("--seed_mode", choices=("crc32", "hash"), default="crc32")
     args = ap.parse_args()
 
     from xrdclip.data.dataset import StickStore
@@ -163,6 +166,8 @@ def main() -> int:
         conds = {k: v for k, v in conds.items() if k.startswith(pref)}
 
     methods = ["model", "pearson", "peak_list", "pearson_zs", "wcc_0.5", "wcc_1", "wcc_2", "lnq"]
+    if args.lnq_version == 2:
+        methods.append("lnq_v1")          # the draft-v1 ln q on the same draws, for the R1 comparison
     if not args.no_vc:
         methods.append("vc")
     results = {"n_families": len(stems), "n_queries": int(len(fam_idx)),
@@ -176,7 +181,10 @@ def main() -> int:
 
     for cname, pfn in conds.items():
         t0 = time.time()
-        rng = np.random.default_rng(abs(hash(cname)) % (2**32))
+        # zlib.crc32, not hash(): str hashes are salted per process, so the 10-10 run's draws cannot be
+        # reproduced (found 10-12). --seed_mode hash keeps that behaviour for reference.
+        seed = zlib.crc32(cname.encode()) if args.seed_mode == "crc32" else abs(hash(cname)) % (2**32)
+        rng = np.random.default_rng(seed)
         q_raw = {s: np.stack([A.render_sticks(r, pfn(r, rng), rng=rng) for r in recs[s]]) for s in stems}
         ranks = {m: [] for m in methods}
         secs = {m: 0.0 for m in methods}
@@ -196,7 +204,9 @@ def main() -> int:
             ranks["pearson_zs"].append(rank_within(timed("pearson_zs", lambda: SB.wcc_scores(q, ref_raw[s], l_deg=0.0))))
             for l in (0.5, 1, 2):
                 ranks[f"wcc_{l}"].append(rank_within(timed(f"wcc_{l}", lambda: SB.wcc_scores(q, ref_raw[s], l_deg=l))))
-            ranks["lnq"].append(rank_within(timed("lnq", lambda: SB.lnq_wcc_scores(q, ref_raw[s]))))
+            ranks["lnq"].append(rank_within(timed("lnq", lambda: SB.lnq_wcc_scores(q, ref_raw[s], version=args.lnq_version))))
+            if "lnq_v1" in methods:
+                ranks["lnq_v1"].append(rank_within(timed("lnq_v1", lambda: SB.lnq_wcc_scores(q, ref_raw[s], version=1))))
 
         if "vc" in methods:   # batched across all families: one big optimisation per condition
             t = time.perf_counter()

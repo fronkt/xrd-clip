@@ -572,3 +572,27 @@ passes (powder diffraction, ML benchmarking) changed these readings of the data:
 6. **ln q implementation flaw**: its 16 zero offsets skip 0 and its axis is coarse at high angle; it handicaps ln q.
 
 Open revision options R1-R6 (cost + scope) are listed in tasks/todo.md Step 2; none started without Frank.
+
+## 13. Revision R1-R5 (Frank 10-12: "Do 1-5")
+
+Plan, pre-declared analyses and predictions: tasks/todo.md Step 3 (commit 4d4dae3, before any number).
+Code: scripts/28_rescore.py (R1, R2), 29_critic2_rerank.py (R3), 30_model_gap.py (R4a/b), 31/32 (R5).
+
+### 13a. R1 ln q fix (2026-10-12)
+
+v2 = offset grid -0.32..+0.32 in 0.04 steps (17 offsets, contains 0; v1's 16 skipped it) + bin-averaged
+resampling onto the ln q axis. Checks: tests/test_strong_baselines.py (self-score 1.0 at offset 0, 1 % strain
+found, torch == numpy < 1e-5, peak area kept). scripts/28 tag v1 reproduces 19's smoke ranks exactly (every key,
+model and hybrid included). Full library, 188 queries, local CPU 31 min (results/rescore_r1.json):
+
+| ln q + zero scan | v1 | v2 | paired diff (compound bootstrap) |
+|---|---|---|---|
+| any same form, macro top-1 (123 cpds) | 0.87 | 0.87 | 0.00 [0.00, 0.00] |
+| single-crystal, macro top-1 (30 cpds) | 0.49 | 0.45 | -0.03 [-0.10, 0.00] |
+| single-crystal, macro top-10 | 0.59 | 0.61 | +0.02 [0.00, +0.05] |
+
+One top-1 changes (VELWIV, single-crystal set, lost). 38/188 std ranks move, mostly down by a few places.
+Prediction ("real data moves little, within +-0.05") held. v2 is the pre-declared primary; v1 stays in the ESI.
+Found on the way: the G0 sweep seeded its draws with Python's salted `hash()`, so the 10-10 draws cannot be
+reproduced; scripts/12 now seeds with zlib.crc32 and the sweep is rerun locally (results/strong_baselines_v2.json,
+both ln q versions on the same draws).

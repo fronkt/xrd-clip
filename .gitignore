@@ -92,3 +92,8 @@ paper/*.synctex.gz
 # Revision R1/R2 (2026-10-13): B value from library CIFs (a number + counts) and rescoring summaries (ranks, no structures).
 !/results/r2_bvalue.json
 !/results/rescore_*.json
+!/results/strong_baselines_v2.json
+!/results/model_gap.json
+!/results/critic2_rerank.json
+!/results/real_bench_hub_lnq2.json
+!/results/cod_*.json
