@@ -83,6 +83,40 @@ def paired_macro(ra: np.ndarray, rb_: np.ndarray, stems: np.ndarray, kk: int = 1
             "ci": [rd(np.percentile(bs, 2.5)), rd(np.percentile(bs, 97.5))]}
 
 
+def rnd(o):
+    """Round every float in a nested results object to 4 decimals."""
+    if isinstance(o, float):
+        return rd(o)
+    if isinstance(o, dict):
+        return {k: rnd(v) for k, v in o.items()}
+    if isinstance(o, list):
+        return [rnd(v) for v in o]
+    return o
+
+
+def revision(stems: np.ndarray) -> dict:
+    """R1-R5 (tasks/todo.md Step 3). A block appears once its results file exists; nothing is recomputed here
+    except the R2 one-off ablations against the full package (paired macro, from the 28 rank caches)."""
+    import os
+    load = lambda p: json.load(open(p)) if os.path.exists(p) else None
+    slim = lambda r: None if r is None else rnd({k: r[k] for k in ("meta", "per_pattern", "macro", "paired_vs_base",
+                                                                     "groups") if k in r})
+    rev = {"r1_real": slim(load("results/rescore_r1.json")), "r2": slim(load("results/rescore_r2.json")),
+           "r2_ablations": {}, "r3_critic2": rnd(load("results/critic2_rerank.json")),
+           "r4_gap": rnd(load("results/model_gap.json")), "r5_cod": slim(load("results/rescore_main_cod.json"))}
+    full = "cache/real_bench/rescore_r2/ranks.npz"
+    for tag in ("r2_noB", "r2_nolp", "r2_noka2", "r2_nomask"):
+        res, rk = load(f"results/rescore_{tag}.json"), f"cache/real_bench/rescore_{tag}/ranks.npz"
+        if res is None:
+            continue
+        rev["r2_ablations"][tag] = {"macro": rnd(res["macro"])}
+        if os.path.exists(rk) and os.path.exists(full):
+            a, b = np.load(rk), np.load(full)
+            assert len(a[a.files[0]]) == len(stems)
+            rev["r2_ablations"][tag]["paired_vs_r2"] = {k: paired_macro(a[k], b[k], stems) for k in a.files if k in b.files}
+    return rev
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--truth", default=f"{bench.DATA}/opxrd/opxrd_truth.json")
@@ -356,6 +390,7 @@ def main() -> int:
     ex["model_probe_check"] = json.load(open("results/model_probe_check.json"))
     ex["wrong_top1_audit"] = {k: v for k, v in json.load(open("results/wrong_top1_audit.json")).items()}
     out["extra"] = ex
+    out["revision"] = revision(stems)
 
     with open(args.out, "w") as fh:
         json.dump(out, fh, indent=1)
