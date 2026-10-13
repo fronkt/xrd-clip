@@ -10,7 +10,10 @@ from __future__ import annotations
 
 import glob
 import json
+import os
 import sys
+
+import numpy as np
 
 STRONG = ["pearson_zs", "wcc_0.5", "wcc_1", "wcc_2", "lnq", "vc"]
 SWEEPS = {"zero_offset": "2θ zero offset (°)", "strain": "Isotropic strain", "thermal_dT": "Thermal ΔT (K), anisotropic",
@@ -20,16 +23,30 @@ COLORS = {"model": "C0", "pearson": "C7", "peak_list": "C8", "pearson_zs": "C3",
 
 def main() -> int:
     paths = sys.argv[1:] or sorted(glob.glob("results/sb_w*.json"))
-    merged = None
+    # G0_STEM=results/strong_baselines_v2 for the R1 rerun (ln q v2, crc32 seeds): the v1 files stay for the ESI
+    stem = os.environ.get("G0_STEM", "results/strong_baselines")
+    table = stem.replace("strong_baselines", "g0_table") + ".md"
+    merged, ranks, fam_idx = None, {}, None
     for p in paths:
         with open(p) as fh:
             d = json.load(fh)
         if merged is None:
             merged = {k: v for k, v in d.items() if k != "conditions"}
             merged["conditions"] = {}
+        assert all(d[k] == merged[k] for k in ("n_families", "n_queries", "chance_top1")), p
+        assert not set(d["conditions"]) & set(merged["conditions"]), f"{p}: condition run twice"
         merged["conditions"].update(d["conditions"])
-    with open("results/strong_baselines.json", "w") as fh:
+        rp = p[:-len(".json")] + "_ranks.npz"
+        if os.path.exists(rp):
+            z = dict(np.load(rp))
+            fi = z.pop("fam_idx")
+            assert fam_idx is None or np.array_equal(fi, fam_idx), rp
+            fam_idx = fi
+            ranks.update({k: v for k, v in z.items() if k.split("|")[0] in d["conditions"]})
+    with open(stem + ".json", "w") as fh:
         json.dump(merged, fh, indent=2)
+    if ranks:
+        np.savez_compressed(stem + "_ranks.npz", fam_idx=fam_idx, **ranks)
 
     chance = merged["chance_top1"]
     rows = ["| Condition | Model | Best strong baseline | Δ (model − best) | URTC Pearson | Model µs/pair | Best µs/pair |",
@@ -53,14 +70,14 @@ def main() -> int:
             "the model's figure excludes the one-off library embedding.", "",
             f"**Conditions where the model's CI is entirely above the best strong baseline's:** "
             f"{', '.join(wins) if wins else 'none'}.", ""]
-    with open("results/g0_table.md", "w", encoding="utf-8") as fh:
+    with open(table, "w", encoding="utf-8") as fh:
         fh.write("\n".join(head + rows) + "\n")
     print("\n".join(head + rows))
-    _plot(merged)
+    _plot(merged, stem + ".png")
     return 0
 
 
-def _plot(merged: dict) -> None:
+def _plot(merged: dict, path: str) -> None:
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -93,7 +110,7 @@ def _plot(merged: dict) -> None:
     axs[0][0].set_ylabel("Within-family top-1")
     axs[0][0].legend(fontsize=6, loc="lower left")
     fig.tight_layout()
-    fig.savefig("results/strong_baselines.png", dpi=150, bbox_inches="tight")
+    fig.savefig(path, dpi=150, bbox_inches="tight")
 
 
 if __name__ == "__main__":

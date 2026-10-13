@@ -95,6 +95,9 @@ paper/*.synctex.gz
 !/results/r2_bvalue.json
 !/results/rescore_*.json
 !/results/strong_baselines_v2.json
+!/results/strong_baselines_v2.png
+!/results/g0_table_v2.md
+!/results/real_bench_hub_lnq2_table.md
 !/results/model_gap.json
 !/results/model_gap_realism.json
 !/results/critic2_rerank.json
