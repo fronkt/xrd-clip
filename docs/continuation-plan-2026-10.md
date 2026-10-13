@@ -596,3 +596,25 @@ Prediction ("real data moves little, within +-0.05") held. v2 is the pre-declare
 Found on the way: the G0 sweep seeded its draws with Python's salted `hash()`, so the 10-10 draws cannot be
 reproduced; scripts/12 now seeds with zlib.crc32 and the sweep is rerun locally (results/strong_baselines_v2.json,
 both ln q versions on the same draws).
+
+### 13b. R2 measured-aware library and comparison (2026-10-12)
+
+Package (pre-declared): overall Debye-Waller B = 4.45 A^2 (8 pi^2 x median non-H U_eq of 5,000 library CIFs at
+283-303 K, results/r2_bvalue.json); Lorentz-polarisation conversion of the 68 non-Cu queries; K-alpha2 scanned as a
+nuisance for the 125 lab-tube queries (max over K-alpha1 and K-alpha1 + K-alpha2 libraries); reference norms over
+each query's measured range (46 partial-coverage queries). Full library, local CPU 117 min
+(results/rescore_r2.json). Macro top-1 vs v1, paired compound bootstrap:
+
+| score | any same form | diff | single-crystal | diff |
+|---|---|---|---|---|
+| Pearson, fixed grid | 0.81 | -0.02 [-0.07, +0.02] | 0.27 | -0.04 [-0.11, 0.00] |
+| cosine + zero scan | 0.88 | +0.04 [+0.01, +0.08] | 0.44 | +0.04 [-0.01, +0.13] |
+| WCC l = 1 deg | 0.81 | -0.02 [-0.05, +0.02] | 0.52 | +0.02 [-0.05, +0.10] |
+| WCC l = 2 deg | 0.69 | -0.02 [-0.07, +0.03] | 0.50 | +0.03 [0.00, +0.10] |
+| ln q v2 | 0.86 | -0.02 [-0.05, +0.02] | 0.49 | 0.00 [-0.13, +0.13] |
+
+**Prediction mostly wrong:** I predicted every classical single-crystal score would rise. They move -0.04 to
++0.04 and only cosine (any form) clears zero. The model gap is unchanged (model 0.00-0.02). Reading: the
+classical numbers are robust to these library-fidelity choices; the single-crystal failures are not a
+simulation-fidelity problem. Non-Cu single-crystal patterns (25, mostly synchrotron temperature series) stay at
+top-1 0.04-0.24 under every variant. One-off ablations run on the GPU box (R2 package minus one switch).

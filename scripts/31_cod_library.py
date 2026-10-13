@@ -235,11 +235,72 @@ def cmd_fetch_cifs(args) -> int:
     return 0
 
 
+# ------------------------------------------------------------------------------------------------
+# box side: rsync file list, then CIF -> stage-1-style records for the unchanged stick simulator
+# ------------------------------------------------------------------------------------------------
+def cod_path(cid: str) -> str:
+    """COD's rsync layout: cif/1/54/42/1544226.cif."""
+    return f"{cid[0]}/{cid[1:3]}/{cid[3:5]}/{cid}.cif"
+
+
+def cmd_paths(args) -> int:
+    """library = corpus filter + every query candidate (the 'extras', as the CSD library added target families)."""
+    rows = read_meta()
+    lib = set(open(os.path.join(DATA, "library_ids.txt")).read().split())
+    cands = json.load(open(os.path.join(DATA, "candidates.json")))
+    extra = {c for v in cands.values() for c in v} - lib
+    ids = sorted(lib | extra)
+    with open(os.path.join(DATA, "library_all_ids.txt"), "w") as fh:
+        fh.write("\n".join(ids) + "\n")
+    with open(os.path.join(DATA, "rsync_paths.txt"), "w") as fh:
+        fh.write("\n".join(cod_path(c) for c in ids) + "\n")
+    meta = {c: {k: rows[c].get(k) for k in ("a", "b", "c", "alpha", "beta", "gamma", "sg", "formula")} for c in ids}
+    with open(os.path.join(DATA, "library_meta.json"), "w") as fh:
+        json.dump(meta, fh)
+    print(f"[paths] corpus {len(lib):,} + candidate extras {len(extra):,} = {len(ids):,} COD entries")
+    return 0
+
+
+def cmd_shards(args) -> int:
+    """(box) downloaded CIFs -> jsonl.gz shards in the stage-1 record format that xrdclip.data.simulate reads.
+    n_atoms = atom-site rows of the CIF (the asymmetric unit, as CCDC's crystal.molecule counts for the CSD)."""
+    import gzip as gz
+    meta = json.load(open(args.meta))
+    ids = sorted(meta)
+    os.makedirs(args.out, exist_ok=True)
+    per = (len(ids) + args.n_shards - 1) // args.n_shards
+    missing = 0
+    for s in range(args.n_shards):
+        with gz.open(os.path.join(args.out, f"shard_{s:03d}.jsonl.gz"), "wt", encoding="utf-8") as fh:
+            for cid in ids[s * per:(s + 1) * per]:
+                p = os.path.join(args.cif_root, cod_path(cid))
+                if not os.path.exists(p):
+                    missing += 1
+                    continue
+                cif = open(p, encoding="utf-8", errors="replace").read()
+                m = meta[cid]
+                try:
+                    import gemmi
+                    n_atoms = len(gemmi.cif.read_string(cif).sole_block().find_loop("_atom_site_label"))
+                except Exception:
+                    n_atoms = 0
+                fh.write(json.dumps({"refcode": cid, "cif": cif, "smiles": "", "spacegroup": m.get("sg") or "",
+                                     "n_atoms": n_atoms, "formula": m.get("formula") or "",
+                                     "cell": [float(m[k]) for k in ("a", "b", "c", "alpha", "beta", "gamma")]}) + "\n")
+    print(f"[shards] {len(ids) - missing:,} records in {args.n_shards} shards ({missing} CIFs missing)")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=("meta", "select", "cands", "fetch_cifs"))
+    ap.add_argument("cmd", choices=("meta", "select", "cands", "fetch_cifs", "paths", "shards"))
+    ap.add_argument("--meta", default="cod/library_meta.json")
+    ap.add_argument("--cif_root", default="cod/cif")
+    ap.add_argument("--out", default="cod/shards")
+    ap.add_argument("--n_shards", type=int, default=6)
     args = ap.parse_args()
-    return {"meta": cmd_meta, "select": cmd_select, "cands": cmd_cands, "fetch_cifs": cmd_fetch_cifs}[args.cmd](args)
+    return {"meta": cmd_meta, "select": cmd_select, "cands": cmd_cands, "fetch_cifs": cmd_fetch_cifs,
+            "paths": cmd_paths, "shards": cmd_shards}[args.cmd](args)
 
 
 if __name__ == "__main__":
