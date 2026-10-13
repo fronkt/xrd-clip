@@ -111,6 +111,69 @@ Revision options the referees raised that change numbers or scope (Frank's call;
 - R6 statements: AI-use wording (his own), corresponding e-mail (Purdue OA agreement ends 2026-12-31, applied at
      acceptance), checkpoint release (ask CCDC?), ChemRxiv preprint, final title.
 
+### Step 3 — revision R1–R5 (Frank 10-12: "Do 1-5")
+Rule for every item: the analysis and a written prediction are committed here BEFORE its numbers exist
+(lessons 10-12). Components of a package are reported as one-off ablations, never selected. v1 numbers stay
+reproducible (old code paths kept behind a flag). Readouts go to plan Section 13; numbers to paper_numbers.json.
+Local machine: 8 cores, 32 GB, no CUDA (measured 10-12: render 11 ms/entry/core; torch-CPU scoring of 188 queries
+vs 309k: cos/WCC 4-6 min per variant, ln q v1 75 min). No CSD-derived upload anywhere without manual mode.
+
+R1 ln q fix
+- [ ] zero offsets -0.32..+0.32 step 0.04 (17, includes 0; v1: 16, skipped 0); area-preserving resampling onto
+      the ln q axis (bin-average via the cumulative integral; v1 point-sampled a 0.05 deg-step axis at high angle
+      and could miss peak tops by up to ~16 %). Same l = 0.01, +-3 % strain. v1 kept as `lnq_v1`.
+- [ ] checks: self-score 1.0 at offset 0; a 1 % strained copy is found at lag ln(1.01); torch == numpy (<1e-5)
+- [ ] 188 queries x full library locally (scripts/28) -> ln q ranks; hybrid (model top-K -> ln q) recomputed
+- [ ] G0 sweep ln q column recomputed (same seeds, ln q only)
+- [ ] CSLS for ln q: needs the 8k probe rows -> box session (B)
+- Prediction: the clean sweep rises (v1 0.88); real data moves little (an 0.02 deg offset error sits inside the
+  triangle tolerance), macro top-1 changes within +-0.05.
+
+R2 measured-aware library and comparison (one pre-declared package + one-off ablations)
+- (a) overall Debye-Waller factor on library intensities, I x exp(-2B s^2), s = sin(theta)/lambda; B = 8 pi^2 x
+      median non-H mean U_eq over 5,000 random library CIFs measured at 283-303 K, query families excluded
+      (computed from cache/csd before any scoring)
+- (b) Lorentz-polarisation: non-Cu queries are converted to Cu K-alpha1 geometry, I x LP_Cu(theta_Cu) /
+      LP_orig(theta_orig); P = (1 + cos^2 2theta)/2 for lab tubes, 1 for synchrotron (assumption, stated)
+- (c) K-alpha2 as a scanned nuisance for lab-tube queries (Cu, Co, Mo; 3 unlabelled -> Cu): score = max over a
+      K-alpha1 library and a K-alpha1 + K-alpha2 library (I2/I1 = 0.5, the tube's lambda2/lambda1), because
+      monochromatisation is not recorded; synchrotron queries use K-alpha1 only
+- (d) compare over each query's measured range only (21 % of queries do not cover 5-50 deg): reference norms
+      are taken over the query's coverage mask (unshifted mask under the zero scan; stated approximation)
+- [ ] B from the CIFs; [ ] scorer (scripts/28) with (a)-(d) switches; [ ] smoke vs v1 with all switches off (exact)
+- [ ] full package, all classical scores, local; [ ] ablations (package minus one) local if time, else box session
+- Prediction: classical sc macro top-1 rises for every score; (b) helps the 68 non-Cu patterns most; (a) small;
+  the classical-vs-model gap is unchanged in sign and size.
+
+R3 critic2 VC-xPWDF re-rank (the published variable-cell method)
+- [ ] critic2 on Windows (route from the research agent); validate on 5 own-entry + 5 wrong pairs; time each
+- [ ] shortlist = top-100 of fixed ln q for the 59 sc patterns (truth outside the shortlist = miss; report
+      recall@100); critic2 score for each (pattern, candidate) locally; re-rank
+- Prediction: lifts the > 1 % cell-mismatch group (ln q 0.08) but is capped by recall@100; may promote sibling
+  polymorphs (B3 note: free cells bend a sibling onto the query).
+
+R4 learned side
+- [ ] R4a gap ladder (cheapest mechanism test first, local): the 188 own entries rendered clean (top-1 0.21) ->
+      add ONE measured effect at a time (coverage mask, query background removal, K-alpha2, wavelength
+      conversion, measured-like profile width, noise) -> which step takes the model to 0.01
+- [ ] R4b pattern-to-pattern retrieval with the existing pattern encoder (library rendered clean, local)
+- [ ] R4c realism retrain (box session B): same split, architecture and schedule; augmentation adds the effects
+      R4a names (written here before training) -> measured top-1 / median rank
+- Prediction for R4c is written after R4a and before training.
+
+R5 open stand-in (Digital Discovery restricted-data clause)
+- [ ] COD route (research agent) -> COD organic CIFs + metadata (open data, CC0: a rented box is fine)
+- [ ] same organic filter + simulator as the CSD corpus -> COD sticks
+- [ ] truth: per opXRD pattern, COD cell + element search, packing similarity (CCDC API, local) -> same-form
+      sets; powder vs single-crystal from CIF tags
+- [ ] classical + model scores -> open-replica table; release COD IDs, simulated library, truth sets, ranks
+- Prediction: same ordering (classical >> model); absolute numbers differ.
+
+B. Box session (manual mode, one CSD-derived upload): R4c training; ln q CSLS rescore; R2 ablations if not done.
+C. Paper: paper_numbers.json -> manuscript/ESI/figs -> verify_claims -> internal referee pass -> build -> check-in.
+After C (not R1-R5): R6 decisions, Zenodo deposit (code + open data; DD's data reviewer needs a DOI), cover
+letter, TOC graphic (at revision), Frank submits.
+
 Open decisions for Frank (flagged in the draft, not blocking):
 - corresponding e-mail cai485@purdue.edu? (Purdue's RSC OA agreement is applied at acceptance and ends 2026-12-31; otherwise there is an APC)
 - release: public code + Zenodo (refcode lists, opXRD pattern IDs, per-query ranks); the CSD-trained checkpoint is NOT released
