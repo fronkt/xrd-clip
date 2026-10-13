@@ -149,7 +149,10 @@ def cmd_run(args) -> int:
         for line in open(res_path):
             r = json.loads(line)
             done.add((r["pid"], r["cand"]))
-    jobs = [(pid, c) for pid, p in plan.items() for c in p["shortlist"][:args.k] if (pid, c) not in done
+    # rank-major order (every pattern's 1st candidate, then every 2nd, ...): a run stopped early still leaves a
+    # complete re-rank of a shorter shortlist, which `eval --k` scores (10-13: local throughput unknown)
+    jobs = [(pid, p["shortlist"][r]) for r in range(args.k) for pid, p in plan.items()
+            if r < len(p["shortlist"]) and (pid, p["shortlist"][r]) not in done
             and os.path.exists(os.path.join(ROOT, pid, PEAKS))]
     print(f"[run] {len(jobs)} comparisons to run ({len(done)} done) on {args.procs} processes", flush=True)
 
