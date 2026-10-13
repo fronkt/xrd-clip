@@ -210,7 +210,14 @@ B. Box session (manual mode, one CSD-derived upload): R4c training; ln q CSLS re
    - [ ] sweep merge: G0_STEM=results/strong_baselines_v2 python scripts/13_g0_report.py results/sbv2_w*.json
          (-> _v2.json/_ranks.npz/.png + g0_table_v2.md; v1 files untouched). Draws differ from v1 (crc32 seeds;
          v1 used salted hash, irreproducible - disclosed), so compare v2 to its own lnq_v1 column, not to v1
-   - [ ] CSLS ln q v2: mkdir cache/real_bench_lnq2; copy hub_ctx.npz + ranks.npz; full_lnq2 -> full;
+   - Box session 10-13: A = 27542310 (4090 WA, 128-core cgroup, $0.52/h, instance 55706679), B = 54197769
+     (5060 Ti NO, $0.40/h, instance 55706682); both launched 08:32 / 09:31 UTC. On A the 21 ln q v2 score hit CUDA
+     OOM at chunk 1 (R4c train ~17 GB + 6 sweep workers on the 24 GB card); sweep, ablations and training
+     unaffected. Partial cache/real_bench/full deleted on the box (so out.tar has no full_lnq2); scripts/box/
+     rev_gpu_retry.sh reruns 21 score alone after RUN_DONE into cache/real_bench_lnq2r -> /workspace/
+     out_retry.tar; pull it, then touch RETRY_PULLED (else it self-stops 2 h after RETRY_DONE).
+   - [ ] CSLS ln q v2: mkdir cache/real_bench_lnq2; copy hub_ctx.npz + ranks.npz; out_retry.tar's
+         cache/real_bench_lnq2r/full -> cache/real_bench_lnq2/full (check its DONE file);
          LNQ_VERSION=2 python scripts/21_hubness.py eval --work cache/real_bench_lnq2 --emb_dir cache/real_bench
          --out results/real_bench_hub_lnq2.json --table results/real_bench_hub_lnq2_table.md
          CHECK: its none|*|lnq_bkg top-1 == rescore_r1 (same v2 scores, GPU vs CPU torch)
