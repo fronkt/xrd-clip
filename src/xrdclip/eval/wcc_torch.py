@@ -48,8 +48,8 @@ class TorchWCC:
     """
 
     def __init__(self, l_deg: float = 1.0, shift_deg: float = 0.5, lnq: bool = False, l_lnq: float = 0.01,
-                 max_strain: float = 0.03, device: str = "cpu"):
-        self.lnq, self.device = lnq, device
+                 max_strain: float = 0.03, device: str = "cpu", version: int = 1):
+        self.lnq, self.device, self.version = lnq, device, version
         if lnq:
             self.l_pts = max(1, int(round(l_lnq / SB._LNQ_STEP)))
             self.s_pts = int(round(math.log1p(max_strain) / SB._LNQ_STEP))
@@ -69,14 +69,14 @@ class TorchWCC:
                   shift_step_deg: float = 0.04) -> "list[tuple[torch.Tensor, torch.Tensor]]":
         if not self.lnq:
             return [self._rows(q_raw)]
-        return [self._rows(np.stack([SB._to_lnq(y, delta) for y in q_raw]))
-                for delta in np.arange(-shift_deg, shift_deg + 1e-9, shift_step_deg)]
+        return [self._rows(np.stack([SB._to_lnq(y, delta, self.version) for y in q_raw]))
+                for delta in SB.lnq_offsets(self.version, shift_deg, shift_step_deg)]
 
     # -- reference side --------------------------------------------------------------------------
     def prep_refs(self, r: np.ndarray, already_lnq: bool = False) -> "tuple[torch.Tensor, torch.Tensor]":
         """r: (n_refs, n) 2theta patterns, or ln q patterns when `already_lnq` (saves the resampling)."""
         if self.lnq and not already_lnq:
-            r = np.stack([SB._to_lnq(y) for y in r])
+            r = np.stack([SB._to_lnq(y, 0.0, self.version) for y in r])
         r = (r - r.min(axis=1, keepdims=True)).astype(np.float32)
         t = torch.from_numpy(r).to(self.device)
         rw = _smooth(t, self.w, self.s_pts)                                    # (C, n + 2S)

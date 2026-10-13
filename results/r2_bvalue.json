@@ -1,0 +1,17 @@
+{
+ "B": 4.45,
+ "median_mean_Ueq": 0.05634583333333334,
+ "Ueq_iqr": [
+  0.048581818181818184,
+  0.06512675729442971
+ ],
+ "n_entries": 5000,
+ "n_seen": 14412,
+ "skipped": {
+  "temperature outside 283-303 K": 7885,
+  "no temperature in K": 1459,
+  "query family": 8,
+  "no U_eq for non-H atoms": 60
+ },
+ "rule": "B = 8 pi^2 x median over entries of the mean non-H U_iso_or_equiv; entries measured at 283-303 K, query families excluded, random order (seed 0)"
+}

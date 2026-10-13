@@ -89,3 +89,6 @@ paper/*.synctex.gz
 # Referee checks (2026-10-12): model diagnostic on probes/own entries, wrong-top-1 packing audit (refcodes + counts only).
 !/results/model_probe_check.json
 !/results/wrong_top1_audit.json
+# Revision R1/R2 (2026-10-13): B value from library CIFs (a number + counts) and rescoring summaries (ranks, no structures).
+!/results/r2_bvalue.json
+!/results/rescore_*.json

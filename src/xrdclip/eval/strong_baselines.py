@@ -112,26 +112,55 @@ _LNQ_STEP = float(_LNQ[1] - _LNQ[0])
 _TT_OF_LNQ = np.degrees(2 * np.arcsin(np.exp(_LNQ)))
 
 
-def _to_lnq(y: np.ndarray, delta: float = 0.0) -> np.ndarray:
-    """Resample a 2theta pattern onto the ln q grid after removing a zero offset `delta`."""
-    return np.interp(_TT_OF_LNQ + delta, A.GRID, y).astype(np.float32)
+# ln q bin edges in 2theta: midpoints between axis points, extended by half a step at both ends
+_LNQ_EDGES = np.degrees(2 * np.arcsin(np.exp(np.r_[_LNQ[0] - _LNQ_STEP / 2, (_LNQ[1:] + _LNQ[:-1]) / 2,
+                                                  _LNQ[-1] + _LNQ_STEP / 2])))
+
+
+def lnq_offsets(version: int = 1, shift_deg: float = 0.3, shift_step_deg: float = 0.04) -> np.ndarray:
+    """2theta zero offsets scanned before the ln q lag scan.
+
+    v1 (draft v1 numbers): arange(-0.3, 0.3, 0.04) = 16 offsets that skip 0 (nearest +-0.02 deg).
+    v2: a symmetric odd grid that contains 0, -0.32..+0.32 in 0.04 steps (17 offsets).
+    """
+    if version == 1:
+        return np.arange(-shift_deg, shift_deg + 1e-9, shift_step_deg)
+    n = int(math.ceil(shift_deg / shift_step_deg - 1e-9))
+    return np.arange(-n, n + 1) * shift_step_deg
+
+
+def _to_lnq(y: np.ndarray, delta: float = 0.0, version: int = 1) -> np.ndarray:
+    """Resample a 2theta pattern onto the ln q grid after removing a zero offset `delta`.
+
+    v1 point-samples the pattern at each axis point. At high angle the axis step is ~0.05 deg of 2theta,
+    wider than the 0.02 deg data step, so point samples can miss a sharp peak's top. v2 averages the pattern
+    over each ln q bin (difference of the cumulative trapezoid integral), which keeps every peak's area.
+    """
+    if version == 1:
+        return np.interp(_TT_OF_LNQ + delta, A.GRID, y).astype(np.float32)
+    y = np.asarray(y, dtype=np.float64)
+    cum = np.r_[0.0, np.cumsum((y[1:] + y[:-1]) * 0.5 * STEP)]                 # integral from GRID[0]
+    edges = _LNQ_EDGES + delta
+    c = np.interp(edges, A.GRID, cum)
+    return (np.diff(c) / np.diff(edges)).astype(np.float32)
 
 
 def lnq_wcc_scores(q_raw: np.ndarray, r_raw: np.ndarray, l_lnq: float = 0.01,
                    max_strain: float = 0.03, shift_deg: float = 0.3,
-                   shift_step_deg: float = 0.04) -> np.ndarray:
+                   shift_step_deg: float = 0.04, version: int = 1) -> np.ndarray:
     """B2. Max over (zero offset delta, ln-q lag) of a triangle-weighted cross-correlation.
 
     l_lnq = 0.01 is ~0.3 deg of 2theta at 2theta = 25 deg. A lag of ln(1 + max_strain) covers
     isotropic strain up to max_strain exactly; the triangle tolerates the anisotropic residue.
+    `version` selects the offset grid and resampling (see lnq_offsets / _to_lnq); 1 = draft v1.
     """
-    r = np.stack([_to_lnq(y) for y in r_raw])
+    r = np.stack([_to_lnq(y, 0.0, version) for y in r_raw])
     r = r - r.min(axis=1, keepdims=True)
     l_pts = max(1, int(round(l_lnq / _LNQ_STEP)))
     lag_pts = int(round(math.log1p(max_strain) / _LNQ_STEP))
     best = None
-    for delta in np.arange(-shift_deg, shift_deg + 1e-9, shift_step_deg):
-        q = np.stack([_to_lnq(y, delta) for y in q_raw])
+    for delta in lnq_offsets(version, shift_deg, shift_step_deg):
+        q = np.stack([_to_lnq(y, delta, version) for y in q_raw])
         q = q - q.min(axis=1, keepdims=True)
         s = _wcc_core(q, r, l_pts, lag_pts)
         best = s if best is None else np.maximum(best, s)
@@ -292,10 +321,11 @@ class WCCLibrary:
     """
 
     def __init__(self, r_raw: np.ndarray, l_deg: float = 1.0, shift_deg: float = 0.5,
-                 chunk: int = 4000, lnq: bool = False, l_lnq: float = 0.01, max_strain: float = 0.03):
-        self.lnq = lnq
+                 chunk: int = 4000, lnq: bool = False, l_lnq: float = 0.01, max_strain: float = 0.03,
+                 version: int = 1):
+        self.lnq, self.version = lnq, version
         if lnq:
-            r_raw = np.stack([_to_lnq(y) for y in r_raw])
+            r_raw = np.stack([_to_lnq(y, 0.0, version) for y in r_raw])
             step = _LNQ_STEP
             self.l_pts = max(1, int(round(l_lnq / step)))
             self.s_pts = int(round(math.log1p(max_strain) / step))
@@ -335,8 +365,8 @@ class WCCLibrary:
                 rows.append(self._score_one(q))
             else:
                 best = None
-                for delta in np.arange(-shift_deg, shift_deg + 1e-9, shift_step_deg):
-                    s = self._score_one(_to_lnq(q, delta))
+                for delta in lnq_offsets(self.version, shift_deg, shift_step_deg):
+                    s = self._score_one(_to_lnq(q, delta, self.version))
                     best = s if best is None else np.maximum(best, s)
                 rows.append(best)
         return np.stack(rows)
