@@ -227,6 +227,15 @@ B. Box session (manual mode, one CSD-derived upload): R4c training; ln q CSLS re
      Pulled + merged locally: sweep v2 (strong_baselines_v2.*, g0_table_v2.md), rescore_r2_no*.json.
      STILL OPEN: CSLS ln q v2 needs a GPU rerun (CSD upload -> manual mode); critic2 run to resume (local
      Windows critic2 is validated; 29 `run` skips done pairs).
+   - 10-13 evening (Frank: "go ahead on critic2 and ln q CSLS"): box A's machine freed up -> restarted it,
+     scripts/box/lnq2_box.sh ran 21 score alone (405 s) with a local pull loop armed at launch; all outputs
+     md5-verified, box A destroyed. B outputs via relay (copies one at a time; copied files read as ????????
+     until a relay stop/start, lesson #20), md5-verified; relay + B destroyed. No instances left; credit $1.23.
+     CSLS ln q v2 done (86def71). critic2 on B ran 0 comparisons: the peak file is fit.peaks on Linux AND
+     Windows, the code looked for expt-bg.peaks (fixed); 55/59 box fits reused (inputs md5-identical; a
+     Windows refit of pattern_655 gives RMS 0.556 vs 0.567, same 1.4.155) + 4 fitted locally. Local run:
+     2,750 + 200 comparisons, 6-8 critic2 processes, unthrottled children (19 unthrottle(pid)); resumable.
+     R5: COD sticks 108,902/109,570 (99.4 %); scripts/33_cod_embed.py + 28 main score/eval running locally.
    - [ ] CSLS ln q v2: mkdir cache/real_bench_lnq2; copy hub_ctx.npz + ranks.npz; out_retry.tar's
          cache/real_bench_lnq2r/full -> cache/real_bench_lnq2/full (check its DONE file);
          LNQ_VERSION=2 python scripts/21_hubness.py eval --work cache/real_bench_lnq2 --emb_dir cache/real_bench

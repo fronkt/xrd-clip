@@ -191,8 +191,8 @@ be checked without a licence, we rebuilt the benchmark from the Crystallography 
 unchanged. The library applies the corpus filter of Section 2.4 to the COD metadata (C-containing entries
 with coordinates, no disorder flag, R ≤ 7.5 %, Z′ of 1–2, no element outside H, C, N, O, F, S, Cl, Br, I
 and P), which keeps 108,716 entries, and adds 854 candidate entries of the queries (below) that the filter
-removes. Of these 109,570 entries, TBD(n_cod_simulated) gave stick patterns, computed and rendered exactly as
-for the CSD library.
+removes. Of these 109,570 entries, 108,902 gave stick patterns, computed and rendered exactly as for the
+CSD library.
 
 The answer sets follow Section 2.2 with two changes. First, the COD has no refcode families. Candidates
 are COD entries with the same non-H element set whose primitive reduced cell lies within 5 % of the deposited
