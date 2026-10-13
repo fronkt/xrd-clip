@@ -167,9 +167,9 @@ removed; 28 further entries have no coordinates in the CSD. Stick patterns (Cu K
 XRDCalculator module of pymatgen [@ong2013pymatgen]; recomputing 296 randomly drawn entries with pymatgen
 2026.4.16 reproduces the stored sticks exactly. The sticks were rendered with one pseudo-Voigt profile
 (Caglioti-type width, U = 0.002, V = −0.001, W = 0.004 deg², η = 0.5) [@caglioti1958], without
-Debye–Waller factors, texture, background or noise. For disordered entries whose CIF fails a strict parse,
-coincident sites are merged by rescaling occupancies; the own entry of 28 patterns (9 compounds) is
-disordered.
+Debye–Waller factors, texture, background or noise; a library closer to the measurements is tested in
+Section 3.7. For disordered entries whose CIF fails a strict parse, coincident sites are merged by
+rescaling occupancies; the own entry of 28 patterns (9 compounds) is disordered.
 
 ### 2.5 Metrics
 
@@ -182,6 +182,34 @@ contribute many patterns, per-pattern averages mostly measure those compounds, s
 compound move together; for the single-crystal set only its 30 compounds are resampled. Differences
 between scores and the effect of a correction are paired: both are computed on the same resampled
 compounds.
+
+### 2.6 An open replica
+
+The CSD licence does not allow the library or the answer sets to be redistributed. So that the results can
+be checked without a licence, we rebuilt the benchmark from the Crystallography Open Database (COD; CC0)
+[@grazulis2009cod; @vaitkus2021cod], the source of the opXRD patterns themselves. The queries are
+unchanged. The library applies the corpus filter of Section 2.4 to the COD metadata (C-containing entries
+with coordinates, no disorder flag, R ≤ 7.5 %, Z′ of 1–2, no element outside H, C, N, O, F, S, Cl, Br, I
+and P), which keeps 108,716 entries, and adds 854 candidate entries of the queries (below) that the filter
+removes. Of these 109,570 entries, TBD(n_cod_simulated) gave stick patterns, computed and rendered exactly as
+for the CSD library.
+
+The answer sets follow Section 2.2 with two changes. First, the COD has no refcode families. Candidates
+are COD entries with the same non-H element set whose primitive reduced cell lies within 5 % of the deposited
+structure's in each length and within 6 % in volume, a wider window than in the CSD search so that
+temperature series are not lost. The two closest anchors are then compared with every other candidate, COD
+entry against COD entry with the strict settings, to give the same-form set. Second, the COD candidates
+include other compounds, which the CSD family search never returned. A candidate whose reduced non-H formula
+differs from that of every same-form entry stays an ordinary library entry, and so counts as an error when it
+ranks above the answer; setting the 2,670 such candidates aside, as the rule of Section 2.2 would, would
+remove the hardest decoys and flatter every score. Same-formula candidates that cannot be compared (23) are
+set aside as before. Powder or single-crystal is read from the COD method field, else from the powder tags of
+the CIF. This rule was fixed before any replica result was computed.
+
+191 of the 196 patterns are identified in the COD: all 189 identified in the CSD and two more. 35 patterns
+have a single-crystal same-form entry, against 59 in the CSD, so the replica's single-crystal set is smaller
+and its intervals are wider. Compounds are labelled as in the main benchmark. The replica is scored with the
+scores of Section 3.2 and the model, without the corrections of Sections 3.5 and 3.7.
 
 ## 3. Methods
 
@@ -205,16 +233,19 @@ removed before scaling. Library patterns are scored as simulated.
   (*cosine + zero scan*). These widths are large compared with the simulated peak width (FWHM about 0.06°);
   the simulated sweep also includes l = 0.5°.
 - **ln q lag scan.** Both patterns are resampled onto a ln q axis with 2,251 points, on which an isotropic
-  lattice strain is a translation. The score is a WCC with l = 0.01 in ln q, maximised over lags up to ±3 %
-  strain and over 16 zero offsets from −0.3° to +0.3° in 0.04° steps, applied before resampling. This
-  offset grid does not contain zero (the nearest offsets are ±0.02°), and the ln q axis is coarser than the
-  2θ grid at high angle. Both choices handicap the ln q score rather than favour it; they are the reason it
-  reaches only 0.88 on clean simulated queries (Section 4.1).
+  lattice strain is a translation; each ln q bin takes the mean of the pattern over its width, so peak areas
+  are kept where the bins are wider than the 2θ step. The score is a WCC with l = 0.01 in ln q, maximised over
+  lags up to ±3 % strain and over 17 zero offsets from −0.32° to +0.32° in 0.04° steps, applied before
+  resampling. A first version of this score sampled the ln q axis at points and used 16 offsets that skipped
+  zero (nearest ±0.02°), which cost it accuracy on clean simulated queries; we found both problems in an
+  internal review, corrected them, and report the first version in the ESI.† The offset grid is still 0.04°, so on simulated
+  queries the score depends on whether an applied offset falls on the grid (Section 4.1).
 
 In the simulated sweep the l = 0 variant was applied to standardised patterns, which makes it Pearson +
 zero scan; on the measured patterns it is cosine + zero scan. A variable-cell method
 [@oterodelaroza2024vcgpwdf] was also tried in the sweep but is not reported, because our reimplementation
-has not been validated against the reference code.
+has not been validated against the reference code; on the measured patterns we run the reference code
+itself (Section 3.8).
 
 ### 3.3 Exact scores on a GPU
 
@@ -238,6 +269,23 @@ zero offset, isotropic strain, Caglioti and crystallite-size broadening, March�
 validation top-1. A measured pattern is scored against the library by the cosine between its pattern
 embedding and each entry's structure embedding. We also test the model as a shortlist, re-ranking its top
 100 or 1,000 entries with a classical score. Further details are in the ESI.†
+
+Three diagnostics probe the failure reported in Section 4.5. (i) **Effect ladder.** Each pattern's own
+library entry is rendered cleanly and then with one effect of the measurement at a time, each estimated from
+the measured pattern: its 2θ coverage, its peak width, Kα2 (lab Cu patterns), its own background followed by
+the background subtraction of Section 3.1, noise at its noise level, and the zero offset that best aligns it
+with its entry; then with all six, and with all six plus an overall Debye–Waller factor (B = 4.45 Å², from
+the library, Section 3.7) or log-normal intensity jitter per reflection. Every variant is scored with the
+answer sets of the measured pattern. Two of the effects use the own entry, so the ladder diagnoses the model
+and is not a method. (ii) **Pattern to pattern.** The clean library patterns are passed through the model's
+pattern encoder, so measured patterns are matched against simulated patterns in the learned space without
+the structure encoder. (iii) **Realism retrain.** The model was retrained once with the design and a
+prediction fixed before training (repository commit 3b77818): the same split, architecture,
+hyperparameters, epochs, hard-negative batches and checkpoint rule, with the training simulation extended by
+a Kα2 copy (probability 0.6, I₂/I₁ = 0.5), an overall Debye–Waller factor with B drawn uniformly from 0–8 Å²,
+log-normal intensity jitter per reflection with σ drawn uniformly from 0–0.5, a cut of the 2θ range (probability 0.25;
+start 5–12°, end 30–50°), and the background subtraction applied to the measured patterns. The retrained
+model is scored like the original, including the ladder.
 
 ### 3.5 Hubness diagnosis and correction
 
@@ -269,7 +317,37 @@ and counting noise; or an anisotropic thermal strain for a temperature change of
 expansion coefficients drawn so that the mean volumetric coefficient (about 1.65 × 10⁻⁴ K⁻¹) matches the
 CSD survey of ref. [@bond2021thermal]; or combinations with random offsets and strains. Every method scores
 the same rendered queries, and CIs come from a bootstrap over families. The sweep has 34 distinct
-conditions (a zero offset of 0° is the clean condition).
+conditions (a zero offset of 0° is the clean condition). Each condition's random draws are seeded from a
+checksum of its name, so the sweep can be regenerated exactly.
+
+### 3.7 A library closer to the measurements
+
+The library of Section 2.4 leaves out several features of the measured patterns. As a robustness check, all
+classical scores were recomputed with one package of changes, fixed before scoring (repository commit
+4d4dae3). (a) An overall Debye–Waller factor on the library intensities, I exp(−2Bs²) with s = sin θ/λ and
+B = 4.45 Å², which is 8π² times the median mean non-H U_eq of 5,000 random library entries measured at
+283–303 K. (b) For the 68 patterns not measured with Cu Kα, the Lorentz–polarisation factor converted from
+the measurement to Cu Kα1, with polarisation (1 + cos² 2θ)/2 for laboratory tubes and none for synchrotrons
+(an assumption). (c) For the 125 laboratory-tube patterns, Kα2 as a nuisance: the score is the higher of
+those against a Kα1 library and a Kα1 + Kα2 library (I₂/I₁ = 0.5), because opXRD does not record whether
+the beam was monochromated. (d) For the 46 patterns that do not cover 5–50°, comparison over the measured
+range only (reference norms over the query's coverage, not shifted with the zero scan). Each change was also
+removed on its own to give one-off ablations. None of the four was selected after seeing results.
+
+### 3.8 Variable-cell re-rank
+
+Single-crystal references fail mainly when their cell differs from the measured one (Section 4.2), which
+variable-cell comparison is designed to absorb. We re-ranked shortlists with VC-GPWDF
+[@oterodelaroza2024vcgpwdf] as implemented in critic2 1.4 [@oterodelaroza2014critic2], which compares a
+candidate structure with a measured pattern while varying the candidate's cell (±10 % in lengths and ±5° in
+angles in its quick mode). We ran the published pipeline: background fit with 20 knots, peak fit with the
+default settings, and the global quick comparison with α = 1 as in the paper (the code's default is 0.5) and
+the measurement wavelength; it applies no zero-offset correction. One step was added: each pattern was cut
+to the d-spacing window that the other scores see (Cu Kα1 2θ of 5–50°). The shortlist of each single-crystal
+pattern is the 50 best entries of ln q, with set-aside entries excluded; a pattern whose answer is not in
+its shortlist counts as a miss, and a failed comparison as maximally dissimilar. We had planned a shortlist
+of 100, but one comparison takes 1–5 CPU-minutes, and the shortlist contains an answer for the same fraction
+of patterns at 50 as at 100 (TBD(recall_at_50)).
 
 ## 4. Results
 

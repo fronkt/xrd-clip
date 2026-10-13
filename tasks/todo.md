@@ -216,6 +216,17 @@ B. Box session (manual mode, one CSD-derived upload): R4c training; ln q CSLS re
      unaffected. Partial cache/real_bench/full deleted on the box (so out.tar has no full_lnq2); scripts/box/
      rev_gpu_retry.sh reruns 21 score alone after RUN_DONE into cache/real_bench_lnq2r -> /workspace/
      out_retry.tar; pull it, then touch RETRY_PULLED (else it self-stops 2 h after RETRY_DONE).
+   - OUTCOME 10-13 (nobody pulled: the manual-mode session sat on an approval ~11 h; lessons.md):
+     A: train (best val 0.911), embeddings, sweep, 4 ablations all EXIT 0; the watchdog then stopped A at 11:24Z
+     (its pattern "[e]mbed_lib" never matched the heredoc `python -`, so the 30 idle minutes ran during the
+     embedding) before out.tar/RUN_DONE, so the ln q retry never ran. B: COD rsync 109,570/109,570 + simulation
+     done (COD_DONE 14:40Z, cod_out.tar 426 MB); cod_box.sh's own 2-h self-stop then stopped B at 16:40Z with
+     critic2 `run` still going (two queues on one box, each able to stop it). Both GPUs re-rented; restarts
+     queued -> cancelled. Recovery: relay 55811910 (RTX 2070 ON, $0.07/h, 3-h self-stop) + sequential
+     `vastai copy` (8 concurrent copies failed with Permission denied). Credit $1.66 after the boxes.
+     Pulled + merged locally: sweep v2 (strong_baselines_v2.*, g0_table_v2.md), rescore_r2_no*.json.
+     STILL OPEN: CSLS ln q v2 needs a GPU rerun (CSD upload -> manual mode); critic2 run to resume (local
+     Windows critic2 is validated; 29 `run` skips done pairs).
    - [ ] CSLS ln q v2: mkdir cache/real_bench_lnq2; copy hub_ctx.npz + ranks.npz; out_retry.tar's
          cache/real_bench_lnq2r/full -> cache/real_bench_lnq2/full (check its DONE file);
          LNQ_VERSION=2 python scripts/21_hubness.py eval --work cache/real_bench_lnq2 --emb_dir cache/real_bench

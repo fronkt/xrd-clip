@@ -22,3 +22,12 @@
   texture axis). If it is not run, the sentence says "hypothesis".
 - **Rule:** count distinct conditions by comparing their results, not by counting names.
 - **Rule:** run the adversarial referee pass BEFORE showing a draft; it found ~10 must-fix items here.
+
+## 2026-10-13 — box results not pulled before the self-stop (manual mode)
+- **What happened:** both revision boxes finished, waited their 2 h for a pull, and stopped themselves (correctly:
+  no idle billing). The pull never came because in manual mode every tool call waits for Frank's approval and he
+  was away ~11 h. Their GPUs were re-rented, restarts failed, and the outputs had to come off the stopped disks
+  through a relay box. Credit went $7.30 -> $1.66, ~$1.8 of it the unused pull windows.
+- **Rule:** in manual mode, the command that launches a box queue also starts the local pull loop (wait for
+  RUN_DONE, pull, md5, touch PULLED), so nothing after launch needs an approval.
+- **Rule:** budget GPU memory per concurrent job on a box (21 score OOMed beside a 17 GB train on 24 GB).

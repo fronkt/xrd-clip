@@ -4,6 +4,7 @@
 # Run from the repo root:  bash paper/dd/build.sh
 set -euo pipefail
 cd "$(dirname "$0")/../.."
+if grep -n "TBD" paper/dd/manuscript.md paper/dd/esi.md; then echo "unfilled TBD placeholders" >&2; exit 1; fi
 python scripts/verify_claims.py paper/dd/manuscript.md
 cd paper/dd
 sed 's/\.pdf)/.png)/g' manuscript.md > _manuscript_png.md
