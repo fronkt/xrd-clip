@@ -41,7 +41,9 @@ RUN_FACTS = {"bench_cost_usd": 2.53, "hub_cost_usd": 0.26, "hub_gpu": "RTX 4090"
              "model_params_millions": 6.1, "model_epochs": 60, "model_batch": 512,
              # 10-12: 300 random cache/csd entries re-simulated with simulate_one under pymatgen 2026.4.16;
              # 296 were in the stick cache and all matched exactly (same reflections, |d2theta| = |dI| = 0)
-             "pymatgen_recheck_n": 296, "pymatgen_recheck_version": "2026.4.16"}
+             "pymatgen_recheck_n": 296, "pymatgen_recheck_version": "2026.4.16",
+             # 10-13: ln q v2 rescored alone on an RTX 4090 (box A; logs/hub_lnq2_retry.log "SCORE_DONE 405s wall")
+             "hub_lnq2_wall_s": 405}
 
 
 def rd(x):          # 4 decimals: the manuscript rounds once, to 2
@@ -101,9 +103,11 @@ def rnd(o):
     return o
 
 
-def revision(stems: np.ndarray) -> dict:
+def revision(stems: np.ndarray, R) -> dict:
     """R1-R5 (tasks/todo.md Step 3). A block appears once its results file exists; nothing is recomputed here
-    except the R2 one-off ablations against the full package (paired macro, from the 28 rank caches)."""
+    except paired macro differences from the 28 rank caches: the R2 package against the main benchmark (R: its ranks,
+    ln q v2; 28's own paired_vs_base is against v1, so its ln q entry mixes in the v2 fix) and the R2 one-off ablations
+    against the full package."""
     import os
     load = lambda p: json.load(open(p)) if os.path.exists(p) else None
     slim = lambda r: None if r is None else rnd({k: r[k] for k in ("meta", "per_pattern", "macro", "paired_vs_base",
@@ -113,6 +117,10 @@ def revision(stems: np.ndarray) -> dict:
            "r4_gap": rnd(load("results/model_gap.json")), "r4c_realism": rnd(load("results/model_gap_realism.json")),
            "r5_cod": slim(load("results/rescore_main_cod.json"))}
     full = "cache/real_bench/rescore_r2/ranks.npz"
+    if rev["r2"] is not None and os.path.exists(full):
+        f = np.load(full)
+        rev["r2"]["paired_vs_main"] = {k: {f"top{kk}": paired_macro(f[k], R[f"none|{k}"], stems, kk) for kk in (1, 10)}
+                                       for k in f.files if "@" not in k}
     for tag in ("r2_noB", "r2_nolp", "r2_noka2", "r2_nomask"):
         res, rk = load(f"results/rescore_{tag}.json"), f"cache/real_bench/rescore_{tag}/ranks.npz"
         if res is None:
@@ -427,13 +435,44 @@ def main() -> int:
                    "n_rank_changed": int((a[ok] != b_[ok]).sum()), "n_top1_changed": int(((a[ok] == 0) != (b_[ok] == 0)).sum())}
         assert abs(lv1[td]["v1"]["macro_top1"]["value"] - round(hub1["macro"][f"none|{td}|lnq_bkg"]["top1"], 4)) < 1e-9
     ex["lnq_v1"] = lv1
+    # variable-cell re-rank: median rank over the 59 sc patterns (a miss lies beyond the shortlist, so the median is
+    # defined only if it falls inside it) and per-pattern hits against ln q v2 on the same patterns
+    k_c2 = c2["meta"]["k"]
+    rc = rank_c2[rank_c2 >= 0]
+    med_c2 = float(np.median(np.where(rc >= k_c2, 10 ** 9, rc)) + 1)
+    assert med_c2 <= k_c2
+    rl = R["none|sc|lnq_bkg"][rank_c2 >= 0]
+    in_list = rl < k_c2
+    ex["critic2"] = {"k": k_c2, "median_rank": med_c2, "n_patterns": int(len(rc)), "hits": int((rc == 0).sum()),
+                     "lnq_hits": int((rl == 0).sum()), "n_answer_in_shortlist": int(in_list.sum()),
+                     "n_answer_in_lnq_top100": int((rl < 100).sum()),
+                     "gains": int(((rc == 0) & (rl != 0)).sum()), "losses": int(((rc != 0) & (rl == 0)).sum()),
+                     # 1-based: ln q's rank of the answers the re-rank moves to first; the re-rank's rank of the
+                     # answers ln q had first and it moves down
+                     "gain_lnq_ranks": sorted(int(x) + 1 for x in rl[(rc == 0) & (rl != 0)]),
+                     "loss_c2_ranks": sorted(int(x) + 1 for x in rc[(rc != 0) & (rl == 0)]),
+                     "n_comparisons": c2["meta"]["n_comparisons"], "n_failed": c2["meta"]["n_failed_comparisons"],
+                     "cpu_min_median": rd(c2["meta"]["cpu_s_median"] / 60), "cpu_h_max": rd(c2["meta"]["cpu_s_max"] / 3600),
+                     "cpu_h_total": rd(c2["meta"]["cpu_h_total"])}
     # chance level of the real within-family task: one random score per candidate
     wf_rows = [m for m in meta if m["n_other"] > 0]
     ex["within_family_chance"] = rd(np.mean([m["n_same_in_lib"] / (m["n_same_in_lib"] + m["n_other"]) for m in wf_rows]))
     ex["model_probe_check"] = json.load(open("results/model_probe_check.json"))
     ex["wrong_top1_audit"] = {k: v for k, v in json.load(open("results/wrong_top1_audit.json")).items()}
+    # open replica (R5): library selection and identification counts from 31's outputs in the data dir
+    cdir = f"{bench.DATA}/cod"
+    sel_c = json.load(open(f"{cdir}/library_select.json"))
+    n_all = sum(1 for ln in open(f"{cdir}/library_all_ids.txt") if ln.strip())
+    tc = json.load(open(f"{cdir}/opxrd_truth_cod.json"))
+    ident = [x for x in tc if x["true_stems"]]
+    ex["cod"] = {"n_selected": sel_c["n_library"], "n_all": n_all, "n_added_candidates": n_all - sel_c["n_library"],
+                 "n_patterns": len(tc), "n_identified": len(ident),
+                 "n_identified_both": sum(1 for x in ident if truth[x["id"]]["true_stems"]),
+                 "n_identified_cod_only": sum(1 for x in ident if not truth[x["id"]]["true_stems"]),
+                 "n_other_compound": sum(x["n_other_compound"] for x in tc),
+                 "n_unknown_same_formula": sum(len(x["unknown"]) for x in tc)}
     out["extra"] = ex
-    out["revision"] = revision(stems)
+    out["revision"] = revision(stems, R)
 
     with open(args.out, "w") as fh:
         json.dump(out, fh, indent=1)

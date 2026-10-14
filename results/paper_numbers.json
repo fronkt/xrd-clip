@@ -11,7 +11,8 @@
   "model_epochs": 60,
   "model_batch": 512,
   "pymatgen_recheck_n": 296,
-  "pymatgen_recheck_version": "2026.4.16"
+  "pymatgen_recheck_version": "2026.4.16",
+  "hub_lnq2_wall_s": 405
  },
  "dataset": {
   "n_opxrd_organic": 196,
@@ -4674,6 +4675,33 @@
     "n_top1_changed": 1
    }
   },
+  "critic2": {
+   "k": 50,
+   "median_rank": 3.0,
+   "n_patterns": 59,
+   "hits": 26,
+   "lnq_hits": 25,
+   "n_answer_in_shortlist": 36,
+   "n_answer_in_lnq_top100": 36,
+   "gains": 4,
+   "losses": 3,
+   "gain_lnq_ranks": [
+    2,
+    3,
+    7,
+    9
+   ],
+   "loss_c2_ranks": [
+    2,
+    22,
+    50
+   ],
+   "n_comparisons": 2950,
+   "n_failed": 1,
+   "cpu_min_median": 2.2,
+   "cpu_h_max": 2.9628,
+   "cpu_h_total": 399.7017
+  },
   "within_family_chance": 0.3977,
   "model_probe_check": {
    "n_library": 309080,
@@ -4772,6 +4800,17 @@
      "wrong": "GOFWUV"
     }
    ]
+  },
+  "cod": {
+   "n_selected": 108716,
+   "n_all": 109570,
+   "n_added_candidates": 854,
+   "n_patterns": 196,
+   "n_identified": 191,
+   "n_identified_both": 189,
+   "n_identified_cod_only": 2,
+   "n_other_compound": 2670,
+   "n_unknown_same_formula": 23
   }
  },
  "revision": {
@@ -7387,6 +7426,224 @@
       "n": 44,
       "top1": 0.0,
       "top1_base": 0.0
+     }
+    }
+   },
+   "paired_vs_main": {
+    "std|pearson_bkg": {
+     "top1": {
+      "n_compounds": 123,
+      "diff": -0.0233,
+      "ci": [
+       -0.065,
+       0.0171
+      ]
+     },
+     "top10": {
+      "n_compounds": 123,
+      "diff": 0.0004,
+      "ci": [
+       -0.024,
+       0.0244
+      ]
+     }
+    },
+    "sc|pearson_bkg": {
+     "top1": {
+      "n_compounds": 30,
+      "diff": -0.0364,
+      "ci": [
+       -0.1061,
+       0.0
+      ]
+     },
+     "top10": {
+      "n_compounds": 30,
+      "diff": 0.0,
+      "ci": [
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "std|cos_zs_bkg": {
+     "top1": {
+      "n_compounds": 123,
+      "diff": 0.0425,
+      "ci": [
+       0.0114,
+       0.0813
+      ]
+     },
+     "top10": {
+      "n_compounds": 123,
+      "diff": 0.0,
+      "ci": [
+       -0.0244,
+       0.0244
+      ]
+     }
+    },
+    "sc|cos_zs_bkg": {
+     "top1": {
+      "n_compounds": 30,
+      "diff": 0.0433,
+      "ci": [
+       -0.0133,
+       0.1333
+      ]
+     },
+     "top10": {
+      "n_compounds": 30,
+      "diff": 0.0027,
+      "ci": [
+       -0.01,
+       0.0182
+      ]
+     }
+    },
+    "std|wcc_1_bkg": {
+     "top1": {
+      "n_compounds": 123,
+      "diff": -0.0163,
+      "ci": [
+       -0.0488,
+       0.0163
+      ]
+     },
+     "top10": {
+      "n_compounds": 123,
+      "diff": -0.0081,
+      "ci": [
+       -0.0244,
+       0.0
+      ]
+     }
+    },
+    "sc|wcc_1_bkg": {
+     "top1": {
+      "n_compounds": 30,
+      "diff": 0.0167,
+      "ci": [
+       -0.05,
+       0.1
+      ]
+     },
+     "top10": {
+      "n_compounds": 30,
+      "diff": 0.0,
+      "ci": [
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "std|wcc_2_bkg": {
+     "top1": {
+      "n_compounds": 123,
+      "diff": -0.0163,
+      "ci": [
+       -0.0732,
+       0.0325
+      ]
+     },
+     "top10": {
+      "n_compounds": 123,
+      "diff": -0.0244,
+      "ci": [
+       -0.065,
+       0.0081
+      ]
+     }
+    },
+    "sc|wcc_2_bkg": {
+     "top1": {
+      "n_compounds": 30,
+      "diff": 0.0333,
+      "ci": [
+       0.0,
+       0.1
+      ]
+     },
+     "top10": {
+      "n_compounds": 30,
+      "diff": -0.0333,
+      "ci": [
+       -0.1667,
+       0.0667
+      ]
+     }
+    },
+    "std|lnq_bkg": {
+     "top1": {
+      "n_compounds": 123,
+      "diff": -0.0163,
+      "ci": [
+       -0.0488,
+       0.0163
+      ]
+     },
+     "top10": {
+      "n_compounds": 123,
+      "diff": -0.0141,
+      "ci": [
+       -0.0369,
+       -0.0008
+      ]
+     }
+    },
+    "sc|lnq_bkg": {
+     "top1": {
+      "n_compounds": 30,
+      "diff": 0.0333,
+      "ci": [
+       -0.0667,
+       0.1333
+      ]
+     },
+     "top10": {
+      "n_compounds": 30,
+      "diff": -0.0067,
+      "ci": [
+       -0.02,
+       0.0
+      ]
+     }
+    },
+    "std|model_bkg": {
+     "top1": {
+      "n_compounds": 123,
+      "diff": -0.0163,
+      "ci": [
+       -0.0407,
+       0.0
+      ]
+     },
+     "top10": {
+      "n_compounds": 123,
+      "diff": -0.0081,
+      "ci": [
+       -0.0244,
+       0.0
+      ]
+     }
+    },
+    "sc|model_bkg": {
+     "top1": {
+      "n_compounds": 30,
+      "diff": 0.0,
+      "ci": [
+       0.0,
+       0.0
+      ]
+     },
+     "top10": {
+      "n_compounds": 30,
+      "diff": 0.0,
+      "ci": [
+       0.0,
+       0.0
+      ]
      }
     }
    }
