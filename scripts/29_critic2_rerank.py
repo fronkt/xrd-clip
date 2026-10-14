@@ -152,7 +152,9 @@ def cmd_fit(args) -> int:
 def compare(pid: str, cand: str, wavelength: float, timeout: int, peaks: str = PEAKS) -> dict:
     """One COMPAREVC of candidate CIF cache/critic2/cif/<cand>.cif against the pattern's fitted peaks."""
     d = os.path.join(ROOT, pid)
-    tag = f"cmp_{cand}"
+    # per-process name: two concurrent runs on one pattern (X2 + X3 on pattern_594, 10-14) shared cmp_<cand>.cri/.cro,
+    # read and deleted each other's files (empty results, crossed peak lists); threads of one run never repeat a pair
+    tag = f"cmp_{cand}_{os.getpid()}"
     cif = os.path.relpath(os.path.join(ROOT, "cif", cand + ".cif"), d).replace("\\", "/")
     with open(os.path.join(d, tag + ".cri"), "w") as fh:
         fh.write(f"comparevc {cif} {peaks} global quick alpha 1 lambda {wavelength:.6f}\n")
@@ -292,7 +294,8 @@ def cmd_eval(args) -> int:
     lib_rc, gidx, qinfo, keep = sc_queries(args)
     plan = json.load(open(os.path.join(ROOT, "plan.json")))
     diffs = {}
-    # a variant (--suffix) overlays its rows on the main comparisons: only its patterns/pairs were rerun
+    # a variant (--suffix) overlays its rows on the main comparisons: only its patterns/pairs were rerun; later rows
+    # win, so a repair rerun is appended to the variant's file
     lines = open(os.path.join(ROOT, "diffs.jsonl")).readlines()
     if args.suffix:
         lines += open(os.path.join(ROOT, f"diffs{args.suffix}.jsonl")).readlines()
@@ -340,6 +343,15 @@ def cmd_eval(args) -> int:
         res[name] = {f"top{kk}": pn.macro(r, kk, stems, cboot) for kk in (1, 10)}
         res[name]["per_pattern_top1"] = float((r[r >= 0] == 0).mean()) if (r >= 0).any() else None
     res["paired_critic2_minus_lnq"] = {f"top{kk}": pn.paired_macro(rank_c2, np.where(sel, r1, -1), stems, kk) for kk in (1, 10)}
+    if args.suffix:  # a variant is judged against the main re-rank (X2/X3 pre-declared comparison)
+        main = json.load(open("results/critic2_rerank.json"))["rank_by_pattern"]
+        rank_main = np.full(nq, -1, np.int64)
+        for pid, p in plan.items():
+            if pid in main:
+                rank_main[p["qi"]] = main[pid]["critic2"]
+        res["paired_variant_minus_main"] = {f"top{kk}": pn.paired_macro(rank_c2, rank_main, stems, kk) for kk in (1, 10)}
+        res["meta"]["patterns_changed_rank"] = sorted(pid for pid, p in plan.items()
+                                                      if pid in main and rank_c2[p["qi"]] != main[pid]["critic2"])
     # rank of the first correct entry (0 = top-1; K = answer not in the shortlist), for 22's subgroup splits + release
     res["rank_by_pattern"] = {pid: {"critic2": int(rank_c2[p["qi"]]), "lnq_shortlist": int(rank_lnq_short[p["qi"]])}
                               for pid, p in plan.items() if rank_c2[p["qi"]] >= 0}

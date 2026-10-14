@@ -584,6 +584,70 @@ def main() -> int:
         npk = {t_: [r_["n_peaks"] for r_ in pp_ if r_["pressure_series"] == (t_ == "pressure_series")]
                for t_ in ("ambient", "pressure_series")}
         ex["critic2"]["n_peaks_range"] = {t_: [int(min(v)), int(max(v)), float(np.median(v))] for t_, v in npk.items()}
+    # Frank's extra checks (todo C8), each a re-rank variant judged against the main re-rank (29 eval --suffix):
+    # X2 answer-blind zero offsets (36 answer-holding shortlists), X3 zero-trimmed default refits of the 10
+    # zero-padded pressure-series patterns (shortlists, own-entry control, answer injection)
+    main_r = {pid: v["critic2"] for pid, v in c2["rank_by_pattern"].items()}
+    for tag, suf in (("x2_zero_offset", "_zs"), ("x3_dac_refit", "_x3")):
+        if not os.path.exists(f"results/critic2_rerank{suf}.json"):
+            continue
+        v_ = json.load(open(f"results/critic2_rerank{suf}.json"))
+        var_r = {pid: x["critic2"] for pid, x in v_["rank_by_pattern"].items()}
+        changed = v_["meta"]["patterns_changed_rank"]
+        # unique pairs: the pattern_594 repair rerun (critic2_x23_fix594.sh) is appended, and later rows win
+        rerun = {(r_["pid"], r_["cand"]) for r_ in map(json.loads, open(f"cache/critic2/diffs{suf}.jsonl"))}
+        ex[tag] = {"top1": rnd(v_["critic2_vcgpwdf"]["top1"]), "top10": rnd(v_["critic2_vcgpwdf"]["top10"]),
+                   "paired_minus_main": rnd(v_["paired_variant_minus_main"]),
+                   "hits": sum(r_ == 0 for r_ in var_r.values()), "hits_main": sum(r_ == 0 for r_ in main_r.values()),
+                   "gains": sorted(p for p in changed if var_r[p] == 0), "losses": sorted(p for p in changed if main_r[p] == 0),
+                   "n_rank_changed": len(changed), "n_comparisons_rerun": len(rerun),
+                   "n_failed": v_["meta"]["n_failed_comparisons"], "cpu_h_total": rd(v_["meta"]["cpu_h_total"])}
+    if "x2_zero_offset" in ex:
+        zo = json.load(open("results/critic2_zero_offsets.json"))
+        lab = [abs(z["delta_native_deg"]) for z in zo.values() if abs(z["wavelength"] - 1.5418) < 0.01]
+        ex["x2_zero_offset"]["delta"] = {"n": len(zo), "n_lab_cu": len(lab), "median_abs_lab_cu_deg": rd(np.median(lab)),
+                                         "median_abs_cu_equiv_deg": rd(np.median([abs(z["delta_cu_equiv_deg"]) for z in zo.values()])),
+                                         "n_at_edge": sum(z["at_edge"] for z in zo.values())}
+    if "x3_dac_refit" in ex and os.path.exists("cache/critic2/control_x3.jsonl"):
+        dd3 = {}
+        for f_ in ("diffs.jsonl", "diffs_x3.jsonl"):     # the refits' rows overlay the main ones
+            for ln in open(f"cache/critic2/{f_}"):
+                r_ = json.loads(ln)
+                dd3[(r_["pid"], r_["cand"])] = r_["diff"] if r_["diff"] is not None else 1.0
+        plan_ = json.load(open("cache/critic2/plan.json"))
+        old = {row["id"]: row for row in ex["critic2"]["per_pattern"]}
+        v3 = json.load(open("results/critic2_rerank_x3.json"))["rank_by_pattern"]
+        rows3 = []
+        for ln in open("cache/critic2/control_x3.jsonl"):
+            r_ = json.loads(ln)
+            od = r_["diff"] if r_["diff"] is not None else 1.0
+            sl = [dd3[(r_["pid"], c)] for c in plan_[r_["pid"]]["shortlist"][:k_c2] if c not in plan_[r_["pid"]]["truth"]]
+            o_ = (old.get(r_["pid"]) or {}).get("control") or {}
+            nr = v3[r_["pid"]]["critic2"]
+            rows3.append({"id": r_["pid"], "stem": old[r_["pid"]]["stem"], "own": r_["cand"], "diff": rd(od),
+                          "rank_in_shortlist": int(sum(x < od for x in sl)) + 1,
+                          "old_diff": o_.get("diff"), "old_rank_in_shortlist": o_.get("rank_in_shortlist"),
+                          # the answer's re-rank position, 1-based (None: not in the shortlist), as Table S18
+                          "rerank_rank": nr + 1 if nr < k_c2 else None, "old_rerank_rank": old[r_["pid"]]["critic2_rank"],
+                          "old_n_peaks": old[r_["pid"]]["n_peaks"]})
+        inj3 = {}
+        if os.path.exists("cache/critic2/inject_x3.jsonl"):
+            for ln in open("cache/critic2/inject_x3.jsonl"):
+                r_ = json.loads(ln)
+                od = r_["diff"] if r_["diff"] is not None else 1.0
+                sl = [dd3[(r_["pid"], c)] for c in plan_[r_["pid"]]["shortlist"][:k_c2]]
+                o_ = (old.get(r_["pid"]) or {}).get("injected") or {}
+                inj3[r_["pid"]] = {"answer": r_["cand"], "diff": rd(od), "rank_if_shortlisted": int(sum(x < od for x in sl)) + 1,
+                                   "old_rank_if_shortlisted": o_.get("rank_if_shortlisted")}
+        ex["x3_dac_refit"]["control"] = sorted(rows3, key=lambda r_: r_["id"])
+        ex["x3_dac_refit"]["control_rank1"] = sum(r_["rank_in_shortlist"] == 1 for r_ in rows3)
+        ex["x3_dac_refit"]["control_rank1_old"] = sum(r_["old_rank_in_shortlist"] == 1 for r_ in rows3)
+        ex["x3_dac_refit"]["control_median_diff"] = rd(np.median([r_["diff"] for r_ in rows3]))
+        ex["x3_dac_refit"]["control_median_diff_old"] = rd(np.median([r_["old_diff"] for r_ in rows3 if r_["old_diff"] is not None]))
+        ex["x3_dac_refit"]["injected"] = inj3
+        ex["x3_dac_refit"]["injected_rank1"] = sum(v["rank_if_shortlisted"] == 1 for v in inj3.values())
+        ex["x3_dac_refit"]["injected_rank1_old"] = sum(v["old_rank_if_shortlisted"] == 1 for v in inj3.values())
+        ex["x3_dac_refit"]["n_peaks"] = {r_["pid"]: r_["n_peaks"] for r_ in json.load(open("cache/critic2/x3_refits.json"))}
     # chance level of the real within-family task: one random score per candidate
     wf_rows = [m for m in meta if m["n_other"] > 0]
     ex["within_family_chance"] = rd(np.mean([m["n_same_in_lib"] / (m["n_same_in_lib"] + m["n_other"]) for m in wf_rows]))

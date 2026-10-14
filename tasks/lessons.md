@@ -68,3 +68,12 @@
   import + lookup takes 4 s. A finished script also hung at exit after writing its output.
 - **Rule:** run one CSD API process at a time, write outputs before the end of the script, wrap it in `timeout`,
   and when killing stragglers filter by PID, never by a command-line substring that the current shell also contains.
+
+## 2026-10-14 — two concurrent critic2 runs shared one pattern's work files
+- **What happened:** X2 and X3 ran side by side on one box; pattern_594 belongs to both, and each comparison wrote
+  `cmp_<cand>.cri/.cro` in the pattern's directory and deleted them afterwards. The runs read and deleted each
+  other's files: 25 rows came back empty in seconds, and the rest could have read the other run's peak list.
+  Caught only because a dry-run eval showed 23 failures on one pattern.
+- **Rule:** any scratch file a parallel job writes gets a name unique to the process (pid or uuid), never one
+  derived only from the job's inputs; before launching runs side by side, intersect their job lists; dry-run the
+  eval on the first partial pull, not on the final one.

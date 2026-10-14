@@ -141,6 +141,51 @@ def revision_sections() -> list:
           f"temperatures more than 50 K apart (not pressure series) {cd['dT_gt_50_not_pressure']}; supercell description "
           f"{cd['supercell']}; none of these {cd['none_of_these']} ({', '.join(cd['none_of_these_ids'])})."]
 
+    x2, x3 = ex.get("x2_zero_offset"), ex.get("x3_dac_refit")
+    if x2 and x3:
+        dz = x2["delta"]
+        L += ["", "### Sensitivity of the re-rank to the zero offset and to the peak fits", "",
+              "Zero offset: each single-crystal pattern gets an answer-blind zero offset δ, the native shift (±0.5°, steps of "
+              "0.02°, both scaled by λ/λ(Cu)) that maximises the cosine between the background-subtracted measured pattern on "
+              "the Cu grid and the clean rendering of its ln q top-1 entry, which is never the answer. The fitted peak positions "
+              f"are shifted by −δ and the {c2['n_answer_in_shortlist']} shortlists that hold the answer are rerun "
+              f"({x2['n_comparisons_rerun']:,} comparisons; a shortlist without the answer stays a miss). Median |δ| "
+              f"{dz['median_abs_lab_cu_deg']:.2f}° for the {dz['n_lab_cu']} laboratory Cu patterns and "
+              f"{dz['median_abs_cu_equiv_deg']:.2f}° (Cu-equivalent) over all {dz['n']}; {dz['n_at_edge']} offsets lie at the "
+              "edge of the scan.", "",
+              f"Peak fits: {len(x3['control'])} patterns, all from pressure series, start their measured range with a run of "
+              "zero-intensity points, which can drive the 20-knot background into large oscillations. Those points are dropped "
+              "and the patterns refitted with critic2's default settings; their shortlists "
+              f"({x3['n_comparisons_rerun']:,} comparisons), own-entry controls and answer injections are rerun. A grid search "
+              "over the fit settings, judged by the own-entry DIFF, was set aside before it ran: that criterion rewards sparse "
+              "peak lists and would have picked degenerate fits.", "",
+              "**Table S18c** The re-rank with answer-blind zero offsets and with the refitted pressure-series patterns, against "
+              f"the main re-rank (paired differences over {x2['top1']['n_compounds']} compounds).", ""]
+        L += table(["re-rank", "comparisons rerun", "macro top-1", "− main, top-1", "macro top-10", "− main, top-10",
+                    "first places", "patterns whose rank changes"],
+                   [["main", "", mci(c2r["critic2_vcgpwdf"]["top1"]), "", mci(c2r["critic2_vcgpwdf"]["top10"]), "",
+                     x2["hits_main"], ""]] +
+                   [[nm_, f"{v['n_comparisons_rerun']:,}", mci(v["top1"]), dci(v["paired_minus_main"]["top1"]), mci(v["top10"]),
+                     dci(v["paired_minus_main"]["top10"]), v["hits"], v["n_rank_changed"]]
+                    for nm_, v in (("zero offsets", x2), ("refitted pressure series", x3))])
+        L += ["", "**Table S18d** The refitted patterns, before → after. Ranks as in Table S18 ('–': the answer is not in "
+              "the shortlist; 'n/a': no injection, the answer is in the shortlist).", ""]
+
+        def ba(a, b, fmt="d"):
+            f_ = (lambda v: "n/a" if v is None else format(v, fmt))
+            return f"{f_(a)} → {f_(b)}"
+        inj = x3["injected"]
+        L += table(["opXRD pattern", "CSD family", "own entry", "peaks", "own entry DIFF", "own entry, rank among wrong entries",
+                    "injected answer, rank", "rank after the re-rank"],
+                   [[r["id"], r["stem"], r["own"], ba(r["old_n_peaks"], x3["n_peaks"][r["id"]]), ba(r["old_diff"], r["diff"], ".3f"),
+                     ba(r["old_rank_in_shortlist"], r["rank_in_shortlist"]),
+                     ba(inj[r["id"]]["old_rank_if_shortlisted"], inj[r["id"]]["rank_if_shortlisted"]) if r["id"] in inj else "n/a",
+                     " → ".join("–" if v is None else str(v) for v in (r["old_rerank_rank"], r["rerank_rank"]))]
+                    for r in sorted(x3["control"], key=lambda r: (r["stem"], int(r["id"].split("_")[1])))])
+        L += ["", f"Own entry ranked first: {x3['control_rank1_old']} → {x3['control_rank1']} of {len(x3['control'])}; median "
+              f"own-entry DIFF {x3['control_median_diff_old']:.3f} → {x3['control_median_diff']:.3f}. Injected answer ranked "
+              f"first: {x3['injected_rank1_old']} → {x3['injected_rank1']} of {len(inj)}."]
+
     GA, GR = rev["r4_gap"]["results"], rev["r4c_realism"]["results"]
     est = rev["r4_gap"]["estimates"]
     L += ["", "## S11 Effect ladder", "",

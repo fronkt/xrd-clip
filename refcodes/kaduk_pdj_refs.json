@@ -1,0 +1,258 @@
+{
+ "description": "Kaduk et al. Powder Diffraction structures (2014-2021) whose CSD entry is in the xrd-clip 309k library: DOI, CSD refcode, citation, and where the raw powder data can be obtained (checked 2026-10-14). Refcodes only, no CIFs.",
+ "csd_version": "6.01",
+ "refs": [
+  {
+   "doi": "10.1017/s088571561500041x",
+   "refcode": "BUFPAV01",
+   "short": "tramadol hydrochloride",
+   "title": "Crystal structure of tramadol hydrochloride, C16H26NO2Cl",
+   "year": 2015,
+   "citation": "Kaduk, J. A., Zhong, K., Gindhart, A. M., and Blanton, T. N. (2015). Crystal structure of tramadol hydrochloride, C16H26NO2Cl. Powder Diffraction 30(3), 242-249. https://doi.org/10.1017/s088571561500041x",
+   "public_supp_cifs": [
+    "S088571561500041Xsup001.cif",
+    "S088571561500041Xsup002.cif"
+   ],
+   "route": "public supplement (Cambridge Core)"
+  },
+  {
+   "doi": "10.1017/s0885715614000815",
+   "refcode": "FOLCAH03",
+   "short": "folic acid dihydrate",
+   "title": "Crystal structure of folic acid dihydrate, C29H29N2O6(H2O)2",
+   "year": 2015,
+   "citation": "Kaduk, J. A., Crowder, C. E., and Zhong, K. (2015). Crystal structure of folic acid dihydrate, C29H29N2O6(H2O)2. Powder Diffraction 30(1), 52-56. https://doi.org/10.1017/s0885715614000815",
+   "public_supp_cifs": [
+    "S0885715614000815sup001.cif",
+    "S0885715614000815sup002.cif"
+   ],
+   "route": "public supplement (Cambridge Core)"
+  },
+  {
+   "doi": "10.1017/s0885715615000317",
+   "refcode": "HUCHEU02",
+   "short": "fingolimod hydrochloride",
+   "title": "Crystal structure of fingolimod hydrochloride, C19H34ClNO2",
+   "year": 2015,
+   "citation": "Kaduk, J. A., Zhong, K., Gindhart, A. M., and Blanton, T. N. (2015). Crystal structure of fingolimod hydrochloride, C19H34ClNO2. Powder Diffraction 30(3), 205-210. https://doi.org/10.1017/s0885715615000317",
+   "public_supp_cifs": [
+    "S0885715615000317sup001.cif",
+    "S0885715615000317sup002.cif"
+   ],
+   "route": "public supplement (Cambridge Core)"
+  },
+  {
+   "doi": "10.1017/s0885715615000172",
+   "refcode": "OMAJIX",
+   "short": "levalbuterol hydrochloride",
+   "title": "Crystal structure of levalbuterol hydrochloride polymorph A (Xopenex), C13H22NO3Cl",
+   "year": 2015,
+   "citation": "Kaduk, J. A., Zhong, K., Blanton, T. N., and Gates, S. (2015). Crystal structure of levalbuterol hydrochloride polymorph A (Xopenex), C13H22NO3Cl. Powder Diffraction 30(2), 158-162. https://doi.org/10.1017/s0885715615000172",
+   "public_supp_cifs": [
+    "S0885715615000172sup001.cif",
+    "S0885715615000172sup002.cif"
+   ],
+   "route": "public supplement (Cambridge Core)"
+  },
+  {
+   "doi": "10.1017/s0885715615000305",
+   "refcode": "OMAKAQ01",
+   "short": "ziprasidone hydrochloride monohydrate",
+   "title": "Crystal structure of ziprasidone hydrochloride monohydrate, C21H22Cl2N4OS(H2O)",
+   "year": 2015,
+   "citation": "Kaduk, J. A., Zhong, K., Gindhart, A. M., and Blanton, T. N. (2015). Crystal structure of ziprasidone hydrochloride monohydrate, C21H22Cl2N4OS(H2O). Powder Diffraction 30(3), 192-198. https://doi.org/10.1017/s0885715615000305",
+   "public_supp_cifs": [
+    "S0885715615000305sup001.cif",
+    "S0885715615000305sup002.cif"
+   ],
+   "route": "public supplement (Cambridge Core)"
+  },
+  {
+   "doi": "10.1017/s0885715615000196",
+   "refcode": "OMAKOE01",
+   "short": "rilpivirine",
+   "title": "Crystal structure of rilpivirine, C22H18N6",
+   "year": 2015,
+   "citation": "Kaduk, J. A., Zhong, K., and Blanton, T. N. (2015). Crystal structure of rilpivirine, C22H18N6. Powder Diffraction 30(2), 170-174. https://doi.org/10.1017/s0885715615000196",
+   "public_supp_cifs": [
+    "S0885715615000196sup001.cif",
+    "S0885715615000196sup002.cif"
+   ],
+   "route": "public supplement (Cambridge Core)"
+  },
+  {
+   "doi": "10.1017/s0885715615000329",
+   "refcode": "URATAK",
+   "short": "solifenacin hydrogen succinate",
+   "title": "Crystal structure of solifenacin hydrogen succinate, C23H27N2O2(HC4H4O4)",
+   "year": 2015,
+   "citation": "Kaduk, J. A., Reid, J. W., Zhong, K., Gindhart, A. M., and Blanton, T. N. (2015). Crystal structure of solifenacin hydrogen succinate, C23H27N2O2(HC4H4O4). Powder Diffraction 30(3), 211-217. https://doi.org/10.1017/s0885715615000329",
+   "public_supp_cifs": [
+    "S0885715615000329sup001.cif",
+    "S0885715615000329sup002.cif"
+   ],
+   "route": "public supplement (Cambridge Core)"
+  },
+  {
+   "doi": "10.1017/s0885715615000378",
+   "refcode": "URATIS",
+   "short": "lacosamide form I",
+   "title": "Crystal structure of lacosamide form I, C13H18N2O3",
+   "year": 2015,
+   "citation": "Kaduk, J. A., Zhong, K., Gindhart, A. M., and Blanton, T. N. (2015). Crystal structure of lacosamide form I, C13H18N2O3. Powder Diffraction 30(3), 224-230. https://doi.org/10.1017/s0885715615000378",
+   "public_supp_cifs": [
+    "S0885715615000378sup001.cif",
+    "S0885715615000378sup002.cif"
+   ],
+   "route": "public supplement (Cambridge Core)"
+  },
+  {
+   "doi": "10.1017/s0885715615000512",
+   "refcode": "URAVUG",
+   "short": "nilotinib",
+   "title": "Crystal structure of nilotinib, C28H22F3N7O",
+   "year": 2015,
+   "citation": "Kaduk, J. A., Zhong, K., Gindhart, A. M., and Blanton, T. N. (2015). Crystal structure of nilotinib, C28H22F3N7O. Powder Diffraction 30(3), 270-277. https://doi.org/10.1017/s0885715615000512",
+   "public_supp_cifs": [
+    "S0885715615000512sup001.cif",
+    "S0885715615000512sup002.cif"
+   ],
+   "route": "public supplement (Cambridge Core)"
+  },
+  {
+   "doi": "10.1017/s0885715615000755",
+   "refcode": "URAWUH",
+   "short": "sitagliptin dihydrogen phosphate monohydrate",
+   "title": "Crystal structure of sitagliptin dihydrogen phosphate monohydrate, C16H16F6N5O(H2PO4)(H2O)",
+   "year": 2015,
+   "citation": "Kaduk, J. A., Zhong, K., Gindhart, A. M., and Blanton, T. N. (2015). Crystal structure of sitagliptin dihydrogen phosphate monohydrate, C16H16F6N5O(H2PO4)(H2O). Powder Diffraction 30(4), 349-356. https://doi.org/10.1017/s0885715615000755",
+   "public_supp_cifs": [
+    "S0885715615000755sup001.cif",
+    "S0885715615000755sup002.cif"
+   ],
+   "route": "public supplement (Cambridge Core)"
+  },
+  {
+   "doi": "10.1017/s0885715616000178",
+   "refcode": "EZIQEL",
+   "short": "citalopram hydrobromide",
+   "title": "Crystal structure of citalopram hydrobromide, C20H22FN2OBr",
+   "year": 2016,
+   "citation": "Kaduk, J. A., Zhong, K., Gindhart, A. M., and Blanton, T. N. (2016). Crystal structure of citalopram hydrobromide, C20H22FN2OBr. Powder Diffraction 31(3), 176-184. https://doi.org/10.1017/s0885715616000178",
+   "public_supp_cifs": [
+    "S0885715616000178sup001.cif",
+    "S0885715616000178sup003.cif"
+   ],
+   "route": "public supplement (Cambridge Core)"
+  },
+  {
+   "doi": "10.1017/s0885715616000087",
+   "refcode": "YAGRIJ01",
+   "short": "paliperidone",
+   "title": "Crystal structure of paliperidone, C23H27FN4O3",
+   "year": 2016,
+   "citation": "Kaduk, J. A., Zhong, K., Gindhart, A. M., and Blanton, T. N. (2016). Crystal structure of paliperidone, C23H27FN4O3. Powder Diffraction 31(2), 135-141. https://doi.org/10.1017/s0885715616000087",
+   "public_supp_cifs": [
+    "S0885715616000087sup001.cif",
+    "S0885715616000087sup002.cif"
+   ],
+   "route": "public supplement (Cambridge Core)"
+  },
+  {
+   "doi": "10.1017/s0885715617000896",
+   "refcode": "NOKFUR",
+   "short": "paliperidone palmitate",
+   "title": "Crystal structure of paliperidone palmitate (INVEGA SUSTENNA®), C39H57FN4O4",
+   "year": 2017,
+   "citation": "Kaduk, J. A., Dmitrienko, A. O., Gindhart, A. M., and Blanton, T. N. (2017). Crystal structure of paliperidone palmitate (INVEGA SUSTENNA®), C39H57FN4O4. Powder Diffraction 32(4), 222-227. https://doi.org/10.1017/s0885715617000896",
+   "public_supp_cifs": [
+    "S0885715617000896sup001.cif",
+    "S0885715617000896sup002.cif"
+   ],
+   "route": "public supplement (Cambridge Core)"
+  },
+  {
+   "doi": "10.1017/s0885715616000713",
+   "refcode": "ZZZGCU01",
+   "short": "hydrocortisone acetate",
+   "title": "Crystal structure of hydrocortisone acetate, C23H32O6",
+   "year": 2017,
+   "citation": "Kaduk, J. A., Gindhart, A. M., and Blanton, T. N. (2017). Crystal structure of hydrocortisone acetate, C23H32O6. Powder Diffraction 32(1), 31-34. https://doi.org/10.1017/s0885715616000713",
+   "public_supp_cifs": [
+    "S0885715616000713sup001.cif",
+    "S0885715616000713sup002.cif"
+   ],
+   "route": "public supplement (Cambridge Core)"
+  },
+  {
+   "doi": "10.1017/s0885715618000039",
+   "refcode": "DOVGEC02",
+   "short": "estradiol valerate",
+   "title": "Crystal structure of estradiol 17βvalerate (Delestrogen), C23H32O3",
+   "year": 2018,
+   "citation": "Wheatley, A. M., Kaduk, J. A., Gindhart, A. M., and Blanton, T. N. (2018). Crystal structure of estradiol 17βvalerate (Delestrogen), C23H32O3. Powder Diffraction 33(1), 70-71. https://doi.org/10.1017/s0885715618000039",
+   "public_supp_cifs": [
+    "S0885715618000039sup001.cif"
+   ],
+   "route": "public supplement (Cambridge Core)"
+  },
+  {
+   "doi": "10.1017/s0885715621000415",
+   "refcode": "EDUPUS",
+   "short": "donepezil hydrochloride form III",
+   "title": "Crystal structure of donepezil hydrochloride form III, C24H29NO3⋅HCl",
+   "year": 2021,
+   "citation": "Reid, J. W., and Kaduk, J. A. (2021). Crystal structure of donepezil hydrochloride form III, C24H29NO3⋅HCl. Powder Diffraction 36(4), 233-240. https://doi.org/10.1017/s0885715621000415",
+   "public_supp_cifs": [],
+   "route": "PDJ form"
+  },
+  {
+   "doi": "10.1017/s0885715614000232",
+   "refcode": "SALBUT02",
+   "short": "salbutamol sulfate",
+   "title": "Powder X-ray diffraction of albuterol sulfate (C13H22NO3)2SO4",
+   "year": 2014,
+   "citation": "Kaduk, J., Crowder, C., Zhong, K., Fawcett, T., and Suchomel, M. (2014). Powder X-ray diffraction of albuterol sulfate (C13H22NO3)2SO4. Powder Diffraction 29(2), 202-202. https://doi.org/10.1017/s0885715614000232",
+   "public_supp_cifs": [],
+   "route": "PDF database"
+  },
+  {
+   "doi": "10.1017/s0885715614001018",
+   "refcode": "BINMEQ09",
+   "short": "curcumin",
+   "title": "Rietveld refinement using synchrotron powder diffraction data for curcumin, C21H20O6, and comparison with density functional theory",
+   "year": 2015,
+   "citation": "Reid, J. W., Kaduk, J. A., Garimella, S. V., and Tse, J. S. (2015). Rietveld refinement using synchrotron powder diffraction data for curcumin, C21H20O6, and comparison with density functional theory. Powder Diffraction 30(1), 67-75. https://doi.org/10.1017/s0885715614001018",
+   "public_supp_cifs": [
+    "S0885715614001018sup001.cif"
+   ],
+   "route": "public supplement (Cambridge Core)"
+  },
+  {
+   "doi": "10.1017/s0885715615000548",
+   "refcode": "HAQQUN02",
+   "short": "saxagliptin",
+   "title": "Powder X-ray diffraction of saxagliptin hydrochloride dihydrate, C18H26N3O2Cl(H2O)2",
+   "year": 2015,
+   "citation": "Kaduk, J. A., Zhong, K., Blanton, T. N., Gindhart, A. M., and Fawcett, T. G. (2015). Powder X-ray diffraction of saxagliptin hydrochloride dihydrate, C18H26N3O2Cl(H2O)2. Powder Diffraction 30(3), 296-297. https://doi.org/10.1017/s0885715615000548",
+   "public_supp_cifs": [
+    "S0885715615000548sup001.cif"
+   ],
+   "route": "public supplement (Cambridge Core)"
+  },
+  {
+   "doi": "10.1017/s0885715616000294",
+   "refcode": "IQISAE",
+   "short": "trandolapril",
+   "title": "The crystal structure of trandolapril, C24H34N2O5: an example of the utility of raw data deposition in the powder diffraction file",
+   "year": 2016,
+   "citation": "Reid, J. W., Kaduk, J. A., and Vickers, M. (2016). The crystal structure of trandolapril, C24H34N2O5: an example of the utility of raw data deposition in the powder diffraction file. Powder Diffraction 31(3), 205-210. https://doi.org/10.1017/s0885715616000294",
+   "public_supp_cifs": [
+    "S0885715616000294sup002.cif",
+    "S0885715616000294sup003.cif",
+    "S0885715616000294sup004.cif"
+   ],
+   "route": "public supplement (Cambridge Core)"
+  }
+ ]
+}

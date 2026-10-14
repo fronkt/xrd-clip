@@ -405,6 +405,30 @@ C. Paper: paper_numbers.json -> manuscript/ESI/figs -> verify_claims -> internal
            series (EPIVEF 2, LILRIJ 1, MEHNIY 7; NAPHTA, HOJQII and every ambient pattern have none). X3 is now:
            drop the zero-intensity points and refit with critic2's defaults, for every pattern that has them
            (these 10); no grid. Rerun their 10 x 50 shortlist comparisons, controls and injections.
+     - [~] X2 + X3 BOX RUN (10-14, Vast 55988256, EPYC 7B12 256 thr, $0.52/h; scripts/box/critic2_x23_box.sh): 2,297 of
+           2,300 done by 19:41 (3 slow ones left: GOGZOU, POSHIR, RUWVUB; 4-h cap). BUG found in the partial pull:
+           pattern_594 is in BOTH sets (X2's 36 answer-holding shortlists and X3's 10 refits), and compare() named its
+           files cmp_<cand>.cri/.cro per pattern dir, so the two concurrent runs read and deleted each other's files
+           (23 X3 + 2 X2 rows empty in 15-300 s; the rest may have read the other peak list). No other pair overlaps
+           (control/inject vs either run: 0; main run 10-13: run vs control/inject 0, so its rows are clean). FIX:
+           per-process names cmp_<cand>_<pid> (29 compare); scripts/box/critic2_x23_fix594.sh reruns 594's 50 pairs
+           under each peak list (diffs_zs594 / diffs_x3594, launched 23:52Z) -> APPEND to diffs_zs / diffs_x3
+           (later rows win in 29 eval and in 22's overlay; 22 counts unique pairs). Pull out.tar AND out_fix.tar
+           before touching PULLED (the box self-stops on it). The local pull loop was killed by Claude Code's
+           low-memory reaper at ~19:45 (not a failure of the loop).
+           Dry runs on the partial pull (eval, 22, 25 ESI S18c/S18d) all pass; no numbers taken from them.
+   - [ ] C9 Kaduk / ICDD raw data (Tier C; NOT part of draft v2 — a possible external set). Nicole (pdj@icdd.com)
+         replied 10-14: journal supplemental raw data need Executive Director approval + one "PDJ Supplemental
+         Data Request" form per reference; PDF-database deposits are a separate route (icdd.com/pdfdld, verified
+         students get 5 PDF entries free). CSD API check (10-14): only 23 of the 113 requested DOIs have a CSD
+         entry (CSD 6.01), 16 of them in the 309k library; author search adds 4 in-library organics not on the
+         list (albuterol sulfate SALBUT02, curcumin BINMEQ09 [16 CSD siblings], saxagliptin HCl 2H2O HAQQUN02,
+         trandolapril IQISAE) -> 20 usable references (refcodes/kaduk_pdj_refs.json). Cambridge Core: 18 of the
+         20 have PUBLIC supplementary CIFs (static.cambridge.org ...supNNN.cif, HTTP 200, mostly ~2.7 MB = raw
+         profile size; repotrectinib's emailed CIF is 1.9 MB with _pd_meas_intensity_total). Only donepezil HCl
+         form III (2021) needs the form; albuterol sulfate (2014 data report) has no supplement (PDF route).
+         Waiting on Frank: OK to download the form template + the 18 public CIFs; then reply draft to Nicole
+         narrowing the request to donepezil (filler: scratchpad fill_pdj_form.py).
    - [~] C7 build.sh -> docx (builds 10-14, after the referee fixes); plan Section 13c-f readouts; check in with Frank
 After C (not R1-R5): R6 decisions, Zenodo deposit (code + open data; DD's data reviewer needs a DOI), cover
 letter, TOC graphic (at revision), Frank submits.
