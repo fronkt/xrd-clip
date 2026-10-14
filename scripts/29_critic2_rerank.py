@@ -16,7 +16,8 @@ entries (same-form powder studies) left out. A query whose answer is not in its 
   python scripts/29_critic2_rerank.py fit --procs 60             # critic2 peak fits (box or local)
   python scripts/29_critic2_rerank.py run --procs 120            # comparisons (CRITIC2=<binary> on the box)
   PYTHONPATH=src python scripts/29_critic2_rerank.py eval        # -> results/critic2_rerank.json
-Everything under cache/critic2/ (CSD-derived CIFs: gitignored, never uploaded).
+Everything under cache/critic2/ (CSD-derived CIFs: gitignored, never released; a rented box gets them only by a
+manual-mode upload, scripts/box/critic2_k10_box.sh).
 """
 from __future__ import annotations
 
@@ -151,8 +152,9 @@ def cmd_run(args) -> int:
             done.add((r["pid"], r["cand"]))
     # rank-major order (every pattern's 1st candidate, then every 2nd, ...): a run stopped early still leaves a
     # complete re-rank of a shorter shortlist, which `eval --k` scores (10-13: local throughput unknown)
+    only = set(args.pids.split(",")) if args.pids else set(plan)
     jobs = [(pid, p["shortlist"][r]) for r in range(args.k) for pid, p in plan.items()
-            if r < len(p["shortlist"]) and (pid, p["shortlist"][r]) not in done
+            if pid in only and r < len(p["shortlist"]) and (pid, p["shortlist"][r]) not in done
             and os.path.exists(os.path.join(ROOT, pid, PEAKS))]
     print(f"[run] {len(jobs)} comparisons to run ({len(done)} done) on {args.procs} processes", flush=True)
 
@@ -243,11 +245,14 @@ def main() -> int:
     ap.add_argument("cmd", choices=("prep", "fit", "run", "eval"))
     ap.add_argument("--truth", default=f"{bench.DATA}/opxrd/opxrd_truth.json")
     ap.add_argument("--patterns", default=f"{bench.DATA}/opxrd/opxrd_cnrs_organic.json")
-    # K = 50, not the pre-declared 100: the timing test (1-5 CPU-min per comparison) priced 100 at ~300 CPU-h, and
-    # ln q v2's single-crystal recall is the same at 50 and 100 (0.61); disclosed in the paper
-    ap.add_argument("--k", type=int, default=50)
+    # K = 10, not the pre-declared 100 (nor the 50 first chosen from a 1-5 CPU-min timing test): comparevc's global
+    # search grows ~V^2 with the candidate's cell volume (10-13: 16 s at 223 A^3, 230 s at 770, > 40 min at 5,264),
+    # pricing K = 50 at ~3,100 CPU-h. ln q v2's single-crystal recall is 0.542 at 10 vs 0.61 at 50 and 100 (32 vs
+    # 36 of 59 patterns; top-1 25); run on a rented 128-core box with a 4-h cap per comparison; disclosed in the paper
+    ap.add_argument("--k", type=int, default=10)
     ap.add_argument("--procs", type=int, default=6)
-    ap.add_argument("--timeout", type=int, default=3600, help="per comparison (s); a timeout counts as DIFF = 1")
+    ap.add_argument("--timeout", type=int, default=14400, help="per comparison (s); a timeout counts as DIFF = 1")
+    ap.add_argument("--pids", default="", help="run: only these comma-separated patterns (a fit that landed late)")
     ap.add_argument("--fit_timeout", type=int, default=3600, help="per peak fit (s)")
     ap.add_argument("--out", default="results/critic2_rerank.json")
     args = ap.parse_args()
