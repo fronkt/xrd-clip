@@ -15,8 +15,15 @@ from scipy.ndimage import minimum_filter1d, uniform_filter1d
 from xrdclip.data import augment as A
 
 
-def to_cu_grid(tt: np.ndarray, y: np.ndarray, wavelength: float) -> "tuple[np.ndarray, np.ndarray]":
-    """Measured (2theta, I) at `wavelength` -> intensity on A.GRID at Cu K-alpha1, plus coverage mask."""
+def to_cu_grid(tt: np.ndarray, y: np.ndarray, wavelength: float,
+               method: str = "interp") -> "tuple[np.ndarray, np.ndarray]":
+    """Measured (2theta, I) at `wavelength` -> intensity on A.GRID at Cu K-alpha1, plus coverage mask.
+
+    method "interp" point-samples the converted pattern at each grid point (the benchmark's default).
+    "binavg" (10-14 referee check) averages it over each grid point's bin (+-STEP/2, clipped to the measured
+    range), via the cumulative trapezoid integral of the piecewise-linear pattern, so fine-step synchrotron
+    peaks keep their area instead of being sampled at arbitrary phases (the R1 fix of ln q, for every score).
+    """
     tt, y = np.asarray(tt, float), np.asarray(y, float)
     d = wavelength / (2 * np.sin(np.radians(tt / 2)))
     s = A.WAVELENGTH / (2 * d)
@@ -26,7 +33,24 @@ def to_cu_grid(tt: np.ndarray, y: np.ndarray, wavelength: float) -> "tuple[np.nd
     tt_cu, yy = tt_cu[order], y[ok][order]
     mask = (A.GRID >= tt_cu[0]) & (A.GRID <= tt_cu[-1])
     out = np.zeros(A.N_POINTS)
-    out[mask] = np.interp(A.GRID[mask], tt_cu, yy)
+    if method == "interp":
+        out[mask] = np.interp(A.GRID[mask], tt_cu, yy)
+    elif method == "binavg":
+        tt_cu, keep = np.unique(tt_cu, return_index=True)        # strictly increasing for the integral
+        yy = yy[keep]
+        cum = np.r_[0.0, np.cumsum((yy[1:] + yy[:-1]) * 0.5 * np.diff(tt_cu))]
+
+        def integral(t):                                           # integral from tt_cu[0] to t (inside the range)
+            k = np.clip(np.searchsorted(tt_cu, t, side="right") - 1, 0, len(tt_cu) - 2)
+            yt = np.interp(t, tt_cu, yy)
+            return cum[k] + (t - tt_cu[k]) * (yy[k] + yt) * 0.5
+        g = A.GRID[mask]
+        lo = np.clip(g - A.STEP / 2, tt_cu[0], tt_cu[-1])
+        hi = np.clip(g + A.STEP / 2, tt_cu[0], tt_cu[-1])
+        w = hi - lo
+        out[mask] = np.where(w > 0, (integral(hi) - integral(lo)) / np.where(w > 0, w, 1), np.interp(g, tt_cu, yy))
+    else:
+        raise ValueError(method)
     return out.astype(np.float32), mask
 
 

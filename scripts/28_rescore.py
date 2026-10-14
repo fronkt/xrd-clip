@@ -48,6 +48,8 @@ CONFIGS = {
     "r2_nolp":   dict(lnq=2, B=True,  lp=False, ka2=True,  mask=True,  keys=KEYS),
     "r2_noka2":  dict(lnq=2, B=True,  lp=True,  ka2=False, mask=True,  keys=KEYS),
     "r2_nomask": dict(lnq=2, B=True,  lp=True,  ka2=True,  mask=False, keys=KEYS),
+    # 10-14 referee check (Frank's X1): measured patterns put on the Cu grid by bin averaging, not interpolation
+    "binavg":    dict(lnq=2, B=False, lp=False, ka2=False, mask=False, grid="binavg", keys=KEYS),
 }
 BVALUE_JSON = "results/r2_bvalue.json"
 
@@ -151,14 +153,14 @@ def build_queries(cfg: dict, gidx: dict, args):
         o = pats[q["id"]]
         wl = float(q["wavelength"] or A.WAVELENGTH)
         kind = tube(q["wavelength"])
-        y, m = to_cu_grid(o["two_theta"], o["intensity"], wl)
+        y, m = to_cu_grid(o["two_theta"], o["intensity"], wl, method=cfg.get("grid", "interp"))
         if cfg["lp"] and kind != "cu":
             y = np.where(m, y * lp_factor(A.GRID, wl, kind), 0).astype(np.float32)
         raw.append(preprocess(y, m, bkg=True))
         kinds.append(kind)
         masks.append(m)
     raw = np.stack(raw).astype(np.float32)
-    if not cfg["lp"]:
+    if not cfg["lp"] and cfg.get("grid", "interp") == "interp":
         assert np.array_equal(raw, Q["raw_bkg"]), "query build drifted from 19"
     return qinfo, excluded, raw, np.array(kinds), np.stack(masks)
 

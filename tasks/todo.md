@@ -394,6 +394,14 @@ C. Paper: paper_numbers.json -> manuscript/ESI/figs -> verify_claims -> internal
            setting closest to the default. The chosen setting refits all 22; then their full shortlists (1,100
            comparisons, for the control and injection ranks too), controls and injections are rerun with it
            (box session together with X2). Code: scripts/35_critic2_dac.py.
+           AMENDMENT (10-14, after a 2-setting test on pattern_213, BEFORE the grid run): the own-entry DIFF
+           rewards sparse peak lists (k40_y05: 5 peaks, own DIFF 0.011; k20_ymed after trimming: 51 peaks,
+           0.043; original fit 0.227), so the grid criterion would pick degenerate fits, and a criterion that
+           measures discrimination would cost ~600-800 more comparisons. The identified defect needs no tuning:
+           leading zero-intensity runs (29-44 points) occur in exactly 10 of the 59 patterns, all pressure
+           series (EPIVEF 2, LILRIJ 1, MEHNIY 7; NAPHTA, HOJQII and every ambient pattern have none). X3 is now:
+           drop the zero-intensity points and refit with critic2's defaults, for every pattern that has them
+           (these 10); no grid. Rerun their 10 x 50 shortlist comparisons, controls and injections.
    - [~] C7 build.sh -> docx (builds 10-14, after the referee fixes); plan Section 13c-f readouts; check in with Frank
 After C (not R1-R5): R6 decisions, Zenodo deposit (code + open data; DD's data reviewer needs a DOI), cover
 letter, TOC graphic (at revision), Frank submits.

@@ -149,13 +149,13 @@ def cmd_fit(args) -> int:
     return 0
 
 
-def compare(pid: str, cand: str, wavelength: float, timeout: int) -> dict:
+def compare(pid: str, cand: str, wavelength: float, timeout: int, peaks: str = PEAKS) -> dict:
     """One COMPAREVC of candidate CIF cache/critic2/cif/<cand>.cif against the pattern's fitted peaks."""
     d = os.path.join(ROOT, pid)
     tag = f"cmp_{cand}"
     cif = os.path.relpath(os.path.join(ROOT, "cif", cand + ".cif"), d).replace("\\", "/")
     with open(os.path.join(d, tag + ".cri"), "w") as fh:
-        fh.write(f"comparevc {cif} {PEAKS} global quick alpha 1 lambda {wavelength:.6f}\n")
+        fh.write(f"comparevc {cif} {peaks} global quick alpha 1 lambda {wavelength:.6f}\n")
     t0 = time.time()
     try:
         txt = critic2(os.path.join(d, tag + ".cri"), d, timeout=timeout)
@@ -172,11 +172,11 @@ def compare(pid: str, cand: str, wavelength: float, timeout: int) -> dict:
             "cpu": cpu.group(1).strip() if cpu else None, "status": "ok" if m else ("timeout/empty" if not txt else "no DIFF")}
 
 
-def run_jobs(jobs, plan: dict, res_path: str, procs: int, timeout: int, tag: str = "run") -> None:
+def run_jobs(jobs, plan: dict, res_path: str, procs: int, timeout: int, tag: str = "run", peaks: str = PEAKS) -> None:
     """Run (pid, cand) comparisons in parallel, appending one JSON row per comparison to res_path."""
     t0 = time.time()
     with ThreadPoolExecutor(procs) as ex, open(res_path, "a") as out:
-        futs = [ex.submit(compare, pid, cand, plan[pid]["wavelength"], timeout) for pid, cand in jobs]
+        futs = [ex.submit(compare, pid, cand, plan[pid]["wavelength"], timeout, peaks) for pid, cand in jobs]
         for i, f in enumerate(as_completed(futs)):
             r = f.result()
             out.write(json.dumps(r) + "\n")
@@ -195,16 +195,16 @@ def done_pairs(res_path: str) -> set:
 
 def cmd_run(args) -> int:
     plan = json.load(open(os.path.join(ROOT, "plan.json")))
-    res_path = os.path.join(ROOT, "diffs.jsonl")
+    res_path = os.path.join(ROOT, f"diffs{args.suffix}.jsonl")
     done = done_pairs(res_path)
     # rank-major order (every pattern's 1st candidate, then every 2nd, ...): a run stopped early still leaves a
     # complete re-rank of a shorter shortlist, which `eval --k` scores (10-13: local throughput unknown)
     only = set(args.pids.split(",")) if args.pids else set(plan)
     jobs = [(pid, p["shortlist"][r]) for r in range(args.k) for pid, p in plan.items()
             if pid in only and r < len(p["shortlist"]) and (pid, p["shortlist"][r]) not in done
-            and os.path.exists(os.path.join(ROOT, pid, PEAKS))]
+            and os.path.exists(os.path.join(ROOT, pid, args.peaks))]
     print(f"[run] {len(jobs)} comparisons to run ({len(done)} done) on {args.procs} processes", flush=True)
-    run_jobs(jobs, plan, res_path, args.procs, args.timeout)
+    run_jobs(jobs, plan, res_path, args.procs, args.timeout, peaks=args.peaks)
     return 0
 
 
@@ -229,15 +229,29 @@ def cmd_inject(args) -> int:
     closest-cell single-crystal answer entry (22's sc_cell_mismatch.closest_sc_entry) and see where its DIFF would
     fall among the shortlist's. Separates 'not shortlisted' from 'not recognised'. -> inject.jsonl"""
     plan = json.load(open(os.path.join(ROOT, "plan.json")))
-    res = json.load(open(args.out))
+    res = json.load(open("results/critic2_rerank.json"))       # misses are defined on the main shortlists
     closest = json.load(open("results/paper_numbers.json"))["extra"]["sc_cell_mismatch"]["closest_sc_entry"]
     miss = {pid: closest[pid] for pid, v in res["rank_by_pattern"].items() if v["lnq_shortlist"] >= args.k and pid in closest}
     write_cifs(set(miss.values()))
-    res_path = os.path.join(ROOT, "inject.jsonl")
+    res_path = os.path.join(ROOT, f"inject{args.suffix}.jsonl")
     done = done_pairs(res_path)
-    jobs = [(pid, rc) for pid, rc in miss.items() if (pid, rc) not in done]
+    only = set(args.pids.split(",")) if args.pids else set(miss)
+    jobs = [(pid, rc) for pid, rc in miss.items() if (pid, rc) not in done and pid in only]
     print(f"[inject] {len(jobs)} injected answers ({len(miss)} patterns miss) on {args.procs} processes", flush=True)
-    run_jobs(jobs, plan, res_path, args.procs, args.timeout, tag="inject")
+    run_jobs(jobs, plan, res_path, args.procs, args.timeout, tag="inject", peaks=args.peaks)
+    return 0
+
+
+def cmd_pairs(args) -> int:
+    """Run an explicit list of [pid, cand] pairs (a JSON file) into <kind><suffix>.jsonl: the control and injection
+    pairs of a variant, precomputed locally, since `control` needs the CSD library index (not on a rented box)."""
+    plan = json.load(open(os.path.join(ROOT, "plan.json")))
+    pairs = [tuple(p) for p in json.load(open(args.pairs_file))]
+    res_path = os.path.join(ROOT, f"{args.kind}{args.suffix}.jsonl")
+    done = done_pairs(res_path)
+    jobs = [p for p in pairs if p not in done]
+    print(f"[pairs] {len(jobs)} {args.kind} comparisons on {args.procs} processes", flush=True)
+    run_jobs(jobs, plan, res_path, args.procs, args.timeout, tag=args.kind, peaks=args.peaks)
     return 0
 
 
@@ -265,11 +279,12 @@ def cmd_control(args) -> int:
                         out.write(r["cif"])
                     todo.discard(r["refcode"])
     assert not todo, todo
-    res_path = os.path.join(ROOT, "control.jsonl")
+    res_path = os.path.join(ROOT, f"control{args.suffix}.jsonl")
     done = done_pairs(res_path)
-    jobs = [(pid, rc) for pid, rc in own.items() if (pid, rc) not in done]
+    only = set(args.pids.split(",")) if args.pids else set(own)
+    jobs = [(pid, rc) for pid, rc in own.items() if (pid, rc) not in done and pid in only]
     print(f"[control] {len(jobs)} own-entry comparisons on {args.procs} processes", flush=True)
-    run_jobs(jobs, plan, res_path, args.procs, args.timeout, tag="control")
+    run_jobs(jobs, plan, res_path, args.procs, args.timeout, tag="control", peaks=args.peaks)
     return 0
 
 
@@ -277,7 +292,11 @@ def cmd_eval(args) -> int:
     lib_rc, gidx, qinfo, keep = sc_queries(args)
     plan = json.load(open(os.path.join(ROOT, "plan.json")))
     diffs = {}
-    for line in open(os.path.join(ROOT, "diffs.jsonl")):
+    # a variant (--suffix) overlays its rows on the main comparisons: only its patterns/pairs were rerun
+    lines = open(os.path.join(ROOT, "diffs.jsonl")).readlines()
+    if args.suffix:
+        lines += open(os.path.join(ROOT, f"diffs{args.suffix}.jsonl")).readlines()
+    for line in lines:
         r = json.loads(line)
         diffs[(r["pid"], r["cand"])] = r
     nq = len(qinfo)
@@ -324,7 +343,8 @@ def cmd_eval(args) -> int:
     # rank of the first correct entry (0 = top-1; K = answer not in the shortlist), for 22's subgroup splits + release
     res["rank_by_pattern"] = {pid: {"critic2": int(rank_c2[p["qi"]]), "lnq_shortlist": int(rank_lnq_short[p["qi"]])}
                               for pid, p in plan.items() if rank_c2[p["qi"]] >= 0}
-    with open(args.out, "w") as fh:
+    out_path = args.out or f"results/critic2_rerank{args.suffix}.json"
+    with open(out_path, "w") as fh:
         json.dump(res, fh, indent=1)
     print(json.dumps(res, indent=1)[:2000])
     return 0
@@ -332,7 +352,7 @@ def cmd_eval(args) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=("prep", "fit", "run", "control", "inject", "eval"))
+    ap.add_argument("cmd", choices=("prep", "fit", "run", "control", "inject", "pairs", "eval"))
     ap.add_argument("--truth", default=f"{bench.DATA}/opxrd/opxrd_truth.json")
     ap.add_argument("--patterns", default=f"{bench.DATA}/opxrd/opxrd_cnrs_organic.json")
     # K = 50, not the pre-declared 100: ln q v2's single-crystal shortlist holds the answer for the same patterns at
@@ -345,9 +365,14 @@ def main() -> int:
     ap.add_argument("--timeout", type=int, default=14400, help="per comparison (s); a timeout counts as DIFF = 1")
     ap.add_argument("--pids", default="", help="run: only these comma-separated patterns (a fit that landed late)")
     ap.add_argument("--fit_timeout", type=int, default=3600, help="per peak fit (s)")
-    ap.add_argument("--out", default="results/critic2_rerank.json")
+    ap.add_argument("--out", default=None, help="eval output (default results/critic2_rerank<suffix>.json)")
+    ap.add_argument("--peaks", default=PEAKS, help="peak file in each pattern dir (X2 fit_zs.peaks, X3 fit_x3.peaks)")
+    ap.add_argument("--suffix", default="", help="results files diffs/control/inject<suffix>.jsonl (variants)")
+    ap.add_argument("--pairs_file", default="", help="pairs: JSON list of [pid, cand]")
+    ap.add_argument("--kind", default="control", choices=("control", "inject"), help="pairs: results file kind")
     args = ap.parse_args()
-    return {"prep": cmd_prep, "fit": cmd_fit, "run": cmd_run, "control": cmd_control, "inject": cmd_inject, "eval": cmd_eval}[args.cmd](args)
+    return {"prep": cmd_prep, "fit": cmd_fit, "run": cmd_run, "control": cmd_control, "inject": cmd_inject,
+            "pairs": cmd_pairs, "eval": cmd_eval}[args.cmd](args)
 
 
 if __name__ == "__main__":

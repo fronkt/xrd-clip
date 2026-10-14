@@ -106,3 +106,5 @@ paper/*.synctex.gz
 !/results/model_gap_bkgall.json
 !/results/model_gap_realism_bkgall.json
 !/results/sc_conditions.json
+!/results/critic2_zero_offsets.json
+!/results/rescore_binavg.json

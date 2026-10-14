@@ -1,0 +1,474 @@
+{
+ "pattern_1006": {
+  "top1_entry": "ROHWIX01",
+  "wavelength": 1.5418,
+  "delta_native_deg": -0.04003,
+  "delta_cu_equiv_deg": -0.04,
+  "cosine": 0.5645,
+  "at_edge": false
+ },
+ "pattern_1008": {
+  "top1_entry": "QABKUE",
+  "wavelength": 0.708,
+  "delta_native_deg": 0.13787,
+  "delta_cu_equiv_deg": 0.3,
+  "cosine": 0.4999,
+  "at_edge": false
+ },
+ "pattern_1010": {
+  "top1_entry": "HUNLEL",
+  "wavelength": 0.41244,
+  "delta_native_deg": 0.13386,
+  "delta_cu_equiv_deg": 0.5,
+  "cosine": 0.4091,
+  "at_edge": true
+ },
+ "pattern_1021": {
+  "top1_entry": "NULXOH",
+  "wavelength": 0.3685,
+  "delta_native_deg": -0.1196,
+  "delta_cu_equiv_deg": -0.5,
+  "cosine": 0.3804,
+  "at_edge": true
+ },
+ "pattern_1022": {
+  "top1_entry": "MOVTIB",
+  "wavelength": 0.50918,
+  "delta_native_deg": 0.11238,
+  "delta_cu_equiv_deg": 0.34,
+  "cosine": 0.5184,
+  "at_edge": false
+ },
+ "pattern_1029": {
+  "top1_entry": "CEHQEM01",
+  "wavelength": 1.54056,
+  "delta_native_deg": -0.28,
+  "delta_cu_equiv_deg": -0.28,
+  "cosine": 0.744,
+  "at_edge": false
+ },
+ "pattern_1041": {
+  "top1_entry": "EXAXAC",
+  "wavelength": 1.5406,
+  "delta_native_deg": 0.08,
+  "delta_cu_equiv_deg": 0.08,
+  "cosine": 0.5299,
+  "at_edge": false
+ },
+ "pattern_1046": {
+  "top1_entry": "NULXOH",
+  "wavelength": 0.3685,
+  "delta_native_deg": -0.0909,
+  "delta_cu_equiv_deg": -0.38,
+  "cosine": 0.4672,
+  "at_edge": false
+ },
+ "pattern_16": {
+  "top1_entry": "QOGHOL",
+  "wavelength": 0.3685,
+  "delta_native_deg": -0.1196,
+  "delta_cu_equiv_deg": -0.5,
+  "cosine": 0.3419,
+  "at_edge": true
+ },
+ "pattern_180": {
+  "top1_entry": "UPOJER",
+  "wavelength": 1.54059,
+  "delta_native_deg": -0.08,
+  "delta_cu_equiv_deg": -0.08,
+  "cosine": 0.8267,
+  "at_edge": false
+ },
+ "pattern_205": {
+  "top1_entry": "ZZZIZM01",
+  "wavelength": 1.540598,
+  "delta_native_deg": -0.02,
+  "delta_cu_equiv_deg": -0.02,
+  "cosine": 0.8176,
+  "at_edge": false
+ },
+ "pattern_209": {
+  "top1_entry": "ZZZIZM01",
+  "wavelength": 1.540598,
+  "delta_native_deg": 0.0,
+  "delta_cu_equiv_deg": 0.0,
+  "cosine": 0.8347,
+  "at_edge": false
+ },
+ "pattern_213": {
+  "top1_entry": "OWEPAL05",
+  "wavelength": 0.41244,
+  "delta_native_deg": 0.03748,
+  "delta_cu_equiv_deg": 0.14,
+  "cosine": 0.114,
+  "at_edge": false
+ },
+ "pattern_247": {
+  "top1_entry": "QIQVAQ02",
+  "wavelength": 1.5406,
+  "delta_native_deg": -0.08,
+  "delta_cu_equiv_deg": -0.08,
+  "cosine": 0.8218,
+  "at_edge": false
+ },
+ "pattern_252": {
+  "top1_entry": "QIKZUH02",
+  "wavelength": 1.54056,
+  "delta_native_deg": 0.0,
+  "delta_cu_equiv_deg": 0.0,
+  "cosine": 0.861,
+  "at_edge": false
+ },
+ "pattern_297": {
+  "top1_entry": "ROFMEG",
+  "wavelength": 1.5405,
+  "delta_native_deg": 0.49998,
+  "delta_cu_equiv_deg": 0.5,
+  "cosine": 0.6667,
+  "at_edge": true
+ },
+ "pattern_326": {
+  "top1_entry": "NINWIT01",
+  "wavelength": 0.50918,
+  "delta_native_deg": -0.16526,
+  "delta_cu_equiv_deg": -0.5,
+  "cosine": 0.495,
+  "at_edge": true
+ },
+ "pattern_351": {
+  "top1_entry": "KAWBER01",
+  "wavelength": 1.54056,
+  "delta_native_deg": -0.02,
+  "delta_cu_equiv_deg": -0.02,
+  "cosine": 0.8143,
+  "at_edge": false
+ },
+ "pattern_359": {
+  "top1_entry": "ZZZIZM01",
+  "wavelength": 1.540598,
+  "delta_native_deg": -0.08,
+  "delta_cu_equiv_deg": -0.08,
+  "cosine": 0.7369,
+  "at_edge": false
+ },
+ "pattern_396": {
+  "top1_entry": "ZZZIZM01",
+  "wavelength": 1.540598,
+  "delta_native_deg": -0.12,
+  "delta_cu_equiv_deg": -0.12,
+  "cosine": 0.6897,
+  "at_edge": false
+ },
+ "pattern_484": {
+  "top1_entry": "BAPLOT08",
+  "wavelength": 1.54056,
+  "delta_native_deg": 0.08,
+  "delta_cu_equiv_deg": 0.08,
+  "cosine": 0.6835,
+  "at_edge": false
+ },
+ "pattern_487": {
+  "top1_entry": "LOGHOG",
+  "wavelength": 1.5406,
+  "delta_native_deg": 0.22001,
+  "delta_cu_equiv_deg": 0.22,
+  "cosine": 0.4432,
+  "at_edge": false
+ },
+ "pattern_504": {
+  "top1_entry": "ZZZIZM01",
+  "wavelength": 1.540598,
+  "delta_native_deg": 0.04,
+  "delta_cu_equiv_deg": 0.04,
+  "cosine": 0.8818,
+  "at_edge": false
+ },
+ "pattern_511": {
+  "top1_entry": "QOGHOL",
+  "wavelength": 0.3685,
+  "delta_native_deg": -0.04306,
+  "delta_cu_equiv_deg": -0.18,
+  "cosine": 0.5437,
+  "at_edge": false
+ },
+ "pattern_519": {
+  "top1_entry": "ZIVVIL",
+  "wavelength": 1.54056,
+  "delta_native_deg": -0.1,
+  "delta_cu_equiv_deg": -0.1,
+  "cosine": 0.8201,
+  "at_edge": false
+ },
+ "pattern_530": {
+  "top1_entry": "GIYJAA",
+  "wavelength": 1.5406,
+  "delta_native_deg": 0.04,
+  "delta_cu_equiv_deg": 0.04,
+  "cosine": 0.7851,
+  "at_edge": false
+ },
+ "pattern_539": {
+  "top1_entry": "HXACAN69",
+  "wavelength": 1.5418,
+  "delta_native_deg": -0.02002,
+  "delta_cu_equiv_deg": -0.02,
+  "cosine": 0.7297,
+  "at_edge": false
+ },
+ "pattern_574": {
+  "top1_entry": "ZZZIZM01",
+  "wavelength": 1.540598,
+  "delta_native_deg": 0.04,
+  "delta_cu_equiv_deg": 0.04,
+  "cosine": 0.8798,
+  "at_edge": false
+ },
+ "pattern_586": {
+  "top1_entry": "ZIZRUX01",
+  "wavelength": 1.5418,
+  "delta_native_deg": -0.06005,
+  "delta_cu_equiv_deg": -0.06,
+  "cosine": 0.7959,
+  "at_edge": false
+ },
+ "pattern_594": {
+  "top1_entry": "MEHNIY",
+  "wavelength": 0.41244,
+  "delta_native_deg": 0.12315,
+  "delta_cu_equiv_deg": 0.46,
+  "cosine": 0.6874,
+  "at_edge": false
+ },
+ "pattern_619": {
+  "top1_entry": "ZZZIZM01",
+  "wavelength": 1.540598,
+  "delta_native_deg": 0.02,
+  "delta_cu_equiv_deg": 0.02,
+  "cosine": 0.8728,
+  "at_edge": false
+ },
+ "pattern_623": {
+  "top1_entry": "LOPWEV01",
+  "wavelength": 0.41244,
+  "delta_native_deg": 0.12851,
+  "delta_cu_equiv_deg": 0.48,
+  "cosine": 0.7185,
+  "at_edge": false
+ },
+ "pattern_647": {
+  "top1_entry": "TUKJER",
+  "wavelength": 0.3685,
+  "delta_native_deg": -0.08133,
+  "delta_cu_equiv_deg": -0.34,
+  "cosine": 0.5026,
+  "at_edge": false
+ },
+ "pattern_655": {
+  "top1_entry": "QEDWII",
+  "wavelength": 1.5405,
+  "delta_native_deg": 0.29999,
+  "delta_cu_equiv_deg": 0.3,
+  "cosine": 0.6717,
+  "at_edge": false
+ },
+ "pattern_698": {
+  "top1_entry": "ZZZIZM01",
+  "wavelength": 1.540598,
+  "delta_native_deg": -0.04,
+  "delta_cu_equiv_deg": -0.04,
+  "cosine": 0.7898,
+  "at_edge": false
+ },
+ "pattern_710": {
+  "top1_entry": "IKIJER",
+  "wavelength": 0.413541,
+  "delta_native_deg": -0.00537,
+  "delta_cu_equiv_deg": -0.02,
+  "cosine": 0.8095,
+  "at_edge": false
+ },
+ "pattern_726": {
+  "top1_entry": "POJSEQ",
+  "wavelength": 0.3685,
+  "delta_native_deg": -0.00478,
+  "delta_cu_equiv_deg": -0.02,
+  "cosine": 0.4739,
+  "at_edge": false
+ },
+ "pattern_730": {
+  "top1_entry": "VEYHUE",
+  "wavelength": 0.41244,
+  "delta_native_deg": -0.10709,
+  "delta_cu_equiv_deg": -0.4,
+  "cosine": 0.5213,
+  "at_edge": false
+ },
+ "pattern_750": {
+  "top1_entry": "CAKVES",
+  "wavelength": 1.5418,
+  "delta_native_deg": -0.5004,
+  "delta_cu_equiv_deg": -0.5,
+  "cosine": 0.4444,
+  "at_edge": true
+ },
+ "pattern_760": {
+  "top1_entry": "ROGVAN",
+  "wavelength": 0.41337,
+  "delta_native_deg": -0.12343,
+  "delta_cu_equiv_deg": -0.46,
+  "cosine": 0.5348,
+  "at_edge": false
+ },
+ "pattern_77": {
+  "top1_entry": "VAJHAP",
+  "wavelength": 1.5406,
+  "delta_native_deg": -0.42001,
+  "delta_cu_equiv_deg": -0.42,
+  "cosine": 0.4731,
+  "at_edge": false
+ },
+ "pattern_775": {
+  "top1_entry": "ZZZIZM01",
+  "wavelength": 1.540598,
+  "delta_native_deg": 0.0,
+  "delta_cu_equiv_deg": 0.0,
+  "cosine": 0.8562,
+  "at_edge": false
+ },
+ "pattern_787": {
+  "top1_entry": "ZZZIZM01",
+  "wavelength": 1.540598,
+  "delta_native_deg": -0.1,
+  "delta_cu_equiv_deg": -0.1,
+  "cosine": 0.7105,
+  "at_edge": false
+ },
+ "pattern_805": {
+  "top1_entry": "QUWYIR01",
+  "wavelength": 1.54056,
+  "delta_native_deg": -0.02,
+  "delta_cu_equiv_deg": -0.02,
+  "cosine": 0.9059,
+  "at_edge": false
+ },
+ "pattern_808": {
+  "top1_entry": "NULXOH",
+  "wavelength": 0.3685,
+  "delta_native_deg": -0.05262,
+  "delta_cu_equiv_deg": -0.22,
+  "cosine": 0.4662,
+  "at_edge": false
+ },
+ "pattern_816": {
+  "top1_entry": "ACSALA23",
+  "wavelength": 0.410639,
+  "delta_native_deg": 0.06397,
+  "delta_cu_equiv_deg": 0.24,
+  "cosine": 0.718,
+  "at_edge": false
+ },
+ "pattern_82": {
+  "top1_entry": "QOGHOL",
+  "wavelength": 0.3685,
+  "delta_native_deg": -0.11482,
+  "delta_cu_equiv_deg": -0.48,
+  "cosine": 0.5709,
+  "at_edge": false
+ },
+ "pattern_875": {
+  "top1_entry": "LOPWEV01",
+  "wavelength": 0.41244,
+  "delta_native_deg": 0.13386,
+  "delta_cu_equiv_deg": 0.5,
+  "cosine": 0.1048,
+  "at_edge": true
+ },
+ "pattern_880": {
+  "top1_entry": "GEJMER",
+  "wavelength": 1.54184,
+  "delta_native_deg": 0.32027,
+  "delta_cu_equiv_deg": 0.32,
+  "cosine": 0.6206,
+  "at_edge": false
+ },
+ "pattern_887": {
+  "top1_entry": "HADWUG",
+  "wavelength": 1.5406,
+  "delta_native_deg": -0.18,
+  "delta_cu_equiv_deg": -0.18,
+  "cosine": 0.4777,
+  "at_edge": false
+ },
+ "pattern_891": {
+  "top1_entry": "LOPWEV",
+  "wavelength": 0.41244,
+  "delta_native_deg": 0.03748,
+  "delta_cu_equiv_deg": 0.14,
+  "cosine": 0.097,
+  "at_edge": false
+ },
+ "pattern_901": {
+  "top1_entry": "ZZZIZM01",
+  "wavelength": 1.540598,
+  "delta_native_deg": -0.06,
+  "delta_cu_equiv_deg": -0.06,
+  "cosine": 0.7635,
+  "at_edge": false
+ },
+ "pattern_91": {
+  "top1_entry": "NULXOH",
+  "wavelength": 0.3685,
+  "delta_native_deg": -0.1196,
+  "delta_cu_equiv_deg": -0.5,
+  "cosine": 0.4604,
+  "at_edge": true
+ },
+ "pattern_914": {
+  "top1_entry": "HARLUL",
+  "wavelength": 1.5418,
+  "delta_native_deg": -0.18014,
+  "delta_cu_equiv_deg": -0.18,
+  "cosine": 0.677,
+  "at_edge": false
+ },
+ "pattern_917": {
+  "top1_entry": "UVOXEK",
+  "wavelength": 1.54056,
+  "delta_native_deg": 0.02,
+  "delta_cu_equiv_deg": 0.02,
+  "cosine": 0.5743,
+  "at_edge": false
+ },
+ "pattern_921": {
+  "top1_entry": "QATDIY",
+  "wavelength": 0.41244,
+  "delta_native_deg": 0.0,
+  "delta_cu_equiv_deg": 0.0,
+  "cosine": 0.5283,
+  "at_edge": false
+ },
+ "pattern_949": {
+  "top1_entry": "KAWBAN01",
+  "wavelength": 1.54056,
+  "delta_native_deg": -0.02,
+  "delta_cu_equiv_deg": -0.02,
+  "cosine": 0.8335,
+  "at_edge": false
+ },
+ "pattern_96": {
+  "top1_entry": "KIFSAX",
+  "wavelength": 0.3685,
+  "delta_native_deg": 0.04306,
+  "delta_cu_equiv_deg": 0.18,
+  "cosine": 0.5428,
+  "at_edge": false
+ },
+ "pattern_978": {
+  "top1_entry": "HUNLEL",
+  "wavelength": 0.41244,
+  "delta_native_deg": -0.01071,
+  "delta_cu_equiv_deg": -0.04,
+  "cosine": 0.1605,
+  "at_edge": false
+ }
+}
