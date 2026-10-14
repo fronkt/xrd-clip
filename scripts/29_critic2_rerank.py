@@ -245,11 +245,12 @@ def main() -> int:
     ap.add_argument("cmd", choices=("prep", "fit", "run", "eval"))
     ap.add_argument("--truth", default=f"{bench.DATA}/opxrd/opxrd_truth.json")
     ap.add_argument("--patterns", default=f"{bench.DATA}/opxrd/opxrd_cnrs_organic.json")
-    # K = 10, not the pre-declared 100 (nor the 50 first chosen from a 1-5 CPU-min timing test): comparevc's global
-    # search grows ~V^2 with the candidate's cell volume (10-13: 16 s at 223 A^3, 230 s at 770, > 40 min at 5,264),
-    # pricing K = 50 at ~3,100 CPU-h. ln q v2's single-crystal recall is 0.542 at 10 vs 0.61 at 50 and 100 (32 vs
-    # 36 of 59 patterns; top-1 25); run on a rented 128-core box with a 4-h cap per comparison; disclosed in the paper
-    ap.add_argument("--k", type=int, default=10)
+    # K = 50, not the pre-declared 100: ln q v2's single-crystal shortlist holds the answer for the same patterns at
+    # 50 and 100 (36 of 59, recall 0.61), so ranks 51-100 add only competitors; disclosed in the paper. Run on a
+    # rented 256-core box with a 4-h cap per comparison (10-13). A two-point timing extrapolation (cost ~V^2.15 in the
+    # candidate's cell volume) first priced K = 50 at ~3,100 CPU-h and cut K to 10; the K = 10 run measured 76 CPU-h
+    # for 589 comparisons (~6x below that estimate; refit ~V^1.8), so K went back to 50 on the same box
+    ap.add_argument("--k", type=int, default=50)
     ap.add_argument("--procs", type=int, default=6)
     ap.add_argument("--timeout", type=int, default=14400, help="per comparison (s); a timeout counts as DIFF = 1")
     ap.add_argument("--pids", default="", help="run: only these comma-separated patterns (a fit that landed late)")

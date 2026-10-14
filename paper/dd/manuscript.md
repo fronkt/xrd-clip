@@ -345,9 +345,11 @@ default settings, and the global quick comparison with α = 1 as in the paper (t
 the measurement wavelength; it applies no zero-offset correction. One step was added: each pattern was cut
 to the d-spacing window that the other scores see (Cu Kα1 2θ of 5–50°). The shortlist of each single-crystal
 pattern is the 50 best entries of ln q, with set-aside entries excluded; a pattern whose answer is not in
-its shortlist counts as a miss, and a failed comparison as maximally dissimilar. We had planned a shortlist
-of 100, but one comparison takes 1–5 CPU-minutes, and the shortlist contains an answer for the same fraction
-of patterns at 50 as at 100 (TBD(recall_at_50)).
+its shortlist counts as a miss, and a comparison that fails or runs past a 4-hour limit counts as maximally
+dissimilar. We had planned a shortlist of 100, but the shortlist holds the answer for the same 36 of the 59
+patterns at 50 as at 100, so the further entries could only have added competitors; the shorter list is, if
+anything, favourable to the re-rank. A comparison took a median of TBD(c2_cpu_median) CPU-minutes and up to
+TBD(c2_cpu_max) CPU-hours for the largest cells (TBD(c2_capped) reached the limit).
 
 ## 4. Results
 
