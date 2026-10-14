@@ -249,6 +249,9 @@ def cmd_eval(args) -> int:
         res[name] = {f"top{kk}": pn.macro(r, kk, stems, cboot) for kk in (1, 10)}
         res[name]["per_pattern_top1"] = float((r[r >= 0] == 0).mean()) if (r >= 0).any() else None
     res["paired_critic2_minus_lnq"] = {f"top{kk}": pn.paired_macro(rank_c2, np.where(sel, r1, -1), stems, kk) for kk in (1, 10)}
+    # rank of the first correct entry (0 = top-1; K = answer not in the shortlist), for 22's subgroup splits + release
+    res["rank_by_pattern"] = {pid: {"critic2": int(rank_c2[p["qi"]]), "lnq_shortlist": int(rank_lnq_short[p["qi"]])}
+                              for pid, p in plan.items() if rank_c2[p["qi"]] >= 0}
     with open(args.out, "w") as fh:
         json.dump(res, fh, indent=1)
     print(json.dumps(res, indent=1)[:2000])

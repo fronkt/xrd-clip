@@ -2,8 +2,11 @@
 
   python scripts/22_paper_numbers.py            -> results/paper_numbers.json
 
-Sources: results/real_bench.json (19), results/real_bench_hub.json (21 eval), results/strong_baselines.json (13),
-cache/real_bench/hub_ranks.npz (21 eval, gitignored), the opXRD truth + pattern files and the scaffold splits.
+Sources: results/real_bench.json (19), results/real_bench_hub_lnq2.json (21 eval with ln q v2), results/
+strong_baselines_v2.json (13, crc32-seeded sweep), results/rescore_*.json + results/critic2_rerank.json +
+results/model_gap*.json (revision R1-R5), cache/real_bench_lnq2/hub_ranks.npz (21 eval, gitignored), the opXRD truth
++ pattern files and the scaffold splits. ln q v2 (revision R1) is the primary ln q score; v1 (real_bench_hub.json,
+cache/real_bench/hub_ranks.npz) is kept in `lnq_v1` for the ESI. The two hub files differ only in the ln q keys.
 Rank conventions follow 19: r = number of wrong entries scoring above the best correct one, -1 = no correct entry
 in the library. Per-pattern numbers are recomputed from the rank cache and asserted equal to the committed JSONs,
 so the manuscript, the tables and the caches cannot drift apart silently.
@@ -27,6 +30,10 @@ CORRS = ["none", "csls_aug_k10"]
 STRONG = ["pearson_zs", "wcc_0.5", "wcc_1", "wcc_2", "lnq"]   # G0 strong baselines; VC excluded (not validated)
 CASE = "ZZZUWK"
 CLS_KEYS = [k for k in KEYS if k != "model_bkg"]
+HUB, HUB_RANKS = "results/real_bench_hub_lnq2.json", "cache/real_bench_lnq2/hub_ranks.npz"
+HUB_V1, HUB_RANKS_V1 = "results/real_bench_hub.json", "cache/real_bench/hub_ranks.npz"
+SWEEP = "results/strong_baselines_v2.json"     # both ln q versions on the same draws ('lnq' = v2, 'lnq_v1')
+LNQ_V2 = "results/rescore_r1.json"             # 28 tag r1: ln q v2 per pattern + its model hybrids
 # Facts from run logs, not from a results file (plan Sections 12a-12b).
 RUN_FACTS = {"bench_cost_usd": 2.53, "hub_cost_usd": 0.26, "hub_gpu": "RTX 4090", "hub_wall_s": 761,
              "g0_cost_usd": 0.25, "g0_gpu": "RTX 3090",
@@ -126,9 +133,12 @@ def main() -> int:
     args = ap.parse_args()
 
     rb = json.load(open("results/real_bench.json"))
-    hub = json.load(open("results/real_bench_hub.json"))
-    sb = json.load(open("results/strong_baselines.json"))
-    R = np.load("cache/real_bench/hub_ranks.npz")
+    hub = json.load(open(HUB))
+    sb = json.load(open(SWEEP))
+    R = np.load(HUB_RANKS)
+    r1 = json.load(open(LNQ_V2))
+    # 19's committed per-pattern numbers, with ln q v2 (and its hybrids) from 28's r1 run
+    rb_sum = {**rb["summary"], **{f"{k.split('|')[0]}|all|{k.split('|', 1)[1]}": v for k, v in r1["per_pattern"].items()}}
     meta = rb["meta"]
     stems = np.array([m["stem"] for m in meta])
     nq = len(meta)
@@ -209,9 +219,9 @@ def main() -> int:
                     "macro_top10": m10["value"], "macro_top10_ci": m10["ci"],
                     "frac_rank_gt_100": rd((r[ok] >= 100).mean()), "frac_rank_gt_1000": rd((r[ok] >= 1000).mean()),
                 }
-                # against 19's committed numbers (uncorrected): top-1 must be identical
+                # against 19's committed numbers (uncorrected; ln q v2 from 28): top-1 must be identical
                 if corr == "none":
-                    assert abs(rb["summary"][f"{td}|all|{key}"]["top1"] - s["top1"]) < 1e-9, (key, td)
+                    assert abs(rb_sum[f"{td}|all|{key}"]["top1"] - s["top1"]) < 1e-9, (key, td)
     out["bench"] = bm
     out["paired_csls"] = {f"{td}|{k}": {kk: (rd(v) if isinstance(v, float) else ci(v) if kk.endswith("_ci") else v)
                                         for kk, v in hub["paired"][f"csls_aug_k10|{td}|{k}"].items()}
@@ -225,8 +235,8 @@ def main() -> int:
                             for k in KEYS + RAW}
     for name in ("library_curve", "library_curve_macro"):     # {size: [mean, sd over 5 decoy subsets]}
         out[name] = {k: {n: ci(v) for n, v in cv.items()} for k, cv in hub[name].items()}
-    out["hybrid"] = {k: {td: {"top1": rd(rb["summary"][f"{td}|all|{k}"]["top1"]),
-                              "top1_ci": ci(rb["summary"][f"{td}|all|{k}"]["top1_ci"])} for td in ("std", "sc")}
+    out["hybrid"] = {k: {td: {"top1": rd(rb_sum[f"{td}|all|{k}"]["top1"]),
+                              "top1_ci": ci(rb_sum[f"{td}|all|{k}"]["top1_ci"])} for td in ("std", "sc")}
                      for k in rb["keys"] if "->" in k and k.endswith("_bkg")}
 
     # ---- sensitivity of the correction (std, per pattern + macro) -------------------------------------------
@@ -259,10 +269,16 @@ def main() -> int:
                                           for m, per in cz["methods"].items()}}
 
     # ---- rank-equivalence checks of the GPU scorer -------------------------------------------------------------
-    rc = hub["rank_check"]
+    # v1 run: every score against 19's CPU prepass. The v2 file's ln q check compares against the v1 CPU ranks, so
+    # ln q v2 is checked here against 28's CPU torch ranks (rescore_r1) instead.
+    rc = json.load(open(HUB_V1))["rank_check"]
     out["gpu_check"] = {"max_abs_diff_vs_cpu_prepass": max(v["max_abs_diff_vs_prepass"] for v in rc.values()),
                         "rank_mismatches": sum(v["std_rank_mismatches"] + v["sc_rank_mismatches"] for v in rc.values()),
                         "top1_changes": sum(v["std_top1_changes"] + v["sc_top1_changes"] for v in rc.values())}
+    cpu2 = np.load("cache/real_bench/rescore_r1/ranks.npz")
+    out["gpu_check"]["lnq_v2_vs_cpu"] = {
+        "rank_mismatches": int(sum((R[f"none|{td}|lnq_bkg"] != cpu2[f"{td}|lnq_bkg"]).sum() for td in ("std", "sc"))),
+        "top1_changes": int(sum(((R[f"none|{td}|lnq_bkg"] == 0) != (cpu2[f"{td}|lnq_bkg"] == 0)).sum() for td in ("std", "sc")))}
 
     # ---- simulated sweep (G0) ---------------------------------------------------------------------------------
     rows_g0, wins = [], 0
@@ -273,7 +289,8 @@ def main() -> int:
         rows_g0.append({"condition": name, "model": rd(m["top1"]), "model_ci": ci(m["ci95"]), "best": best,
                         "best_top1": rd(b["top1"]), "best_ci": ci(b["ci95"]), "delta": rd(m["top1"] - b["top1"]),
                         "ci_overlap": not (m["ci95"][1] < b["ci95"][0] or m["ci95"][0] > b["ci95"][1]),
-                        "pearson_fixed": rd(res["pearson"]["top1"])})
+                        "pearson_fixed": rd(res["pearson"]["top1"]),
+                        **{s: rd(res[s]["top1"]) for s in STRONG + ["lnq_v1"]}})
     d = [x["delta"] for x in rows_g0]
     out["g0"] = {"n_families": sb["n_families"], "n_queries": sb["n_queries"], "chance": rd(sb["chance_top1"]),
                  "n_conditions": len(rows_g0), "n_model_wins": int(wins),
@@ -375,16 +392,41 @@ def main() -> int:
         need |= set(anc[:1]) | set(scs)
     need = sorted(need)
     cell = {rc: np.asarray(r["cell"], float) for rc, r in zip(need, hubm.records_at(shards, [gidx[rc] for rc in need], ("cell",)))}
-    dcell, rk = [], []
-    for (anc, scs), r in zip(rows_c, R["none|sc|lnq_bkg"]):
-        if anc and scs and r >= 0:
+    dq = np.full(nq, np.nan)                      # per query: max relative cell-length difference, closest sc entry
+    for qi, (anc, scs) in enumerate(rows_c):
+        if anc and scs:
             a = cell[anc[0]]
-            dcell.append(min(float(np.max(np.abs(np.sort(cell[s][:3]) - np.sort(a[:3])) / np.sort(a[:3]))) for s in scs))
-            rk.append(int(r))
-    dcell, rk = np.array(dcell), np.array(rk)
-    ex["sc_cell_mismatch"] = {"n": int(len(dcell)), "median_max_axis_rel": rd(np.median(dcell)),
-                              "lnq_top1_small": rd((rk[dcell <= 0.01] == 0).mean()), "n_small": int((dcell <= 0.01).sum()),
-                              "lnq_top1_large": rd((rk[dcell > 0.01] == 0).mean()), "n_large": int((dcell > 0.01).sum())}
+            dq[qi] = min(float(np.max(np.abs(np.sort(cell[s][:3]) - np.sort(a[:3])) / np.sort(a[:3]))) for s in scs)
+    c2 = json.load(open("results/critic2_rerank.json"))
+    qpos = {m["id"].replace(".json", ""): i for i, m in enumerate(meta)}
+    rank_c2 = np.full(nq, -1)
+    for pid, v in c2["rank_by_pattern"].items():
+        rank_c2[qpos[pid]] = v["critic2"]
+    split_ranks = {"lnq": R["none|sc|lnq_bkg"], "lnq_v1": np.load(HUB_RANKS_V1)["none|sc|lnq_bkg"], "critic2": rank_c2,
+                   **{k.replace("_bkg", ""): R[f"none|sc|{k}"] for k in CLS_KEYS if k != "lnq_bkg"}}
+    sel = ~np.isnan(dq) & (R["none|sc|lnq_bkg"] >= 0)
+    assert ((rank_c2 >= 0) == (R["none|sc|lnq_bkg"] >= 0)).all()      # critic2 covers exactly the sc queries
+    small, large = sel & (dq <= 0.01), sel & (dq > 0.01)
+    ex["sc_cell_mismatch"] = {"n": int(sel.sum()), "median_max_axis_rel": rd(np.median(dq[sel])),
+                              "n_small": int(small.sum()), "n_large": int(large.sum())}
+    for name, r in split_ranks.items():
+        ex["sc_cell_mismatch"][f"{name}_top1_small"] = rd((r[small] == 0).mean())
+        ex["sc_cell_mismatch"][f"{name}_top1_large"] = rd((r[large] == 0).mean())
+        ex["sc_cell_mismatch"][f"{name}_hits_small"] = int((r[small] == 0).sum())
+        ex["sc_cell_mismatch"][f"{name}_hits_large"] = int((r[large] == 0).sum())
+    # ln q v1 (the first version, ESI) on the same queries, and the paired v2 - v1 change
+    R1 = np.load(HUB_RANKS_V1)
+    hub1 = json.load(open(HUB_V1))
+    lv1 = {}
+    for td in ("std", "sc"):
+        a, b_ = R[f"none|{td}|lnq_bkg"], R1[f"none|{td}|lnq_bkg"]
+        ok = b_ >= 0
+        lv1[td] = {"v1": {"macro_top1": macro(b_, 1, stems, cboot), "macro_top10": macro(b_, 10, stems, cboot),
+                          "top1": rd((b_[ok] == 0).mean()), "median_rank": float(np.median(b_[ok]) + 1)},
+                   "paired_v2_minus_v1": {f"top{kk}": paired_macro(a, b_, stems, kk) for kk in (1, 10)},
+                   "n_rank_changed": int((a[ok] != b_[ok]).sum()), "n_top1_changed": int(((a[ok] == 0) != (b_[ok] == 0)).sum())}
+        assert abs(lv1[td]["v1"]["macro_top1"]["value"] - round(hub1["macro"][f"none|{td}|lnq_bkg"]["top1"], 4)) < 1e-9
+    ex["lnq_v1"] = lv1
     # chance level of the real within-family task: one random score per candidate
     wf_rows = [m for m in meta if m["n_other"] > 0]
     ex["within_family_chance"] = rd(np.mean([m["n_same_in_lib"] / (m["n_same_in_lib"] + m["n_other"]) for m in wf_rows]))

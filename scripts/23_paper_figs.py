@@ -1,10 +1,11 @@
 """Figures for the Digital Discovery manuscript (tasks/todo.md Step 2, B2).
 
-  python scripts/23_paper_figs.py         -> paper/dd/figs/fig{2..5}_*.{pdf,png}
+  python scripts/23_paper_figs.py         -> paper/dd/figs/fig{1..6}_*.{pdf,png}
 
-Inputs: results/paper_numbers.json (22), results/strong_baselines.json (13), cache/real_bench/hub_ranks.npz (21 eval)
-and cache/real_bench/case_zzzuwk.npz (24; simulated CSD patterns, so the npz stays gitignored; the figure shows
-derived patterns only). Fig. 1 (benchmark construction) is a schematic made separately.
+Inputs: results/paper_numbers.json (22), results/strong_baselines_v2.json (13, crc32-seeded sweep with ln q v2),
+cache/real_bench_lnq2/hub_ranks.npz (21 eval with ln q v2), results/critic2_rerank.json (29), results/model_gap.json
++ model_gap_realism.json (30) and cache/real_bench/case_zzzuwk.npz (24; simulated CSD patterns, so the npz stays
+gitignored; the figure shows derived patterns only).
 Sizes follow RSC: double column 17.1 cm, single column 8.3 cm.
 """
 from __future__ import annotations
@@ -35,6 +36,7 @@ STYLE = {
     "wcc_1":   dict(color="#E69F00", label="WCC, l = 1° + zero scan"),
     "wcc_2":   dict(color="#56B4E9", label="WCC, l = 2° + zero scan"),
     "lnq":     dict(color="#009E73", label=r"$\ln q$ lag + zero scan"),
+    "critic2": dict(color="#CC79A7", label=r"VC-GPWDF re-rank of the $\ln q$ top 50"),
 }
 REAL = {"model_bkg": "model", "pearson_bkg": "pearson", "cos_zs_bkg": "zs", "wcc_1_bkg": "wcc_1",
         "wcc_2_bkg": "wcc_2", "lnq_bkg": "lnq"}
@@ -137,13 +139,18 @@ def fig_sweep(sb: dict) -> None:
 
 
 # ---- Fig. 3: real benchmark ------------------------------------------------------------------------------
-def fig_real(pn: dict) -> None:
+def fig_real(pn: dict, c2: dict) -> None:
     bm = pn["bench"]
     order = ["lnq_bkg", "cos_zs_bkg", "pearson_bkg", "wcc_1_bkg", "wcc_2_bkg", "model_bkg"]
     names = {"lnq_bkg": r"$\ln q$ lag + zero scan", "cos_zs_bkg": "Cosine + zero scan", "pearson_bkg": "Pearson, fixed grid",
              "wcc_1_bkg": "WCC, l = 1°", "wcc_2_bkg": "WCC, l = 2°", "model_bkg": "Learned embedding"}
-    fig, (a, b) = plt.subplots(1, 2, figsize=(DOUBLE, 0.36 * DOUBLE), gridspec_kw=dict(width_ratios=[1.25, 1]))
+    fig, (a, b) = plt.subplots(1, 2, figsize=(DOUBLE, 0.40 * DOUBLE), gridspec_kw=dict(width_ratios=[1.25, 1]))
     y = np.arange(len(order))[::-1]
+    # the variable-cell re-rank exists for the single-crystal set only: its own row above the others
+    yc, d = len(order), c2["critic2_vcgpwdf"]["top1"]
+    col = STYLE["critic2"]["color"]
+    a.errorbar(d["value"], yc - 0.17, xerr=[[d["value"] - d["ci"][0]], [d["ci"][1] - d["value"]]], fmt="s", ms=3.5,
+               color=col, mfc="white", elinewidth=0.8, capsize=0)
     for td, dy, mk, tl in (("std", 0.17, "o", "Any same-form entry"), ("sc", -0.17, "s", "Independent single-crystal entry")):
         for corr, fill in (("none", True), ("csls_aug_k10", False)):
             for yi, k in zip(y, order):
@@ -155,7 +162,7 @@ def fig_real(pn: dict) -> None:
                                fmt=mk, ms=3.5, color=c, mfc=c if td == "std" else "white", elinewidth=0.8, capsize=0)
                 else:
                     a.plot(d["macro_top1"], yi + dy, marker="|", ms=6, mew=1.0, color="k")
-    a.set_yticks(y, [names[k] for k in order])
+    a.set_yticks(list(y) + [yc], [names[k] for k in order] + ["VC-GPWDF re-rank\n" + r"of the $\ln q$ top 50"])
     a.set_xlim(-0.02, 1.0)
     a.set_xlabel("Top-1, compound-weighted (95 % CI)")
     a.grid(axis="x", alpha=0.25, lw=0.4)
@@ -256,13 +263,50 @@ def fig_ranks(R) -> None:
     save(fig, "fig5_rank_distributions")
 
 
+# ---- Fig. 6: effect ladder (own entries rendered with the measurement's effects) ----------------------------
+LADDER = [("own_clean", "clean"), ("own_mask", "+ coverage"), ("own_width", "+ peak width"), ("own_ka2", "+ Kα2"),
+          ("own_bkg", "+ background"), ("own_noise", "+ noise"), ("own_zero", "+ zero offset"), ("own_all", "all six"),
+          ("own_all_dw", "all six + B"), ("own_all_int30", "all six + jitter 0.3"),
+          ("own_all_int50", "all six + jitter 0.5"), ("own_all_dw_int30", "all six + B + jitter 0.3"),
+          ("measured", "measured")]
+
+
+def fig_ladder(orig: dict, real: dict) -> None:
+    fig, (a, b) = plt.subplots(1, 2, figsize=(DOUBLE, 0.40 * DOUBLE))
+    xs = np.arange(len(LADDER))
+    series = (("pearson", orig, "Pearson, fixed grid", STYLE["pearson"]["color"], ":", "o", True),
+              ("model", orig, "Learned embedding (original)", STYLE["model"]["color"], "-", "o", True),
+              ("model", real, "Learned embedding (realism retrain)", STYLE["model"]["color"], "--", "s", False))
+    for meth, res, lab, c, ls, mk, filled in series:
+        top1 = [res[f"{k}|{meth}|std"]["macro_top1"]["value"] for k, _ in LADDER]
+        med = [res[f"{k}|{meth}|std"]["per_pattern"]["median_rank"] for k, _ in LADDER]
+        kw = dict(color=c, ls=ls, marker=mk, ms=3, lw=1.0, mfc=c if filled else "white", label=lab)
+        a.plot(xs, top1, **kw)
+        if meth == "model":
+            b.plot(xs, med, **kw)
+    for ax in (a, b):
+        ax.axvline(len(LADDER) - 1.5, color="0.5", lw=0.6, ls="--")
+        ax.set_xticks(xs, [t for _, t in LADDER], rotation=55, ha="right", rotation_mode="anchor")
+        ax.grid(alpha=0.25, lw=0.4)
+    a.set_ylim(-0.02, 1.03)
+    a.set_ylabel("Top-1, compound-weighted")
+    b.set_yscale("log")
+    b.set_ylabel("Median rank of the first correct entry")
+    a.legend(frameon=False, loc="center left", bbox_to_anchor=(0.0, 0.55))
+    label(a, 0, x=-0.14)
+    label(b, 1, x=-0.16)
+    fig.tight_layout()
+    save(fig, "fig6_effect_ladder")
+
+
 def main() -> int:
     pn = json.load(open("results/paper_numbers.json"))
     fig_schematic(pn)
-    fig_sweep(json.load(open("results/strong_baselines.json")))
-    fig_real(pn)
+    fig_sweep(json.load(open("results/strong_baselines_v2.json")))
+    fig_real(pn, json.load(open("results/critic2_rerank.json")))
     fig_case(pn, pn["case"], np.load("cache/real_bench/case_zzzuwk.npz"))
-    fig_ranks(np.load("cache/real_bench/hub_ranks.npz"))
+    fig_ranks(np.load("cache/real_bench_lnq2/hub_ranks.npz"))
+    fig_ladder(json.load(open("results/model_gap.json"))["results"], json.load(open("results/model_gap_realism.json"))["results"])
     return 0
 
 

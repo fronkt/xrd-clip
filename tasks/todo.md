@@ -306,6 +306,22 @@ B. Box session (manual mode, one CSD-derived upload): R4c training; ln q CSLS re
          28 score + eval --tag main --work cache/real_bench_cod --truth <data>/cod/opxrd_truth_cod.json --base ""
          --out results/rescore_main_cod.json
 C. Paper: paper_numbers.json -> manuscript/ESI/figs -> verify_claims -> internal referee pass -> build -> check-in.
+   Started 10-14 after R3. Methods (Sections 2.6, 3.2, 3.4, 3.7, 3.8) already describe R1-R5; Abstract, Results,
+   Table 1, Discussion, Conclusions, Data availability are still v1. real_bench_hub_lnq2.json differs from v1 only
+   in lnq_bkg keys and matches rescore_r1 (checked 10-14) -> it becomes 22's main source (ln q v2 primary, v1 in ESI).
+   - [ ] C1 22: hub source -> real_bench_hub_lnq2 (+ cache/real_bench_lnq2/hub_ranks.npz); lnq_v1 block kept for
+         the ESI; G0 from strong_baselines_v2 (v1 sweep kept); 29 eval saves per-query critic2 ranks -> 22 adds the
+         cell-mismatch split for ln q v2 AND critic2 (R3 prediction: critic2 lifts the > 1 % group); R2 ablations;
+         regenerate results/paper_numbers.json, every existing assertion passing
+   - [ ] C2 figs (23): Fig. 2 from sweep v2, Figs. 3/5 with ln q v2 (+ critic2 point in Fig. 3a)
+   - [ ] C3 manuscript: Abstract; Section 1 contributions; 2.6 replica counts vs rescore_main_cod (190 queries,
+         9 sc compounds); 4.1 sweep v2; 4.2 Table 1 ln q v2 + variable-cell re-rank + cell-mismatch split; 4.3; 4.4
+         CSLS with ln q v2; 4.5 ladder, pattern-to-pattern, realism retrain; new 4.6 library realism (R2 + ablations)
+         and 4.7 open replica (R5); Discussion (variable-cell now tested; limitations); Conclusions; Data availability
+   - [ ] C4 ESI (25): ln q v1 vs v2, R2 ablations, critic2 per-pattern + cost, ladder table, COD replica table
+   - [ ] C5 verify_claims: templates for every new number; 100 % verified
+   - [ ] C6 internal referee pass (powder + ML subagents), fixes applied
+   - [ ] C7 build.sh -> docx; plan Section 13c-e readouts (R3, R4, R5); check in with Frank
 After C (not R1-R5): R6 decisions, Zenodo deposit (code + open data; DD's data reviewer needs a DOI), cover
 letter, TOC graphic (at revision), Frank submits.
 

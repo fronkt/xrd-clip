@@ -15,7 +15,7 @@ import sys
 
 P = json.load(open("results/paper_numbers.json"))
 B, D, G, CASE, EX, RF = P["bench"], P["dataset"], P["g0"], P["case"], P["extra"], P["run_facts"]
-SB = json.load(open("results/strong_baselines.json"))
+SB = json.load(open("results/strong_baselines_v2.json"))
 CLS = ["pearson_bkg", "cos_zs_bkg", "wcc_1_bkg", "wcc_2_bkg", "lnq_bkg"]
 
 

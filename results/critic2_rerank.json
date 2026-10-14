@@ -74,5 +74,243 @@
     0.0919
    ]
   }
+ },
+ "rank_by_pattern": {
+  "pattern_16": {
+   "critic2": 27,
+   "lnq_shortlist": 6
+  },
+  "pattern_77": {
+   "critic2": 0,
+   "lnq_shortlist": 6
+  },
+  "pattern_82": {
+   "critic2": 22,
+   "lnq_shortlist": 6
+  },
+  "pattern_91": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_96": {
+   "critic2": 46,
+   "lnq_shortlist": 22
+  },
+  "pattern_180": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_205": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_209": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_213": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_247": {
+   "critic2": 1,
+   "lnq_shortlist": 0
+  },
+  "pattern_252": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_297": {
+   "critic2": 2,
+   "lnq_shortlist": 43
+  },
+  "pattern_326": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_351": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_359": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_396": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_484": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_487": {
+   "critic2": 0,
+   "lnq_shortlist": 1
+  },
+  "pattern_504": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_511": {
+   "critic2": 1,
+   "lnq_shortlist": 27
+  },
+  "pattern_519": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_530": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_539": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_574": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_586": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_594": {
+   "critic2": 21,
+   "lnq_shortlist": 0
+  },
+  "pattern_619": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_623": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_647": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_655": {
+   "critic2": 0,
+   "lnq_shortlist": 8
+  },
+  "pattern_698": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_710": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_726": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_730": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_750": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_760": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_775": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_787": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_805": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_808": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_816": {
+   "critic2": 2,
+   "lnq_shortlist": 39
+  },
+  "pattern_875": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_880": {
+   "critic2": 15,
+   "lnq_shortlist": 3
+  },
+  "pattern_887": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_891": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_901": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_914": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_917": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_921": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_949": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_978": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_1006": {
+   "critic2": 49,
+   "lnq_shortlist": 0
+  },
+  "pattern_1008": {
+   "critic2": 0,
+   "lnq_shortlist": 2
+  },
+  "pattern_1010": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_1021": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_1022": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_1029": {
+   "critic2": 0,
+   "lnq_shortlist": 0
+  },
+  "pattern_1041": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  },
+  "pattern_1046": {
+   "critic2": 50,
+   "lnq_shortlist": 50
+  }
  }
 }
