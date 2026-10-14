@@ -358,6 +358,32 @@ C. Paper: paper_numbers.json -> manuscript/ESI/figs -> verify_claims -> internal
          primary + non-HP as secondary, or reframe; (2) more compute: critic2 refits of the DAC patterns,
          zero-offset sensitivity, bin-averaged Cu-grid conversion for all scores (np.interp aliasing of fine
          synchrotron steps, the R1 issue for every score; GPU rescore ~$0.5).
+         FRANK 10-14 (AskUserQuestion): "Keep all 59" as headline; run ALL THREE: "Refit critic2 on DAC data,
+         critic2 zero-offset test, Bin-averaged Cu grid".
+   - C8 Frank's three extra checks. Designs + predictions fixed here BEFORE any number (10-14):
+     - [ ] X1 bin-averaged Cu grid (sensitivity, pre-declared rule). Each measured pattern goes onto the Cu
+           grid by area-preserving bin averaging (the mean of the native pattern over each Cu grid point's
+           d-range, as R1 did for ln q) instead of np.interp; behind a flag, interp stays the default. Score
+           every classical score + the model with 28 (new tag, ln q v2, no R2 switches) locally; paired macro
+           top-1 against the main benchmark. RULE: if any classical score's compound-weighted top-1 moves by
+           more than 0.05 (point estimate) in either answer set, propose to Frank that it become primary (GPU
+           rescore of hubness/CSLS/library curves, ~$0.5); otherwise it is a sensitivity check (Section 4.6 +
+           ESI). PREDICTION: every change within +-0.02; Cu lab patterns barely move.
+     - [ ] X2 critic2 zero offset (sensitivity). Per sc pattern an ANSWER-BLIND native zero offset: delta =
+           argmax over native shifts (+-0.5 deg x lambda/lambda_Cu, step 0.02 deg x lambda/lambda_Cu) of the
+           cosine between the background-subtracted measured pattern, shifted by -delta and put on the Cu grid,
+           and the clean rendering of its ln q top-1 entry (never the answer). fit.peaks positions shifted by
+           -delta (equivalent to refitting a shifted pattern). Rerun only the 36 shortlists that hold the
+           answer (1,800 comparisons; a miss stays a miss) on a rented CPU box (manual mode, CSD CIF upload,
+           pull armed at launch, self-stop + watchdog). Report re-rank top-1/top-10 with paired diffs against
+           the unshifted re-rank, and the delta distribution. PREDICTION: lab Cu median |delta| <= 0.03 deg;
+           re-rank top-1 moves within +-0.05, unresolved.
+     - [ ] X3 critic2 refits of the 22 pressure-series patterns. Tune XRPD BACKGROUND/FIT settings using ONLY
+           the own-entry positive control as the criterion (never the sc answers); fix one setting for all 22;
+           refit; rerun their answer-holding shortlists, the control and the injection (~300 comparisons,
+           local). Report the re-rank with refitted pressure-series patterns as a sensitivity. PREDICTION: the
+           control improves (own entry first for a majority), the re-rank's sc top-1 rises by <= 0.03 because
+           most pressure-series answers are outside the shortlist (injection: 1 of 17 first with old fits).
    - [~] C7 build.sh -> docx (builds 10-14, after the referee fixes); plan Section 13c-f readouts; check in with Frank
 After C (not R1-R5): R6 decisions, Zenodo deposit (code + open data; DD's data reviewer needs a DOI), cover
 letter, TOC graphic (at revision), Frank submits.
