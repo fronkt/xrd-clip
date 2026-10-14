@@ -451,6 +451,11 @@ def main() -> int:
                      # answers ln q had first and it moves down
                      "gain_lnq_ranks": sorted(int(x) + 1 for x in rl[(rc == 0) & (rl != 0)]),
                      "loss_c2_ranks": sorted(int(x) + 1 for x in rc[(rc != 0) & (rl == 0)]),
+                     "per_pattern": [{"id": meta[i]["id"].replace(".json", ""), "stem": str(stems[i]),
+                                      "cell_diff_pct": None if np.isnan(dq[i]) else rd(100 * dq[i]),
+                                      "lnq_rank": int(R["none|sc|lnq_bkg"][i]) + 1,
+                                      "critic2_rank": int(rank_c2[i]) + 1 if rank_c2[i] < k_c2 else None}
+                                     for i in np.nonzero(rank_c2 >= 0)[0]],
                      "n_comparisons": c2["meta"]["n_comparisons"], "n_failed": c2["meta"]["n_failed_comparisons"],
                      "cpu_min_median": rd(c2["meta"]["cpu_s_median"] / 60), "cpu_h_max": rd(c2["meta"]["cpu_s_max"] / 3600),
                      "cpu_h_total": rd(c2["meta"]["cpu_h_total"])}

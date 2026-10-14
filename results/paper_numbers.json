@@ -4696,6 +4696,421 @@
     22,
     50
    ],
+   "per_pattern": [
+    {
+     "id": "pattern_16",
+     "stem": "NAPHTA",
+     "cell_diff_pct": 0.6086,
+     "lnq_rank": 7,
+     "critic2_rank": 28
+    },
+    {
+     "id": "pattern_77",
+     "stem": "TAQBIY",
+     "cell_diff_pct": 4.8118,
+     "lnq_rank": 7,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_82",
+     "stem": "NAPHTA",
+     "cell_diff_pct": 0.2766,
+     "lnq_rank": 7,
+     "critic2_rank": 23
+    },
+    {
+     "id": "pattern_91",
+     "stem": "NAPHTA",
+     "cell_diff_pct": 0.651,
+     "lnq_rank": 274,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_96",
+     "stem": "NAPHTA",
+     "cell_diff_pct": 0.0388,
+     "lnq_rank": 23,
+     "critic2_rank": 47
+    },
+    {
+     "id": "pattern_180",
+     "stem": "UPOJER",
+     "cell_diff_pct": 0.2504,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_205",
+     "stem": "ZZZIZM",
+     "cell_diff_pct": 0.3759,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_209",
+     "stem": "ZZZIZM",
+     "cell_diff_pct": 0.2993,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_213",
+     "stem": "MEHNIY",
+     "cell_diff_pct": 14.0989,
+     "lnq_rank": 306484,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_247",
+     "stem": "QIQVAQ",
+     "cell_diff_pct": 0.3827,
+     "lnq_rank": 1,
+     "critic2_rank": 2
+    },
+    {
+     "id": "pattern_252",
+     "stem": "FOPKOK",
+     "cell_diff_pct": 0.0557,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_297",
+     "stem": "DEHKUA",
+     "cell_diff_pct": 21.1534,
+     "lnq_rank": 44,
+     "critic2_rank": 3
+    },
+    {
+     "id": "pattern_326",
+     "stem": "HOJQII",
+     "cell_diff_pct": 17.6143,
+     "lnq_rank": 21136,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_351",
+     "stem": "AKAGIG",
+     "cell_diff_pct": 0.0782,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_359",
+     "stem": "ZZZIZM",
+     "cell_diff_pct": 0.6211,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_396",
+     "stem": "ZZZIZM",
+     "cell_diff_pct": 0.7887,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_484",
+     "stem": "BAPLOT",
+     "cell_diff_pct": 0.0,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_487",
+     "stem": "VELWIV",
+     "cell_diff_pct": 0.3442,
+     "lnq_rank": 2,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_504",
+     "stem": "ZZZIZM",
+     "cell_diff_pct": 0.0729,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_511",
+     "stem": "NAPHTA",
+     "cell_diff_pct": 0.3905,
+     "lnq_rank": 28,
+     "critic2_rank": 2
+    },
+    {
+     "id": "pattern_519",
+     "stem": "QILDAS",
+     "cell_diff_pct": 0.3973,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_530",
+     "stem": "GOFWUV",
+     "cell_diff_pct": 0.2404,
+     "lnq_rank": 22004,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_539",
+     "stem": "HXACAN",
+     "cell_diff_pct": 0.6555,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_574",
+     "stem": "ZZZIZM",
+     "cell_diff_pct": 0.0654,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_586",
+     "stem": "ZIZRUX",
+     "cell_diff_pct": 0.3285,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_594",
+     "stem": "MEHNIY",
+     "cell_diff_pct": 1.6197,
+     "lnq_rank": 1,
+     "critic2_rank": 22
+    },
+    {
+     "id": "pattern_619",
+     "stem": "ZZZIZM",
+     "cell_diff_pct": 0.1488,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_623",
+     "stem": "MEHNIY",
+     "cell_diff_pct": 8.7619,
+     "lnq_rank": 301365,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_647",
+     "stem": "NAPHTA",
+     "cell_diff_pct": 0.8837,
+     "lnq_rank": 107,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_655",
+     "stem": "DEHKUA",
+     "cell_diff_pct": 1.1514,
+     "lnq_rank": 9,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_698",
+     "stem": "ZZZIZM",
+     "cell_diff_pct": 0.4532,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_710",
+     "stem": "IKIJER",
+     "cell_diff_pct": 0.5442,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_726",
+     "stem": "NAPHTA",
+     "cell_diff_pct": 3.9141,
+     "lnq_rank": 78049,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_730",
+     "stem": "EPIVEF",
+     "cell_diff_pct": 13.5521,
+     "lnq_rank": 9894,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_750",
+     "stem": "HXACAN",
+     "cell_diff_pct": 1.96,
+     "lnq_rank": 24367,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_760",
+     "stem": "LILRIJ",
+     "cell_diff_pct": 8.9184,
+     "lnq_rank": 187487,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_775",
+     "stem": "ZZZIZM",
+     "cell_diff_pct": 0.2258,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_787",
+     "stem": "ZZZIZM",
+     "cell_diff_pct": 0.7079,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_805",
+     "stem": "QUWYIR",
+     "cell_diff_pct": 0.1099,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_808",
+     "stem": "NAPHTA",
+     "cell_diff_pct": 3.066,
+     "lnq_rank": 15104,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_816",
+     "stem": "COUMAR",
+     "cell_diff_pct": 2.7501,
+     "lnq_rank": 40,
+     "critic2_rank": 3
+    },
+    {
+     "id": "pattern_875",
+     "stem": "MEHNIY",
+     "cell_diff_pct": 9.7636,
+     "lnq_rank": 302001,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_880",
+     "stem": "AZUDOP",
+     "cell_diff_pct": 0.2287,
+     "lnq_rank": 4,
+     "critic2_rank": 16
+    },
+    {
+     "id": "pattern_887",
+     "stem": "IYESEO",
+     "cell_diff_pct": 1.256,
+     "lnq_rank": 5738,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_891",
+     "stem": "MEHNIY",
+     "cell_diff_pct": 10.9116,
+     "lnq_rank": 299969,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_901",
+     "stem": "ZZZIZM",
+     "cell_diff_pct": 0.5405,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_914",
+     "stem": "RIXNES",
+     "cell_diff_pct": 1.8363,
+     "lnq_rank": 28191,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_917",
+     "stem": "MIGQOJ",
+     "cell_diff_pct": 6.137,
+     "lnq_rank": 3541,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_921",
+     "stem": "EPIVEF",
+     "cell_diff_pct": 6.1801,
+     "lnq_rank": 1419,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_949",
+     "stem": "AKAFUR",
+     "cell_diff_pct": 0.0953,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_978",
+     "stem": "MEHNIY",
+     "cell_diff_pct": 6.685,
+     "lnq_rank": 166952,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_1006",
+     "stem": "ROHWIX",
+     "cell_diff_pct": 0.1307,
+     "lnq_rank": 1,
+     "critic2_rank": 50
+    },
+    {
+     "id": "pattern_1008",
+     "stem": "QILZIX",
+     "cell_diff_pct": 2.0687,
+     "lnq_rank": 3,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_1010",
+     "stem": "MEHNIY",
+     "cell_diff_pct": 4.5632,
+     "lnq_rank": 1884,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_1021",
+     "stem": "NAPHTA",
+     "cell_diff_pct": 0.4848,
+     "lnq_rank": 118,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_1022",
+     "stem": "HOJQII",
+     "cell_diff_pct": 10.3021,
+     "lnq_rank": 10436,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_1029",
+     "stem": "CEHQEM",
+     "cell_diff_pct": 29.0435,
+     "lnq_rank": 1,
+     "critic2_rank": 1
+    },
+    {
+     "id": "pattern_1041",
+     "stem": "GOFWOP",
+     "cell_diff_pct": 0.5428,
+     "lnq_rank": 1676,
+     "critic2_rank": null
+    },
+    {
+     "id": "pattern_1046",
+     "stem": "NAPHTA",
+     "cell_diff_pct": 1.5878,
+     "lnq_rank": 1308,
+     "critic2_rank": null
+    }
+   ],
    "n_comparisons": 2950,
    "n_failed": 1,
    "cpu_min_median": 2.2,
