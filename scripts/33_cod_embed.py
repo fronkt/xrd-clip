@@ -30,7 +30,8 @@ def main() -> int:
              os.path.join(args.out, f"emb_{os.path.basename(os.path.dirname(p))}_{os.path.basename(p)[:-4]}_{n}.npy"))
             for p, n, _ in bench.shard_table(None)]
     print(f"[cod_embed] {len(jobs)} shards, {sum(j[1] for j in jobs):,} entries", flush=True)
-    with ProcessPoolExecutor(args.procs) as ex:
+    # one shard per fresh process, as in 19 (a reused worker grows ~1.8 GB per shard; 10-13 the reaper hit it)
+    with ProcessPoolExecutor(args.procs, max_tasks_per_child=1) as ex:
         for out, dt in ex.map(bench._embed_shard, jobs):
             print("[cod_embed]", out, round(dt), "s", flush=True)
     return 0
