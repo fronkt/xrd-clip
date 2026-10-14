@@ -53,3 +53,18 @@
   queued GOGZOU again; both copies ran the full 4-h cap and diffs.jsonl got a duplicate row (cheap here: one core).
 - **Rule:** when an extension starts beside stragglers, pass the in-flight jobs as excluded (or wait for them);
   after any merge, count duplicate keys before scoring.
+
+## 2026-10-14 — a disordered CIF went to critic2 with every disorder component at full occupancy
+- **What happened:** the CSD extraction writes CIFs without `_atom_site_occupancy`, so ROHWIX01 (piperazine
+  disordered over two orientations, 0.712/0.288) reached critic2 with both orientations present. Its answer got
+  the worst DIFF of its shortlist (0.261) and was reported as a re-rank "loss"; with the major component only it
+  scores 0.006, the best of the 50. The main library hides this (pymatgen merges coincident sites); critic2 does not.
+- **Rule:** before feeding structures to an external code, check each input's composition against the database
+  formula (or at least flag `has_disorder` entries) and supply the major component; never let a bulk run be the
+  first test of the inputs.
+
+## 2026-10-14 — CSD API processes hang when two run at once, and sometimes at exit
+- **What happened:** two CCDC-interpreter scripts started together both sat at ~0 CPU for 30 min; alone, the same
+  import + lookup takes 4 s. A finished script also hung at exit after writing its output.
+- **Rule:** run one CSD API process at a time, write outputs before the end of the script, wrap it in `timeout`,
+  and when killing stragglers filter by PID, never by a command-line substring that the current shell also contains.

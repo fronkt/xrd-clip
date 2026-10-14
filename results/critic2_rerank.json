@@ -17,26 +17,26 @@
   "timing_wall_s_median": 137.25,
   "cpu_s_median": 132.0,
   "cpu_s_max": 10666.0,
-  "cpu_h_total": 399.70166666666665
+  "cpu_h_total": 399.7997222222222
  },
  "critic2_vcgpwdf": {
   "top1": {
    "n_compounds": 30,
-   "value": 0.5,
+   "value": 0.5333,
    "ci": [
-    0.3167,
-    0.6667
+    0.3667,
+    0.7
    ]
   },
   "top10": {
    "n_compounds": 30,
-   "value": 0.5867,
+   "value": 0.62,
    "ci": [
-    0.4166,
-    0.7533
+    0.4533,
+    0.7867
    ]
   },
-  "per_pattern_top1": 0.4406779661016949
+  "per_pattern_top1": 0.4576271186440678
  },
  "lnq_v2_full_library": {
   "top1": {
@@ -60,18 +60,18 @@
  "paired_critic2_minus_lnq": {
   "top1": {
    "n_compounds": 30,
-   "diff": 0.0452,
+   "diff": 0.0786,
    "ci": [
-    -0.1095,
-    0.1952
+    -0.0524,
+    0.2119
    ]
   },
   "top10": {
    "n_compounds": 30,
-   "diff": -0.0248,
+   "diff": 0.0086,
    "ci": [
-    -0.1462,
-    0.0919
+    -0.0943,
+    0.1086
    ]
   }
  },
@@ -281,7 +281,7 @@
    "lnq_shortlist": 50
   },
   "pattern_1006": {
-   "critic2": 49,
+   "critic2": 0,
    "lnq_shortlist": 0
   },
   "pattern_1008": {

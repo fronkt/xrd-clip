@@ -141,6 +141,23 @@ r2_all = r2_cls["std"] + r2_cls["sc"]
 r2_resolved = [k for td in ("std", "sc") for k in CLS if R2p[f"{td}|{k}"]["top1"]["ci"][0] > 0 or R2p[f"{td}|{k}"]["top1"]["ci"][1] < 0]
 abl_ka2, abl_mask = R2a["r2_noka2"]["paired_vs_r2"]["std|cos_zs_bkg"], R2a["r2_nomask"]["paired_vs_r2"]["std|wcc_2_bkg"]
 c2_failed_misses = all(c2r["rank_by_pattern"][f[0]]["lnq_shortlist"] >= C2["k"] for f in c2r["meta"]["failed"])
+# referee-pass additions (10-14): ambient-pressure split, causes of cell differences, critic2 control/injection/peaks
+AS = EX["sc_ambient_split"]
+CD = AS["cells_differ"]
+TOL = ["cos_zs_bkg", "wcc_1_bkg", "wcc_2_bkg", "lnq_bkg"]                 # shift- and strain-tolerant scores
+AMB_CLS = ["pearson", "cos_zs", "wcc_1", "wcc_2", "lnq"]                 # keys of the ambient split
+AMB_TOL = ["cos_zs", "wcc_1", "wcc_2", "lnq", "critic2"]
+INJ, CTL, PK = C2["injected_summary"], C2["control_summary"], C2["n_peaks_range"]
+
+
+def mci(v):           # a compound-weighted value with its CI
+    return f"{f2(v['value'])} {ci(v['ci'])}"
+
+
+r2_ints = [R2p[f"{td}|{k}"]["top1"]["ci"] for td in ("std", "sc") for k in CLS] + \
+          [R2a[t]["paired_vs_r2"][f"{td}|{k}"]["ci"] for t in ("r2_noB", "r2_nolp", "r2_noka2", "r2_nomask")
+           for td in ("std", "sc") for k in CLS]
+n_r2_int, n_r2_excl = len(r2_ints), sum(1 for c in r2_ints if c[0] > 0 or c[1] < 0)
 
 CLAIMS = [
     # ---- abstract
@@ -152,13 +169,16 @@ CLAIMS = [
          f"a variable-cell re-rank (VC-GPWDF)\nreaches {f2(c2t1['value'])}, not resolved from the ln q scan it re-ranks "
          f"({f2(lq_sc['macro_top1'])})"),
     need(gm(GR, "measured")[3] < 0.03,     # the pre-declared criterion (Section 4.5)
-         f"stays at {f2(gm(GR, 'measured')[0])} on measured patterns, so the gap lies in effects we did not\nmodel"),
+         f"stays at {f2(gm(GR, 'measured')[0])} on measured patterns, so\nthe gap lies in what our simulation does not reproduce"),
     f"the classical scores reach {macro_rng('std')} and the model {f2(b('model_bkg')['macro_top1'])}",
-    f"its top-1 is {f2(mp['own_entry_clean|std']['top1'])} and its median rank {med(mp['own_entry_clean|std']['median_rank'])}",
+    f"Yet on clean simulations of the same targets it reaches {f2(gm(GA, 'own_clean')[0])} (median rank "
+    f"{mr(gm(GA, 'own_clean')[2])})",
+    need(sum(1 for r in C2["per_pattern"] if r["lnq_rank"] != 1 and (r["pressure_series"] or (r["dT_K"] or 0) > 50))
+         > 0.5 * sum(1 for r in C2["per_pattern"] if r["lnq_rank"] != 1),
+         "Most failures involve references determined at other pressures or temperatures"),
     f"In {g0d['n_conditions']} simulated degradation conditions, each of the\nshift-tolerant classical scores beats it in at least "
     f"{min(beats[s] for s in ('pearson_zs', 'wcc_0.5', 'wcc_1', 'wcc_2', 'lnq'))}",
-    need(all(pair[f"std|{k}"]["macro_diff_ci"][0] <= 0 for k in CLS),
-         f"(CSLS, +{min(csls_std):.2f} to +{max(csls_std):.2f}, indistinguishable from\nzero)"),
+    need(all(pair[f"std|{k}"]["macro_diff_ci"][0] <= 0 for k in CLS), "a hubness\ncorrection (CSLS) change none of this"),
     # ---- introduction
     "82.8 % recall@10 against 34.4 %", "zero-shot test on 773 inorganic opXRD\npatterns",
     f"stress test of the model against shift-tolerant classical scores over {g0d['n_conditions']} degradation\n   conditions",
@@ -223,13 +243,26 @@ CLAIMS = [
          f"with WCC (l = 1°) and the ln q scan within 0.01 of it"),
     # ---- 4.2
     f"the classical scores reach {macro_rng('sc')} compound-weighted top-1 (Table 1, Fig. 3a) and the model {f2(b('model_bkg', 'sc')['macro_top1'])}",
-    f"For {pct(min(b(k, 'sc')['frac_rank_gt_1000'] for k in CLS))}–{pct(max(b(k, 'sc')['frac_rank_gt_1000'] for k in CLS))} % of these patterns",
+    f"Depending on the classical score, the first correct entry lies beyond rank 1,000 for "
+    f"{pct(min(b(k, 'sc')['frac_rank_gt_1000'] for k in CLS))}–{pct(max(b(k, 'sc')['frac_rank_gt_1000'] for k in CLS))} % of these\npatterns",
     need(wcc1_sc[1][0] > 0 and lnq_sc[1][0] <= 0 and cos_sc[1][0] <= 0 and wcc2_sc[1][0] <= 0,
          f"WCC (l = 1°) beats\nfixed-grid Pearson by {f2(wcc1_sc[0])} {ci(wcc1_sc[1])}; the ln q scan (+{f2(lnq_sc[0])} {ci(lnq_sc[1])}), "
          f"cosine + zero scan\n(+{f2(cos_sc[0])} {ci(cos_sc[1])}) and WCC (l = 2°, +{f2(wcc2_sc[0])} {ci(wcc2_sc[1])}) are not resolved"),
     f"has the best median rank, {med(b('lnq_bkg', 'sc')['median_rank'])}",
-    f"ranks it first for {f2(cm['lnq_top1_small'])} of\npatterns ({cm['n_small']} patterns); where they differ by more, for {f2(cm['lnq_top1_large'])} ({cm['n_large']} patterns)",
-    f"differ by a median of {tg['median_dT_K']:.0f} K\nfor the {tg['n']} patterns where both are known",
+    need(cm["n"] == D["n_sc_patterns"] - 1, f"({cm['n']} patterns; one has no powder-study entry)"),
+    need(len(cm["supercell"]) == 1 and cm["supercell"][0]["lnq_rank"] == 1 and cm["lnq_hits_large"] >= 1,
+         f"the ln q scan ranks a single-crystal same-form entry first for {cm['lnq_hits_small']} of {cm['n_small']} patterns; "
+         f"where the cells differ\nby more, for {cm['lnq_hits_large']} of {cm['n_large']}, one of which is a supercell description of the same lattice"),
+    f"{AS['n_pressure_series_patterns']} of the {D['n_sc_patterns']} single-crystal patterns ({AS['n_pressure_series_compounds']} compounds) "
+    f"come from variable-pressure\nstudies",
+    f"they account for {CD['pressure_series']} of the {CD['n']} patterns with differing cells. In {CD['dT_gt_50_not_pressure']} of the other "
+    f"{CD['n'] - CD['pressure_series']}, the\nrecorded temperatures of the two entries differ by more than 50 K",
+    f"where both temperatures are\nrecorded ({tg['n']} patterns), they differ by more than 50 K for {tg['n_dT_gt_50']}, and those "
+    f"{tg['n_dT_gt_50']} are retrieved less often ({f2(tg['top1_dT_gt_50'])}\nagainst {f2(tg['top1_dT_le_50'])})",
+    f"Without them ({AS['n_ambient_patterns']} patterns, {AS['n_ambient_compounds']} compounds; a split defined after an internal review), "
+    f"the classical scores\nreach a compound-weighted top-1 of {rng([AS[k]['macro_top1']['value'] for k in AMB_CLS])} and the model "
+    f"{f2(AS['model']['macro_top1']['value'])}",
+    f"headline; {AS['n_pressure_series_patterns']} of these patterns come from variable-pressure studies (Section 4.2)",
     row("ln q lag + zero scan", "lnq_bkg"), row("WCC, l = 1° + zero scan", "wcc_1_bkg"), row("WCC, l = 2° + zero scan", "wcc_2_bkg"),
     row("Cosine + zero scan", "cos_zs_bkg"), row("Pearson, fixed grid", "pearson_bkg"), row("Learned embedding", "model_bkg"),
     # ---- 4.3
@@ -289,7 +322,8 @@ CLAIMS = [
     f"at a median of about {round(b('model_bkg')['median_rank'], -3):,.0f} of {D['n_library']:,} (Fig. 5a)",
     f"ranks\nthe probe's own entry first for {f2(mp['sim']['top1'])} of probes and within the top 10 for {f2(mp['sim']['top10'])} "
     f"(median rank {med(mp['sim']['median_rank'])}); with the\ntraining-time degradations, for {f2(mp['aug']['top1'])} and {f2(mp['aug']['top10'])} (median rank {med(mp['aug']['median_rank'])})",
-    f"it reaches top-1 {f2(mp['own_entry_clean|std']['top1'])}\nand top-10 {f2(mp['own_entry_clean|std']['top10'])}, with a median rank of {med(mp['own_entry_clean|std']['median_rank'])}",
+    f"it reaches a per-pattern\ntop-1 of {f2(mp['own_entry_clean|std']['top1'])} and top-10 of {f2(mp['own_entry_clean|std']['top10'])}, "
+    f"with a median rank of {med(mp['own_entry_clean|std']['median_rank'])}",
     f"On the measured patterns of the same targets it reaches {f2(mp['measured_bkg|std']['top1'])} and\n{f2(mp['measured_bkg|std']['top10'])}",
     f"For the {ov['model_bkg_train']['n']} patterns that have a same-form entry in the\nmodel's training split, the median rank is "
     f"{med(ov['model_bkg_train']['median_rank'])} and top-1 is {f2(ov['model_bkg_train']['top1'])}; for the {ov['model_bkg_none']['n']} patterns whose same-form\n"
@@ -299,8 +333,10 @@ CLAIMS = [
     f"its top 1,000 contains a correct\nentry for only {f2(EX['model_recall']['1000'])} of patterns",
     f"gives {rng(hyb1000)} per-pattern\ntop-1, against {rng([b(k)['top1'] for k in CLS])} for the same scores on the full library",
     # ---- discussion / conclusions
-    f"of {rng([b(k)['macro_top1'] for k in ('pearson_bkg', 'lnq_bkg')])} when the pattern's own powder-study entry is in the library, where even\n"
-    f"fixed-grid Pearson correlation reaches {f2(b('pearson_bkg')['macro_top1'])}",
+    f"reach a compound-weighted top-1 of {rng([b(k, 'sc')['macro_top1'] for k in TOL] + [c2t1['value']])} "
+    f"({rng([AS[k]['macro_top1']['value'] for k in AMB_TOL])} without the pressure series); when the pattern's\nown powder-study entry is in the "
+    f"library, they reach up to {f2(max(b(k)['macro_top1'] for k in TOL))}, and even fixed-grid Pearson correlation\nreaches "
+    f"{f2(b('pearson_bkg')['macro_top1'])}",
     f"searches {D['n_library']:,}\nentries in about {RF['model_query_ms_cpu']} ms per query on a CPU",
     f"about {cpu['pearson']:.1f} s per query for fixed-grid Pearson, about {round(cpu['wcc_1'], -1):.0f} s for a zero scan and about "
     f"{round(cpu['lnq'] / 60):.0f} min for the ln q\nscan",
@@ -337,57 +373,84 @@ CLAIMS = [
     need(c2p["top1"]["diff"] > 0 and c2p["top1"]["ci"][0] < 0 < c2p["top1"]["ci"][1],
          f"top-1 of {f2(c2t1['value'])} {ci(c2t1['ci'])}, against {f2(lq_sc['macro_top1'])} {ci(lq_sc['macro_top1_ci'])} for the "
          f"ln q scan on the same patterns; the paired\ndifference, {sgn(c2p['top1']['diff'])} {ci(c2p['top1']['ci'])}, does not resolve them"),
-    need(c2p["top10"]["ci"][0] < 0, f"no better ({f2(c2t10['value'])}\nagainst {f2(lq_sc['macro_top10'])})"),
+    need(c2p["top10"]["ci"][0] < 0 < c2p["top10"]["ci"][1] and abs(c2t10["value"] - lq_sc["macro_top10"]) < 0.02,
+         f"at top-10 the two are level ({f2(c2t10['value'])} against\n{f2(lq_sc['macro_top10'])})"),
     f"ranks the answer first for {C2['hits']} of the {C2['n_patterns']} patterns and the ln q scan\nfor {C2['lnq_hits']}",
-    need(max(C2["loss_c2_ranks"]) == C2["k"],
-         f"Of the {C2['n_answer_in_shortlist']} patterns whose shortlist holds the answer, the re-rank moves it to first place for "
-         f"{C2['gains']} (from\nln q ranks {seq(C2['gain_lnq_ranks'])}) and moves ln q's correct first choice down for {C2['losses']} "
-         f"(to ranks {seq(C2['loss_c2_ranks'])}, the last\nof its shortlist)"),
+    f"Of\nthe {C2['n_answer_in_shortlist']} patterns whose shortlist holds the answer, the re-rank moves it to first place for "
+    f"{C2['gains']} (from ln q ranks\n{seq(C2['gain_lnq_ranks'])}) and moves ln q's correct first choice down for {C2['losses']} "
+    f"(to ranks {seq(C2['loss_c2_ranks'])})",
     f"it ranks the answer first for {cm['critic2_hits_large']} of the {cm['n_large']}\npatterns, against {cm['lnq_hits_large']} "
-    f"for the ln q scan; where they agree, for {cm['critic2_hits_small']} of {cm['n_small']}, against {cm['lnq_hits_small']}",
-    f"for {C2['n_patterns'] - C2['n_answer_in_shortlist']} of the {C2['n_patterns']} patterns\nthe answer is not among the "
-    f"{C2['k']} entries re-ranked, and {cm['n_large'] - cm['critic2_hits_large']} of the {cm['n_large']} patterns with mismatched cells still\nfail",
+    f"for the ln q scan; where\nthey agree, for {cm['critic2_hits_small']} of {cm['n_small']}, against {cm['lnq_hits_small']}",
+    need(INJ["ambient"]["n"] + INJ["pressure_series"]["n"] == C2["n_patterns"] - C2["n_answer_in_shortlist"],
+         f"for {C2['n_patterns'] - C2['n_answer_in_shortlist']} of the\n{C2['n_patterns']} patterns the answer is not among the "
+         f"{C2['k']} entries re-ranked, and compared directly, only {INJ['ambient']['rank1'] + INJ['pressure_series']['rank1']} of those "
+         f"{C2['n_patterns'] - C2['n_answer_in_shortlist']}\nanswers would rank first"),
+    f"the fit finds {PK['pressure_series'][0]}–{PK['pressure_series'][1]} peaks (median {PK['pressure_series'][2]:.0f}), against "
+    f"{PK['ambient'][0]}–{PK['ambient'][1]} (median {PK['ambient'][2]:.0f}) on the\nothers",
+    need(CTL["pressure_series"]["rank1"] == 0,
+         f"ranks that entry first among the shortlist for {CTL['ambient']['rank1']} of {CTL['ambient']['n']} ambient-pressure patterns "
+         f"but for none of the {CTL['pressure_series']['n']}\npressure-series patterns (median rank {med(CTL['pressure_series']['median_rank'])})"),
+    f"Without the pressure-series patterns, the re-rank reaches {mci(AS['critic2']['macro_top1'])} against "
+    f"{mci(AS['lnq']['macro_top1'])} for\nthe ln q scan (paired {sgn(AS['paired_critic2_minus_lnq']['diff'])} "
+    f"{ci(AS['paired_critic2_minus_lnq']['ci'])})",
+    f"declared primary before it was scored; it lowers the single-crystal top-1 from "
+    f"{f2(EX['lnq_v1']['sc']['v1']['macro_top1']['value'])} to {f2(lq_sc['macro_top1'])}",
     f"| VC-GPWDF re-rank of the ln q top {C2['k']} | {f2(c2t1['value'])} {ci(c2t1['ci'])} | {f2(c2t10['value'])} | "
     f"{med(C2['median_rank'])} | – | – | – | – |",
     # ---- 4.5 effect ladder, realism retrain, pattern to pattern
     f"Clean, it reaches a compound-weighted\ntop-1 of {f2(gm(GA, 'own_clean')[0])} with a median rank of {mr(gm(GA, 'own_clean')[2])}",
-    need(all(gm(GA, "own_clean")[0] - gm(GA, r)[0] <= 0.05 for r in ("own_mask", "own_width", "own_noise", "own_zero"))
-         and min(gm(GA, r)[0] for r in ("own_ka2", "own_bkg")) < min(gm(GA, r)[0] for r in ("own_mask", "own_width", "own_zero")),
-         f"except Kα2 ({f2(gm(GA, 'own_ka2')[0])}, median rank\n{mr(gm(GA, 'own_ka2')[2])}) and the background with its subtraction "
-         f"({f2(gm(GA, 'own_bkg')[0])}, median rank {mr(gm(GA, 'own_bkg')[2])})"),
-    f"With all six effects it reaches {f2(gm(GA, 'own_all')[0])}\n(median rank {mr(gm(GA, 'own_all')[2])}), and with the "
-    f"Debye–Waller factor added {f2(gm(GA, 'own_all_dw')[0])} (median rank {mr(gm(GA, 'own_all_dw')[2])}), against "
-    f"{f2(gm(GA, 'measured')[0])} and about\n{round(gm(GA, 'measured')[2], -3):,.0f} on the measured patterns",
+    need(gm(GA, "own_dw")[0] < min(gm(GA, r)[0] for r in ("own_mask", "own_width", "own_ka2", "own_bkg", "own_noise", "own_zero"))
+         and gm(GA, "own_dw", "pearson")[0] > 0.995,
+         f"The largest single cost is the Debye–Waller factor ({f2(gm(GA, 'own_dw')[0])}, median rank\n{mr(gm(GA, 'own_dw')[2])}), "
+         f"which fixed-grid Pearson does not notice ({f2(gm(GA, 'own_dw', 'pearson')[0])})"),
+    f"costs {f2(gm(GA, 'own_ka2')[0])} (median rank {mr(gm(GA, 'own_ka2')[2])}), and the background with its subtraction\n"
+    f"{f2(gm(GA, 'own_bkg')[0])} (median rank {mr(gm(GA, 'own_bkg')[2])})",
+    need(all(gm(GA, "own_clean")[0] - gm(GA, r)[0] <= 0.05 for r in ("own_mask", "own_width", "own_noise", "own_zero")),
+         "coverage, peak width, noise and the zero offset cost little"),
+    f"With all six effects\nthe model reaches {f2(gm(GA, 'own_all')[0])} (median rank {mr(gm(GA, 'own_all')[2])}), and with the "
+    f"Debye–Waller factor added {f2(gm(GA, 'own_all_dw')[0])} (median rank {mr(gm(GA, 'own_all_dw')[2])}),\nagainst "
+    f"{f2(gm(GA, 'measured')[0])} and about {round(gm(GA, 'measured')[2], -3):,.0f} on the measured patterns",
     need(f2(gm(GA, "own_all_dw_int30", "pearson")[0]) == f2(gm(GA, "measured", "pearson")[0]),
-         f"its ladder ends at {f2(gm(GA, 'own_all_dw_int30', 'pearson')[0])}, the value it reaches on the measured patterns\n"
-         f"({f2(gm(GA, 'measured', 'pearson')[0])}), whereas for the model the same simulated patterns leave the median rank at about "
-         f"{round(gm(GA, 'own_all_dw_int30')[2], -1):,.0f}, against about\n{round(gm(GA, 'measured')[2], -3):,.0f} on the measured ones"),
-    f"top-1\nrises from {f2(gm(GA, 'own_all_dw')[0])} to {f2(gm(GR, 'own_all_dw')[0])} and the median rank falls from "
-    f"{mr(gm(GA, 'own_all_dw')[2])} to {mr(gm(GR, 'own_all_dw')[2])} (Fig. 6)",
-    need(gm(GR, "own_ka2")[0] < gm(GA, "own_ka2")[0],
-         f"Kα2 alone is the exception ({f2(gm(GA, 'own_ka2')[0])}\nto {f2(gm(GR, 'own_ka2')[0])})"),
-    need(0.4 < gm(GR, "measured")[2] / gm(GA, "measured")[2] < 0.6,
-         f"the retrained model reaches a compound-weighted top-1 of\n{f2(gm(GR, 'measured')[0])} {ci(gm(GR, 'measured')[1])}, against "
-         f"{f2(gm(GA, 'measured')[0])} {ci(gm(GA, 'measured')[1])} before, and {f2(gm(GR, 'measured', td='sc')[0])} for single-crystal "
-         f"references, although its\nmedian rank halves, to about {round(gm(GR, 'measured')[2], -3):,.0f}"),
-    need(gm(GR, "measured")[3] < 0.03,
-         f"a value below 0.03 would mean the remaining gap is not the modelled effects; it is {f2(gm(GR, 'measured')[3])}"),
+         f"fixed-grid Pearson reaches {f2(gm(GA, 'own_all_dw_int30', 'pearson')[0])}, its value on the measured patterns "
+         f"({f2(gm(GA, 'measured', 'pearson')[0])}), and the model {f2(gm(GA, 'own_all_dw_int30')[0])}\nagainst "
+         f"{f2(gm(GA, 'measured')[0])}; the difference shows in the model's median rank, about "
+         f"{round(gm(GA, 'own_all_dw_int30')[2], -1):,.0f} on those simulations against about\n"
+         f"{round(gm(GA, 'measured')[2], -3):,.0f} on the measured patterns"),
+    f"({f2(gm(GR, 'own_dw')[0])} alone, median rank {mr(gm(GR, 'own_dw')[2])}; {f2(gm(GR, 'own_all_dw')[0])}\ntogether with all six "
+    f"effects, median rank {mr(gm(GR, 'own_all_dw')[2])} against {mr(gm(GA, 'own_all_dw')[2])} before)",
+    need(gm(GR, "own_ka2")[1][1] >= gm(GA, "own_ka2")[1][0],
+         f"Kα2 alone stays costly ({f2(gm(GR, 'own_ka2')[0])}, against {f2(gm(GA, 'own_ka2')[0])} before,\nwith overlapping intervals)"),
+    f"the retrained model reaches a compound-weighted top-1 of\n{f2(gm(GR, 'measured')[0])} {ci(gm(GR, 'measured')[1])}, against "
+    f"{f2(gm(GA, 'measured')[0])} {ci(gm(GA, 'measured')[1])} before, and {f2(gm(GR, 'measured', td='sc')[0])} for single-crystal "
+    f"references; its median rank\nfalls from about {round(gm(GA, 'measured')[2], -3):,.0f} to about {round(gm(GR, 'measured')[2], -3):,.0f}",
+    need(gm(GR, "measured")[3] < 0.05 and gm(GR, "measured")[2] > 1000,
+         f"Both predictions failed: the per-pattern top-1 is {f2(gm(GR, 'measured')[3])} and the median rank about "
+         f"{round(gm(GR, 'measured')[2], -3):,.0f}"),
+    f"held in part ({f2(gm(GR, 'own_all_dw_int30')[0])} with every modelled effect, against {f2(gm(GR, 'own_clean')[0])}\nclean)",
     f"reaches a compound-weighted top-1 of {f2(gm(GA, 'measured', 'p2p')[0])} (median rank about\n"
     f"{round(gm(GA, 'measured', 'p2p')[2], -2):,.0f}), and {f2(gm(GR, 'measured', 'p2p')[0])} (about "
     f"{round(gm(GR, 'measured', 'p2p')[2], -1):,.0f}) with the retrained encoder",
-    f"measured\npattern against simulated pattern, at {macro_rng('std')}",
+    f"rendered with every modelled effect to their clean versions at {f2(gm(GR, 'own_all_dw_int30', 'p2p')[0])}",
+    f"does the measured task at\n{f2(gm(GA, 'measured', 'pearson')[0])}",
     f"Answer set: any same-form entry ({D['n_queries']} patterns, {D['n_compounds']} compounds)",
     # ---- 4.6 library closer to the measurements
     f"the classical scores change by {sgn(min(x['diff'] for x in r2_all))} to {sgn(max(x['diff'] for x in r2_all))} in compound-weighted top-1",
     need(r2_resolved == ["cos_zs_bkg"],
          f"Only one change is resolved: cosine + zero scan rises by\n{f2(R2p['std|cos_zs_bkg']['top1']['diff'])} "
          f"{ci(R2p['std|cos_zs_bkg']['top1']['ci'])} when any same-form entry counts"),
-    need(abl_ka2["ci"][1] < 0, f"attribute that gain to the Kα2 nuisance ({f2(abl_ka2['diff'])} {ci(abl_ka2['ci'])} without it)"),
+    need(abl_ka2["ci"][1] < 0, f"point to the Kα2 nuisance for that gain ({f2(abl_ka2['diff'])} {ci(abl_ka2['ci'])} without it)"),
+    need(n_r2_excl == 3 and n_r2_int == 50, "Three of these 50 intervals exclude zero"),
     need(abl_mask["ci"][0] > 0, f"counts ({sgn(abl_mask['diff'])} {ci(abl_mask['ci'])} without it)"),
     need(all(x["ci"][0] <= 0 <= x["ci"][1] for x in r2_cls["sc"]),
          f"they move by\n{sgn(min(x['diff'] for x in r2_cls['sc']))} to {sgn(max(x['diff'] for x in r2_cls['sc']))}, with every interval including zero"),
     need(REV["r2"]["macro"]["std|model_bkg"]["top1"]["value"] == REV["r2"]["macro"]["sc|model_bkg"]["top1"]["value"],
-         f"The learned model scores {f2(REV['r2']['macro']['std|model_bkg']['top1']['value'])} with this library on both\nsets"),
+         f"whose library embeddings are unchanged, scores {f2(REV['r2']['macro']['std|model_bkg']['top1']['value'])} with the package "
+         f"on both sets"),
+    need(CODX["sc_composition"].get("ZZZUWK") == 20 and CODX["sc_composition"].get("NAPHTA") == 8
+         and all(v == 1 for k, v in CODX["sc_composition"].items() if k not in ("ZZZUWK", "NAPHTA"))
+         and sum(CODX["sc_composition"].values()) == COD["per_pattern"]["sc|lnq_bkg"]["n"],
+         f"20 of its {COD['per_pattern']['sc|lnq_bkg']['n']} patterns are ZZZUWK"),
+    f"{AS['n_pressure_series_patterns']} of its {D['n_sc_patterns']} patterns come from variable-pressure studies",
     # ---- 4.7 open replica + Table 2
     f"Against the {COD['meta']['n_library']:,} COD entries, the {COD['meta']['n_queries']} patterns reproduce the main result",
     f"the classical scores reach a compound-weighted top-1 of {rng([cod_m('std', k)['value'] for k in CLS])} "
@@ -406,7 +469,7 @@ CLAIMS = [
     f"and the\ncorrected ln q scan alone {RF['hub_lnq2_wall_s']} s",
     f"a median of {C2['cpu_min_median']:.1f} CPU-minutes per\ncomparison and about {round(C2['cpu_h_total'], -2):,.0f} CPU-hours for the "
     f"{C2['n_comparisons']:,} comparisons of {C2['n_patterns']} shortlists",
-    f"and that of the open replica only {cod_m('sc', 'lnq_bkg')['n_compounds']}",
+    f"the open replica's single-crystal set has only\n{cod_m('sc', 'lnq_bkg')['n_compounds']} compounds",
     need(c2p["top1"]["ci"][0] < 0, f"and {f2(c2t1['value'])} for a\nvariable-cell re-rank, which is not resolved from the ln q scan it re-ranks"),
 ]
 

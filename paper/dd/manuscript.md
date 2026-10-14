@@ -22,18 +22,19 @@ Contrastive models embedding powder X-ray diffraction (PXRD) patterns and crysta
 space have been proposed for structure retrieval, but are mostly tested on simulated queries against
 baselines that cannot absorb a peak shift. We test one such model, trained on 247,089 molecular crystals
 from the Cambridge Structural Database (CSD), against classical profile matching on 188 measured patterns of
-123 organic compounds from the open opXRD database. Correct answers are fixed by packing similarity, and
+123 organic compounds from the opXRD database. Correct answers are fixed by packing similarity, and
 every pattern is ranked against 309,080 simulated CSD entries. When the answer must be an independent
-single-crystal determination, the realistic case, the classical scores reach a compound-weighted top-1 of
-0.30–0.50 (30 compounds) and the model 0.00; a variable-cell re-rank (VC-GPWDF) reaches 0.50, not resolved
-from the ln q scan it re-ranks (0.45). When the pattern's own powder-study entry also counts, the classical
-scores reach 0.71–0.87 and the model 0.02. Yet on clean simulated patterns of the same
-targets its top-1 is 0.21 and its median rank 5. Retrained with the measurement effects we could simulate,
-it handles them in simulation but stays at 0.02 on measured patterns, so the gap lies in effects we did not
-model. In 34 simulated degradation conditions, each of the shift-tolerant classical scores beats it in at
-least 32. A more realistic library, a hubness correction (CSLS, +0.01 to +0.04, indistinguishable from
-zero) and an open replica on the Crystallography Open Database change none of this. We release the
-benchmark as code, refcode lists and the open replica.
+single-crystal determination, the classical scores reach a compound-weighted top-1 of 0.30–0.50 (30
+compounds) and the model 0.00; a variable-cell re-rank (VC-GPWDF) reaches 0.53, not resolved from the ln q
+scan it re-ranks (0.45). Most failures involve references determined at other pressures or temperatures.
+When the pattern's own powder-study entry also counts, the classical scores reach 0.71–0.87 and the model
+0.02. Yet on clean simulations of the same targets it reaches 0.27 (median rank 5). Retrained with
+five modelled measurement effects, it handles them in simulation but stays at 0.02 on measured patterns, so
+the gap lies in what our simulation does not reproduce. In 34 simulated degradation conditions, each
+of the shift-tolerant classical scores beats it in at least 32. A more realistic library and a hubness
+correction (CSLS) change none of this, and an open replica on
+the Crystallography Open Database reproduces the any-same-form result. We release the benchmark as code,
+refcode lists and the open replica.
 
 ## 1. Introduction
 
@@ -156,7 +157,7 @@ it is close to self-retrieval. We therefore score two answer sets.
 
 - **Single-crystal entry only** (59 patterns, 30 compounds): same-form entries that are powder studies are
   set aside, so the answer must be an independent single-crystal determination. This is the realistic case of a new measurement checked against a database, and we treat it as the
-  headline.
+  headline; 22 of these patterns come from variable-pressure studies (Section 4.2).
 - **Any same-form entry** (188 patterns, 123 compounds): any entry in the pattern's same-form set is
   correct. This is an upper bound on what a method can do with these patterns.
 
@@ -187,7 +188,9 @@ contribute many patterns, per-pattern averages mostly measure those compounds, s
 (95 %) come from 2,000 bootstrap resamples of compounds [@field2007cluster], so the patterns of one
 compound move together; for the single-crystal set only its 30 compounds are resampled. Differences
 between scores and the effect of a correction are paired: both are computed on the same resampled
-compounds.
+compounds. Our primary comparison is the learned model against the classical scores in compound-weighted
+top-1. Comparisons among classical scores, and among the variants of Sections 3.5 and 3.7, are exploratory and
+are not corrected for multiple comparisons.
 
 ### 2.6 An open replica
 
@@ -232,9 +235,11 @@ removed before scaling. Library patterns are scored as simulated.
 - **Pearson, fixed grid.** The Pearson correlation of the two patterns on the common grid, the main
   baseline of our earlier work [@cai2026urtc].
 - **Zero scan.** Each score below is maximised over a constant 2θ offset of ±0.5° in 0.02° steps. This
-  absorbs a zero error exactly and a sample-displacement error, which varies as cos θ, approximately. For
-  converted synchrotron patterns a native zero error becomes a slightly angle-dependent shift on the Cu
-  axis.
+  absorbs a zero error exactly and a sample-displacement error, which varies as cos θ, approximately. For a
+  pattern converted from a short wavelength, a native zero error is magnified by about λ_Cu/λ (up to about
+  4.5 times) and becomes weakly angle-dependent on the Cu axis. Specimen transparency, which shifts peaks in
+  proportion to sin 2θ and is often the largest aberration for weakly absorbing organic samples in reflection
+  geometry, is not absorbed by a constant offset.
 - **WCC.** de Gelder's weighted cross-correlation [@degelder2001wcc] with a triangular weight of
   half-width l = 1° or 2°, which makes the score degrade gradually rather than abruptly with peak shifts,
   plus the zero scan. With l = 0 the weight is a delta and WCC reduces to the cosine of the two patterns
@@ -247,7 +252,8 @@ removed before scaling. Library patterns are scored as simulated.
   resampling. A first version of this score sampled the ln q axis at points and used 16 offsets that skipped
   zero (nearest ±0.02°), which cost it accuracy on clean simulated queries (within-family top-1 0.88 rather
 than 1.00); we found both problems in an
-  internal review, corrected them, and report the first version in the ESI.† The offset grid is still 0.04°, so on simulated
+  internal review, corrected them, and report the first version in the ESI.† The corrected version was
+  declared primary before it was scored; it lowers the single-crystal top-1 from 0.49 to 0.45 (ESI†). The offset grid is still 0.04°, so on simulated
   queries the score depends on whether an applied offset falls on the grid (Section 4.1).
 
 In the simulated sweep the l = 0 variant was applied to standardised patterns, which makes it Pearson +
@@ -276,28 +282,31 @@ was trained once (one seed) for 60 epochs with a symmetric InfoNCE loss [@oord20
 batch size 512 and polymorph hard-negative batches (sibling polymorphs placed in the same batch), on 247,089
 CSD structures of a scaffold- and polymorph-family split. Patterns were simulated on the fly with random
 zero offset, isotropic strain, Caglioti and crystallite-size broadening, March–Dollase texture
-[@dollase1986], background and Poisson noise, but without Kα2. The checkpoint was chosen by in-batch
-validation top-1. A measured pattern is scored against the library by the cosine between its pattern
-embedding and each entry's structure embedding. We also test the model as a shortlist, re-ranking its top
-100 or 1,000 entries with a classical score. Further details are in the ESI.†
+[@dollase1986], background and Poisson noise, but without Kα2. The checkpoint was chosen by in-batch top-1 on
+clean, unaugmented validation patterns. A measured pattern is scored against the library by the cosine
+between its pattern embedding and each entry's structure embedding. We also test the model as a shortlist,
+re-ranking its top 100 or 1,000 entries with a classical score. Further details are in the ESI.†
 
-Three diagnostics probe the failure reported in Section 4.5. (i) **Effect ladder.** Each pattern's own
-library entry is rendered cleanly and then with one effect of the measurement at a time, each estimated from
-the measured pattern: its 2θ coverage, its peak width, Kα2 (lab Cu patterns), its own background followed by
-the background subtraction of Section 3.1, noise at its noise level, and the zero offset that best aligns it
-with its entry; then with all six, and with all six plus an overall Debye–Waller factor (B = 4.45 Å², from
-the library, Section 3.7), log-normal intensity jitter per reflection (σ = 0.3 or 0.5), or both (σ = 0.3).
-Every variant is scored with the
-answer sets of the measured pattern. Two of the effects use the own entry, so the ladder diagnoses the model
-and is not a method. (ii) **Pattern to pattern.** The clean library patterns are passed through the model's
-pattern encoder, so measured patterns are matched against simulated patterns in the learned space without
-the structure encoder. (iii) **Realism retrain.** The model was retrained once with the design and a
-prediction fixed before training (repository commit 3b77818): the same split, architecture,
-hyperparameters, epochs, hard-negative batches and checkpoint rule, with the training simulation extended by
-a Kα2 copy (probability 0.6, I₂/I₁ = 0.5), an overall Debye–Waller factor with B drawn uniformly from 0–8 Å²,
-log-normal intensity jitter per reflection with σ drawn uniformly from 0–0.5, a cut of the 2θ range (probability 0.25;
-start 5–12°, end 30–50°), and the background subtraction applied to the measured patterns. The retrained
-model is scored like the original, including the ladder.
+Three further diagnostics probe the failure reported in Section 4.5. (i) **Effect ladder.** Each pattern's
+own library entry is rendered cleanly and then with one effect of the measurement at a time: its 2θ
+coverage, its peak width and its noise level, each estimated from the measured pattern; Kα2, added to every
+laboratory Cu pattern because monochromatisation is not recorded; its own background followed by the
+background subtraction of Section 3.1; the zero offset that best aligns it with its entry; and an overall
+Debye–Waller factor (B = 4.45 Å², from the library, Section 3.7). It is then rendered with the first six
+together, and with those six plus the Debye–Waller factor, log-normal intensity jitter per reflection
+(σ = 0.3 or 0.5, not estimated from the data), or both (σ = 0.3); the Debye–Waller and jitter rungs were
+added after the first ladder. Every variant is scored with the answer sets of the measured pattern. One
+effect, the zero offset, uses the own entry, so the ladder diagnoses the model and is not a method.
+(ii) **Pattern to pattern.** The clean library patterns are passed through the model's pattern encoder, so
+measured patterns are matched against simulated patterns in the learned space without the structure encoder.
+(iii) **Realism retrain.** The model was retrained once with the design and a prediction fixed before
+training (repository commit 3b77818): the same split, architecture, hyperparameters, epochs, hard-negative
+batches and checkpoint rule, with the training simulation extended by a Kα2 copy (probability 0.6,
+I₂/I₁ = 0.5), an overall Debye–Waller factor with B drawn uniformly from 0–8 Å², log-normal intensity jitter
+per reflection with σ drawn uniformly from 0–0.5, a cut of the 2θ range (probability 0.25; start 5–12°, end
+30–50°), and the background subtraction applied to the measured patterns. The retrained model is scored like
+the original, including the ladder; since it was trained only on background-subtracted patterns, its ladder
+was also rerun with the background subtraction applied to every rung (ESI†).
 
 ### 3.5 Hubness diagnosis and correction
 
@@ -339,31 +348,40 @@ The library of Section 2.4 leaves out several features of the measured patterns.
 classical scores were recomputed with one package of changes, fixed before scoring (repository commit
 4d4dae3). (a) An overall Debye–Waller factor on the library intensities, I exp(−2Bs²) with s = sin θ/λ and
 B = 4.45 Å², which is 8π² times the median mean non-H U_eq of 5,000 random library entries measured at
-283–303 K. (b) For the 68 patterns not measured with Cu Kα, the Lorentz–polarisation factor converted from
-the measurement to Cu Kα1, with polarisation (1 + cos² 2θ)/2 for laboratory tubes and none for synchrotrons
-(an assumption). (c) For the 125 laboratory-tube patterns, Kα2 as a nuisance: the score is the higher of
+283–303 K, applied to every pattern whatever its temperature. (b) For the 68 patterns not measured with Cu
+Kα, the Lorentz–polarisation factor converted from the measurement to Cu Kα1, with polarisation
+(1 + cos² 2θ)/2 for laboratory tubes and none for synchrotrons, the two patterns at other wavelengths being
+treated as synchrotron data. No polarisation holds for a vertical scattering plane with a point detector;
+area-detector data integrated without a polarisation correction would carry the laboratory form. (c) For the 125 laboratory-tube patterns, Kα2 as a nuisance: the score is the higher of
 those against a Kα1 library and a Kα1 + Kα2 library (I₂/I₁ = 0.5), because opXRD does not record whether
 the beam was monochromated. (d) For the 46 patterns that do not cover 5–50°, comparison over the measured
 range only (reference norms over the query's coverage, not shifted with the zero scan). Each change was also
-removed on its own to give one-off ablations. None of the four was selected after seeing results.
+removed on its own to give one-off ablations. None of the four was selected after seeing results. Changes
+(b) and (d) act on the queries rather than on the library.
 
 ### 3.8 Variable-cell re-rank
 
 Single-crystal references fail mainly when their cell differs from the measured one (Section 4.2), which
 variable-cell comparison is designed to absorb. We re-ranked shortlists with VC-GPWDF
-[@oterodelaroza2024vcgpwdf] as implemented in critic2 1.4 [@oterodelaroza2014critic2], which compares a
+[@oterodelaroza2024vcgpwdf] as implemented in critic2 1.4.155 [@oterodelaroza2014critic2], which compares a
 candidate structure with a measured pattern while varying the candidate's cell (±10 % in lengths and ±5° in
-angles in its quick mode). We ran the published pipeline: background fit with 20 knots, peak fit with the
-default settings, and the global quick comparison with α = 1 as in the paper (the code's default is 0.5) and
-the measurement wavelength; it applies no zero-offset correction. One step was added: each pattern was cut
-to the d-spacing window that the other scores see (Cu Kα1 2θ of 5–50°). The shortlist of each single-crystal
-pattern is the 50 best entries of ln q, with set-aside entries excluded; a pattern whose answer is not in
-its shortlist counts as a miss, and a comparison that fails or runs past a 4-hour limit counts as maximally
-dissimilar. We had planned a shortlist of 100, but the shortlist holds the answer for the same 36 of the 59
-patterns at 50 as at 100, so the further entries could only have added competitors; the shorter list is, if
-anything, favourable to the re-rank. A comparison took a median of 2.2 CPU-minutes and up to 3.0 CPU-hours
-for the largest cells; one of the 2,950 comparisons reached the limit, in a shortlist that does not hold the
-answer, so it changes no result.
+angles in its quick mode, so larger cell differences cannot be reached). We ran the published pipeline:
+background fit with 20 knots, peak fit with the default settings, and the global quick comparison with α = 1
+as in the paper (the code's default is 0.5) and the measurement wavelength; it applies no zero-offset
+correction, and the peak fit does not model Kα2. One step was added: each pattern was cut to the d-spacing
+window that the other scores see (Cu Kα1 2θ of 5–50°). The shortlist of each single-crystal pattern is the
+50 best entries of ln q, with set-aside entries excluded; a pattern whose answer is not in its shortlist
+counts as a miss, and a comparison that fails or runs past 4 hours of wall time counts as maximally
+dissimilar. Entries with a disorder model are given as their major component; the first run passed every
+component at full occupancy, which affected one answer and is corrected here (ESI†). We had planned a shortlist of 100, but the shortlist holds the answer for the same 36
+of the 59 patterns at 50 as at 100, so the further entries could only have added competitors; the shorter
+list is, if anything, favourable to the re-rank. Because the cost of a comparison was first unknown, we ran
+the top 10 before extending to 50 (ESI†). A comparison took a median of 2.2 CPU-minutes and up to 3.0
+CPU-hours for the largest cells; one of the 2,950 comparisons reached the limit, in a shortlist that does
+not hold the answer, so it changes no result. Two checks were added after an internal review (ESI†): a
+positive control, in which each pattern is compared with its own powder-study entry, the structure refined
+against that very pattern; and an injection test, in which each answer missing from a shortlist is compared
+with its pattern to see where it would rank.
 
 ## 4. Results
 
@@ -397,44 +415,59 @@ between the points of their 0.02° offset grid (0.05° and 0.15°), and the ln q
 
 When the pattern's own powder-study entry is set aside and only independent single-crystal determinations
 count, the classical scores reach 0.30–0.50 compound-weighted top-1 (Table 1, Fig. 3a) and the model 0.00.
-For 34–47 % of these patterns the first correct entry lies beyond rank 1,000 for every classical score.
+Depending on the classical score, the first correct entry lies beyond rank 1,000 for 34–47 % of these
+patterns.
 
-Strain tolerance helps here, although the intervals are wide. Paired over compounds, WCC (l = 1°) beats
+The shift- and strain-tolerant scores all lie above fixed-grid Pearson, but the intervals are wide. Paired
+over compounds, and without correction for the four comparisons, WCC (l = 1°) beats
 fixed-grid Pearson by 0.20 [0.03, 0.36]; the ln q scan (+0.15 [0.00, 0.31]), cosine + zero scan
-(+0.10 [−0.05, 0.24]) and WCC (l = 2°, +0.16 [−0.03, 0.35]) are not resolved. The ln q scan has the best
-median rank, 7.
+(+0.10 [−0.05, 0.24]) and WCC (l = 2°, +0.16 [−0.03, 0.35]) are not resolved. Of the full-library scores, the ln q scan has the best median rank, 7.
 
-What separates success from failure is how well the cells agree. Where the closest single-crystal entry
-has every cell length within 1 % of the powder-study entry's, the ln q scan ranks it first for 0.68 of
-patterns (34 patterns); where they differ by more, for 0.08 (25 patterns). Thermal expansion is the obvious
-suspect, since a typical molecular crystal expands by about 3 % in volume between 100 K and room
-temperature [@bond2021thermal], but the recorded temperatures of the two entries differ by a median of 3 K
-for the 36 patterns where both are known, so it explains few of these mismatches. Pressure, refinement
-differences and the low precision of some early determinations are other candidates; we did not resolve
-them. The ln q scan absorbs isotropic strain up to 3 %, so its failures beyond 1 % suggest anisotropic
-cell differences, which variable-cell comparison is designed to absorb.
+What separates success from failure is how well the cells agree, and why they differ. We compare the
+primitive Niggli-reduced cells of each pattern's own powder-study entry and of its closest single-crystal
+same-form entry (58 patterns; one has no powder-study entry). Where every reduced cell length agrees within
+1 %, the ln q scan ranks a single-crystal same-form entry first for 22 of 33 patterns; where the cells differ
+by more, for 2 of 25, one of which is a supercell description of the same lattice. Most of the differences
+have identifiable causes. 22 of the 59 single-crystal patterns (5 compounds) come from variable-pressure
+studies, room-temperature compression series whose single-crystal references were determined at other
+pressures, and they account for 16 of the 25 patterns with differing cells. In 7 of the other 9, the
+recorded temperatures of the two entries differ by more than 50 K; overall, where both temperatures are
+recorded (35 patterns), they differ by more than 50 K for 15, and those 15 are retrieved less often (0.20
+against 0.45). Thermal expansion of molecular crystals is generally anisotropic
+[@bond2021thermal], and so is their compression; the isotropic ln q lag cannot absorb either, but
+variable-cell comparison is designed to.
+The pressure-series patterns are not the routine case of a new measurement checked against a database.
+Without them (37 patterns, 25 compounds; a split defined after an internal review), the classical scores
+reach a compound-weighted top-1 of 0.35–0.60 and the model 0.00 (ESI†).
 
 **Variable-cell re-rank.** Re-ranking the ln q top 50 with VC-GPWDF (Section 3.8) gives a compound-weighted
-top-1 of 0.50 [0.32, 0.67], against 0.45 [0.28, 0.63] for the ln q scan on the same patterns; the paired
-difference, +0.05 [−0.11, 0.20], does not resolve them, and at top-10 the re-rank is no better (0.59
-against 0.61). Per pattern, the re-rank ranks the answer first for 26 of the 59 patterns and the ln q scan
-for 25. Of the 36 patterns whose shortlist holds the answer, the re-rank moves it to first place for 4 (from
-ln q ranks 2, 3, 7 and 9) and moves ln q's correct first choice down for 3 (to ranks 2, 22 and 50, the last
-of its shortlist). Where the cells differ by more than 1 %, it ranks the answer first for 4 of the 25
-patterns, against 2 for the ln q scan; where they agree, for 22 of 34, against 23. Variable-cell comparison
-recovers a few of the mismatched cells, but most single-crystal failures remain: for 23 of the 59 patterns
-the answer is not among the 50 entries re-ranked, and 21 of the 25 patterns with mismatched cells still
-fail.
+top-1 of 0.53 [0.37, 0.70], against 0.45 [0.28, 0.63] for the ln q scan on the same patterns; the paired
+difference, +0.08 [−0.05, 0.21], does not resolve them, and at top-10 the two are level (0.62 against
+0.61). Per pattern, the re-rank ranks the answer first for 27 of the 59 patterns and the ln q scan for 25. Of
+the 36 patterns whose shortlist holds the answer, the re-rank moves it to first place for 4 (from ln q ranks
+2, 3, 7 and 9) and moves ln q's correct first choice down for 2 (to ranks 2 and 22). Where the cells differ
+by more than 1 %, it ranks the answer first for 4 of the 25 patterns, against 2 for the ln q scan; where
+they agree, for 22 of 33, against 22. Its reach is limited in two ways. First, the shortlist: for 23 of the
+59 patterns the answer is not among the 50 entries re-ranked, and compared directly, only 2 of those 23
+answers would rank first. Second, the peak fits. On the pressure-series patterns, measured at short
+wavelengths at high pressure, the fit finds 11–49 peaks (median 37), against 66–296 (median 154) on the
+others. Compared with its own powder-study entry, the structure refined against the same data, the pipeline
+ranks that entry first among the shortlist for 20 of 29 ambient-pressure patterns but for none of the 16
+pressure-series patterns (median rank 30.5), so on those patterns the re-rank carries little information.
+Without the pressure-series patterns, the re-rank reaches 0.64 [0.46, 0.80] against 0.54 [0.34, 0.72] for
+the ln q scan (paired +0.10 [−0.04, 0.26]).
 
 **Table 1** Retrieval of 188 measured opXRD patterns from 309,080 simulated CSD entries
 (background-subtracted queries, no hubness correction). Compound-weighted top-1 and top-10, with 95 %
 compound-bootstrap CIs for top-1; per-pattern top-1; median rank of the first correct entry over patterns.
 The variable-cell re-rank exists for the single-crystal set only; a pattern whose answer is not in its
-shortlist counts as a miss, and its median rank falls inside the shortlist.
+shortlist counts as a miss, and its median rank falls inside the shortlist. The model's 0.00 [0.00, 0.00]
+on the single-crystal set is a degenerate bootstrap interval: none of the 30 compounds is retrieved, and an
+exact one-sided 95 % bound is 0.10.
 
 | Score | Single-crystal entry only (30 compounds): top-1 | top-10 | median rank | Any same-form entry (123 compounds): top-1 | top-10 | per-pattern top-1 | median rank |
 |---|---|---|---|---|---|---|---|
-| VC-GPWDF re-rank of the ln q top 50 | 0.50 [0.32, 0.67] | 0.59 | 3 | – | – | – | – |
+| VC-GPWDF re-rank of the ln q top 50 | 0.53 [0.37, 0.70] | 0.62 | 3 | – | – | – | – |
 | ln q lag + zero scan | 0.45 [0.28, 0.63] | 0.61 | 7 | 0.87 [0.82, 0.93] | 0.93 | 0.72 | 1 |
 | WCC, l = 1° + zero scan | 0.50 [0.32, 0.67] | 0.57 | 50 | 0.83 [0.76, 0.89] | 0.89 | 0.68 | 1 |
 | WCC, l = 2° + zero scan | 0.47 [0.30, 0.63] | 0.53 | 350 | 0.71 [0.63, 0.78] | 0.81 | 0.57 | 1 |
@@ -532,48 +565,59 @@ that removes hub-like confusions when they occur.
 
 ### 4.5 Why the learned model fails
 
-The model ranks the first correct entry at a median of about 6,000 of 309,080 (Fig. 5a). Four diagnostics
+The model ranks the first correct entry at a median of about 6,000 of 309,080 (Fig. 5a). Five diagnostics
 locate the failure.
 
 **It retrieves simulated patterns.** For the 4,000 clean simulated probes of Section 3.5, the model ranks
 the probe's own entry first for 0.42 of probes and within the top 10 for 0.84 (median rank 2); with the
 training-time degradations, for 0.28 and 0.67 (median rank 4). For the clean simulated patterns of the
-benchmark's own entries, scored with the same answer sets as the measured patterns, it reaches top-1 0.21
-and top-10 0.56, with a median rank of 5. On the measured patterns of the same targets it reaches 0.01 and
-0.03. (A classical score would rank a clean rendering of a library entry first by construction, so this
-test only diagnoses the model.) The model can discriminate among 309,080 entries; what it cannot do is
-carry that ability from simulated to measured patterns.
+benchmark's own entries, scored with the same answer sets as the measured patterns, it reaches a per-pattern
+top-1 of 0.21 and top-10 of 0.56, with a median rank of 5. On the measured patterns of the same targets it
+reaches 0.01 and 0.03. (A classical score would rank a clean rendering of a library entry first by
+construction, so this test only diagnoses the model.) The model can discriminate among 309,080 entries; what
+it cannot do is carry that ability from simulated to measured patterns.
 
 **Seeing the structure in training does not help.** For the 81 patterns that have a same-form entry in the
 model's training split, the median rank is 6,396 and top-1 is 0.01; for the 101 patterns whose same-form
 entries are all outside the corpus, 5,617 and 0.00 (the other 6 have entries in the validation or test
 split).
 
-**No single measured effect explains the gap.** Rendering each pattern's own entry with the effects of its
+**No single modelled effect explains the gap.** Rendering each pattern's own entry with the effects of its
 measurement (Section 3.4) shows where the model loses ground (Fig. 6). Clean, it reaches a compound-weighted
-top-1 of 0.27 with a median rank of 5. One effect at a time costs it little except Kα2 (0.18, median rank
-33) and the background with its subtraction (0.24, median rank 130). With all six effects it reaches 0.15
-(median rank 176), and with the Debye–Waller factor added 0.05 (median rank 744), against 0.02 and about
-6,000 on the measured patterns. Fixed-grid Pearson shows the contrast: with all six effects, the
-Debye–Waller factor and jitter its ladder ends at 0.83, the value it reaches on the measured patterns
-(0.83), whereas for the model the same simulated patterns leave the median rank at about 750, against about
-6,000 on the measured ones.
+top-1 of 0.27 with a median rank of 5. The largest single cost is the Debye–Waller factor (0.07, median rank
+46), which fixed-grid Pearson does not notice (1.00). Kα2, which we add to every laboratory Cu pattern because
+monochromatisation is not recorded, costs 0.18 (median rank 33), and the background with its subtraction
+0.24 (median rank 130); coverage, peak width, noise and the zero offset cost little. With all six effects
+the model reaches 0.15 (median rank 176), and with the Debye–Waller factor added 0.05 (median rank 744),
+against 0.02 and about 6,000 on the measured patterns. With every modelled effect, including intensity
+jitter, fixed-grid Pearson reaches 0.83, its value on the measured patterns (0.83), and the model 0.04
+against 0.02; the difference shows in the model's median rank, about 750 on those simulations against about
+6,000 on the measured patterns. The jitter σ was not estimated from the data, and the Debye–Waller and jitter
+rungs were added after the first ladder.
 
-**A retrain with these effects fixes them in simulation only.** We retrained the model with Kα2, a
+**A retrain with these effects handles them in simulation only.** We retrained the model with Kα2, a
 Debye–Waller factor, intensity jitter, range cuts and the background subtraction in its training simulation
-(Section 3.4). It learned them: on its own entries with all six effects and the Debye–Waller factor, top-1
-rises from 0.05 to 0.23 and the median rank falls from 744 to 34 (Fig. 6); Kα2 alone is the exception (0.18
-to 0.11). On the measured patterns the retrained model reaches a compound-weighted top-1 of
-0.02 [0.00, 0.06], against 0.02 [0.00, 0.04] before, and 0.00 for single-crystal references, although its
-median rank halves, to about 3,000. Before training we had predicted a measured per-pattern top-1 of
-0.05–0.20, and that a value below 0.03 would mean the remaining gap is not the modelled effects; it is 0.02.
-For this model, what separates the measured patterns from their simulations is something we did not model.
+(Section 3.4). On its own entries it now tolerates the Debye–Waller factor (0.34 alone, median rank 4; 0.23
+together with all six effects, median rank 34 against 744 before); Kα2 alone stays costly (0.11, against 0.18 before,
+with overlapping intervals). On the measured patterns the retrained model reaches a compound-weighted top-1 of
+0.02 [0.00, 0.06], against 0.02 [0.00, 0.04] before, and 0.00 for single-crystal references; its median rank
+falls from about 6,000 to about 3,000. Before training we predicted a measured per-pattern top-1 of
+0.05–0.20 and a median rank of 50–1,000, and that a top-1 below 0.03 would mean the remaining gap is not the
+modelled effects. Both predictions failed: the per-pattern top-1 is 0.02 and the median rank about 3,000.
+The predicted recovery on the simulated patterns held in part (0.20 with every modelled effect, against 0.27
+clean). The measured patterns therefore differ from our simulations in a way that barely affects fixed-grid
+Pearson correlation but moves this model's embeddings far. We have not identified it. Candidates include
+instrument aberrations that a constant offset does not absorb (axial divergence, specimen transparency),
+anisotropic broadening and real preferred orientation. One retrain, with one seed and a checkpoint chosen
+on clean validation patterns, does not show that no training on these effects would transfer.
 
 **Pattern to pattern.** Matching the measured patterns to the simulated library patterns in the model's
 pattern space, without the structure encoder, reaches a compound-weighted top-1 of 0.13 (median rank about
-1,600), and 0.21 (about 270) with the retrained encoder. The classical scores do the same task, measured
-pattern against simulated pattern, at 0.71–0.87. The pattern encoder itself, not only the step to the
-structure encoder, places measured patterns away from simulations of the same structures.
+1,600), and 0.21 (about 270) with the retrained encoder. The retrained encoder matches its own entries
+rendered with every modelled effect to their clean versions at 0.92. Fixed-grid Pearson, which like the
+encoder compares the two patterns point by point without an alignment search, does the measured task at
+0.83. The pattern encoder itself, not only the step to the structure encoder, places measured patterns away
+from simulations of the same structures.
 
 Within families, where it only has to separate a compound's forms, the model reaches 0.71 against
 0.94–0.98 for the classical scores. As a shortlist it caps any re-ranker: its top 1,000 contains a correct
@@ -600,21 +644,29 @@ first correct entry for the two models.
 With the package of Section 3.7, the classical scores change by −0.04 to +0.04 in compound-weighted top-1,
 paired against the main benchmark (Table 2). Only one change is resolved: cosine + zero scan rises by
 0.04 [0.01, 0.08] when any same-form entry counts. The one-off ablations, each change removed alone and
-paired against the full package, attribute that gain to the Kα2 nuisance (−0.03 [−0.07, −0.01] without it)
+paired against the full package, point to the Kα2 nuisance for that gain (−0.03 [−0.07, −0.01] without it)
 and show that restricting the comparison to the measured range costs WCC (l = 2°) when any same-form entry
-counts (+0.05 [0.02, 0.09] without it). We had expected every single-crystal score to rise; they move by
-−0.04 to +0.04, with every interval including zero. The learned model scores 0.00 with this library on both
-sets. The classical results are therefore robust to these choices of library simulation, and the
-single-crystal failures are not caused by them.
+counts (+0.05 [0.02, 0.09] without it). Three of these 50 intervals exclude zero, about as many as chance
+would give, so we do not attribute effects to single changes. We had expected every single-crystal score to
+rise; they move by −0.04 to +0.04, with every interval including zero. Two of the changes act on the queries
+rather than the library (the Lorentz–polarisation conversion and the measured range), which is why the
+learned model, whose library embeddings are unchanged, scores 0.00 with the package on both sets. The
+classical results are robust to these choices of library simulation, which do not explain the single-crystal
+failures.
 
 ### 4.7 The open replica
 
-Against the 108,902 COD entries, the 190 patterns reproduce the main result (Table 2). When any same-form
-entry counts, the classical scores reach a compound-weighted top-1 of 0.77–0.90 (125 compounds; ln q
+Against the 108,902 COD entries, the 190 patterns reproduce the main result when any same-form entry counts
+(Table 2): the classical scores reach a compound-weighted top-1 of 0.77–0.90 (125 compounds; ln q
 0.90 [0.85, 0.95]) and the model 0.02 [0.00, 0.04]. The single-crystal set has 35 patterns but only 9
-compounds; there the classical scores reach 0.26–0.58 and the model 0.00, with intervals too wide to order
-the classical scores. The COD library is about a third of the size of the CSD library, and smaller libraries
-favour every score (Fig. 3b). All numbers in this section can be regenerated without a CSD licence.
+compounds; there the classical scores reach 0.26–0.58 and the model 0.00. This set cannot test the CSD
+single-crystal result: 20 of its 35 patterns are ZZZUWK, scored against a 1950 room-temperature structure
+that the CSD benchmark sets aside as not comparable, 8 are the naphthalene compression series, and the other
+compounds have one pattern each; its 5 % cell window also leaves out, by construction, the large cell
+differences that dominate the CSD failures (Section 4.2). The COD library is about a third of the size of
+the CSD library, and smaller libraries favour every score (Fig. 3b). The classical numbers in this section
+can be regenerated from open data alone; the model's need the CSD-trained checkpoint, which is not
+distributed, and can only be checked against the released ranks.
 
 **Table 2** Compound-weighted top-1 on the main benchmark (CSD library, Table 1), with the library of
 Section 3.7 (CSD, realistic) and on the open replica (COD library, Section 2.6). The single-crystal set has
@@ -632,15 +684,16 @@ Section 3.7 (CSD, realistic) and on the open replica (COD library, Section 2.6).
 ## 5. Discussion
 
 **What a learned retrieval method has to beat.** On measured organic patterns searched against the CSD,
-the bar is set by simple classical scores on background-subtracted patterns: a compound-weighted top-1 of
-about 0.5 when the reference is an independent single-crystal structure, reached by the strain-tolerant
-WCC and ln q scans and by a variable-cell re-rank, and of 0.83–0.87 when the pattern's own powder-study entry is in the library, where even
-fixed-grid Pearson correlation reaches 0.83. We suggest that learned PXRD retrieval be reported (i) on
-measured patterns, (ii) against a library of realistic size, (iii) against shift- and strain-tolerant
-correlation scores with background subtraction, (iv) with compound-weighted metrics and a compound-level
-bootstrap whenever compounds repeat, and (v) separately for queries whose reference is an independent
-determination. The benchmark released with this paper supports all five, and its open replica lets them be
-checked without a CSD licence.
+the bar is set by simple classical scores on background-subtracted patterns. When the reference is an
+independent single-crystal structure, the shift- and strain-tolerant scores and the variable-cell re-rank
+reach a compound-weighted top-1 of 0.40–0.53 (0.47–0.64 without the pressure series); when the pattern's
+own powder-study entry is in the library, they reach up to 0.87, and even fixed-grid Pearson correlation
+reaches 0.83. We suggest that learned PXRD retrieval be reported (i) on measured patterns, (ii) against a
+library of realistic size, (iii) against shift- and strain-tolerant correlation scores with background
+subtraction, (iv) with compound-weighted metrics and a compound-level bootstrap whenever compounds repeat,
+and (v) separately for queries whose reference is an independent determination, with their measurement
+conditions recorded. The benchmark released with this paper supports all five, and its open replica lets
+the any-same-form results be checked without a CSD licence.
 
 **Speed is the model's one advantage.** With precomputed library embeddings, the model searches 309,080
 entries in about 5 ms per query on a CPU. From the per-pair costs of the simulated sweep, one CPU core
@@ -651,43 +704,52 @@ comparison and about 400 CPU-hours for the 2,950 comparisons of 59 shortlists. S
 accuracy does, and a shortlist from this model loses most correct entries (Section 4.5).
 
 **Where learning could still help.** Two problems remain open, and both concern the gap between simulated
-and measured patterns. For independent single-crystal references, retrieval fails once the cells differ by
-more than about 1 %. The published variable-cell method [@oterodelaroza2024vcgpwdf] recovers few of these
-cases and is bounded by the shortlist it re-ranks, so the case stays open for classical methods too, and it is
-where a learned method could show its value. For the learned model, the failure is the transfer from
-simulated to measured patterns, not the size of the library, and it survives a retrain with every
-measurement effect we could simulate. Full-profile generative models have shown the same sensitivity to how
-realistic the training patterns are [@segal2026xrdiff]. A learned method aimed at that transfer, for example
-one adapted with measured patterns rather than with more simulated effects, is the more promising use of
-learning than a stand-alone retriever.
+and measured patterns. For independent single-crystal references, retrieval fails when the reference was
+determined at another pressure or temperature and the cells differ anisotropically by more than about 1 %.
+The published variable-cell method [@oterodelaroza2024vcgpwdf] gives no resolved gain here, is bounded
+by the shortlist it re-ranks, and in its automated form fits peaks poorly on the high-pressure patterns that
+make up most of the mismatched cells, so this case stays open for classical methods too, and it is where a
+learned method could show its value. For the learned model, the failure is the transfer from simulated to measured patterns,
+not the size of the library, and it survives a retrain with the five modelled effects of Section 3.4.
+Full-profile generative models have shown the same sensitivity to how realistic the training patterns are
+[@segal2026xrdiff]. A learned method aimed at that transfer, for example one adapted with measured patterns
+rather than with more simulated effects, is the more promising use of learning than a stand-alone
+retriever.
 
 **Limitations.** We tested one learned model, trained once and retrained once with a more realistic
-simulation; another architecture, loss or training strategy could do better, and our conclusions about
-learning are about this model. The benchmark has 123 compounds, all organic, from one contributor to opXRD,
-and most patterns are the data their own entry was refined against; the single-crystal set has 30
-compounds, so its intervals are wide, and that of the open replica only 9. The main library is simulated
-with one peak profile and without Debye–Waller factors or Kα2; a package of such changes moved little
-(Section 4.6) but does not exhaust them, and disordered entries are simulated only approximately. The
-measured patterns have a simple background removal. The zero scans use fixed offset grids (0.02°, and
-0.04° for the ln q scan), and the variable-cell re-rank covers a shortlist of 50 with a 4-hour limit per
-comparison. The correct answers rely on packing similarity, set aside
-entries that cannot be compared, and contain one known error (Section 2.2). Retrieval identifies known
-forms only; crystal structure prediction combined with pattern matching can identify forms that no
-database contains [@glick2025csp].
+simulation, each with one seed and a checkpoint chosen on clean validation patterns; another architecture,
+loss or training strategy could do better, and our conclusions about learning are about this model. The
+benchmark has 123 compounds, all organic, from one contributor to opXRD, and most patterns are the data
+their own entry was refined against. The single-crystal set has 30 compounds, so its intervals are wide;
+22 of its 59 patterns come from variable-pressure studies, and the open replica's single-crystal set has only
+9 compounds. The main library is simulated with one peak profile and without Debye–Waller factors or Kα2; a
+package of such changes moved little (Section 4.6) but does not exhaust them, uses one Debye–Waller factor
+for every temperature, and disordered entries are simulated only approximately. The measured patterns have a
+simple background removal and are interpolated onto the Cu grid, which can miss the tops of narrow
+synchrotron peaks. The zero scans use fixed offset grids (0.02°, and 0.04° for the ln q scan). The effect
+ladder adds Kα2 to every laboratory Cu pattern and does not estimate the intensity jitter. The variable-cell
+re-rank covers a shortlist of 50 with a 4-hour limit per comparison, uses no zero-offset correction, reaches
+only cell differences within ±10 % and ±5°, and fits peaks poorly on the high-pressure synchrotron patterns.
+The correct answers rely on packing similarity, which can count entries as one form across a phase
+transition that preserves the packing, set aside entries that cannot be
+compared, and contain one known error (Section 2.2). Retrieval identifies known forms only; crystal
+structure prediction combined with pattern matching can identify forms that no database contains
+[@glick2025csp].
 
 ## 6. Conclusions
 
 On 188 measured organic patterns searched against 309,080 simulated CSD entries, a contrastive
 PXRD–structure model reaches a compound-weighted top-1 of 0.02, against 0.71–0.87 for classical profile
-matching; with independent single-crystal references, 0.00 against 0.30–0.50, and 0.50 for a
+matching; with independent single-crystal references, 0.00 against 0.30–0.50, and 0.53 for a
 variable-cell re-rank, which is not resolved from the ln q scan it re-ranks. The model retrieves clean
-simulated patterns of the same targets, and a retrain with the measurement effects we could simulate fixes
-those effects in simulation but not on the measured patterns, so its failure lies in a part of the step
-from simulated to measured data that we did not model. A more realistic library and an open replica built
-from the COD give the same picture. The hard open case is a
-measured pattern whose only reference is an independent single-crystal structure with a cell that differs
-by more than about 1 %. We release the benchmark so that learned methods can be compared with these numbers
-on measured data.
+simulated patterns of the same targets, and a retrain with five modelled measurement effects handles those
+effects in simulation but not on the measured patterns, so its failure lies in differences between
+measured and simulated patterns that our simulation does not reproduce. A more realistic library leaves the
+classical results unchanged, and an open replica built from the COD reproduces the any-same-form result.
+The hard open case is a measured pattern whose only reference was determined at another temperature or
+pressure, so that the cells differ anisotropically by more than about 1 %; in this benchmark most such
+patterns come from compression series. We release the benchmark so that learned methods can be compared
+with these numbers on measured data.
 
 ## Data availability
 
@@ -697,12 +759,17 @@ asks, for restricted data, for "a representative dataset that enables similar co
 The code, the benchmark definition and all results are available at [GitHub URL] and archived at Zenodo
 ([DOI]). The deposit contains: the opXRD pattern identifiers with their CSD refcodes, same-form sets and
 packing-similarity results; the corpus refcode list and the training splits; the per-pattern ranks of
-every score and correction, including the learned model's and the variable-cell re-rank's; the scripts
-that build the library from a CSD installation, compute the scores (CPU and GPU) and regenerate every table
-and figure; and results/paper_numbers.json, from which every number in this article is checked by
-scripts/verify_claims.py. The open replica of Section 2.6 is included in full: the COD identifiers, the
-simulated COD library, its answer sets and the ranks of every score, from which Section 4.7 and Table 2 can
-be reproduced without a CSD licence. The measured patterns are from opXRD [@opxrd2025zenodo] under CC BY
+every score and correction, including the learned model's and the variable-cell re-rank's; the
+critic2 inputs derived from the opXRD patterns (cut patterns, background and peak fits, command files) and
+the measurement conditions of the single-crystal patterns; the scripts that build the library from a CSD
+installation, compute the scores (CPU and GPU) and regenerate every table and figure; and
+results/paper_numbers.json, from which every number in this article is checked by scripts/verify_claims.py.
+The open replica of Section 2.6 is included in full: the COD identifiers, the simulated COD library, its
+answer sets and the ranks of every score, from which the classical results of Section 4.7 and the COD
+columns of Table 2 can be reproduced without a CSD licence. The CSD library was built from the May 2026
+release (1,451,367 entries; CSD Python API 3.7.1) and the measurement conditions were read from a later
+update (1,469,017 entries; API 3.8.0); the COD was downloaded on 12–13 October 2026; the opXRD patterns are
+from the Zenodo record 10.5281/zenodo.15298026. The measured patterns are from opXRD [@opxrd2025zenodo] under CC BY
 4.0, and the COD structures are CC0. CSD structures and the simulated patterns derived from them cannot be
 redistributed; users with a CSD licence regenerate them from the refcode lists. The model checkpoints, the
 original and the retrained one, were trained on CSD data and are not distributed.

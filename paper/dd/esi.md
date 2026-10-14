@@ -221,7 +221,7 @@ Maximum |GPU − CPU| score over all benchmark patterns and their special entrie
 
 ## S6 Simulated sweep, all conditions
 
-**Table S12** Within-family top-1 over 1,077 families (2,835 queries); 95 % family-bootstrap CIs; composition-only chance 0.38. The last column is the first version of the ln q scan (Table S17) on the same draws.
+**Table S12** Within-family top-1 over 1,077 families (2,835 queries); 95 % family-bootstrap CIs; composition-only chance 0.38. The last column is the first version of the ln q scan (Section S9) on the same draws.
 
 | Condition | model | best classical | best score | Δ | Pearson, fixed grid | ln q | ln q, first version |
 |---|---|---|---|---|---|---|---|
@@ -320,7 +320,7 @@ Training-split overlap (any same-form entry in): {'none': 101, 'train': 81, 'val
 | own entry ordered | 160 / 115 | 0.81 / 0.88 | 0.81 / 0.85 | 0.85 / 0.83 | 0.77 / 0.84 | 0.64 / 0.71 | 0.01 / 0.02 |
 | own entry disordered | 28 / 9 | 0.21 / 0.67 | 0.25 / 0.78 | 0.64 / 0.73 | 0.18 / 0.56 | 0.18 / 0.56 | 0.00 / 0.00 |
 
-Single-crystal set, cell agreement: largest relative cell-length difference between the own powder-study entry and the closest single-crystal same-form entry, median 0.65 %. Patterns ranked first (per pattern) for ≤ 1 % (n = 34) / > 1 % (n = 25): ln q 23 / 2; ln q, first version 24 / 2; VC-GPWDF re-rank 22 / 4; WCC 1° 23 / 3; WCC 2° 22 / 3; cosine + zs 22 / 0; Pearson 20 / 0. Recorded temperatures known for both entries: n = 36, median |ΔT| 3 K; ln q top-1 0.43 for |ΔT| ≤ 50 K (n = 23) and 0.23 above (n = 13).
+Single-crystal set, cell agreement: largest relative cell-length difference between the own powder-study entry and the closest single-crystal same-form entry, median 0.64 %. Patterns ranked first (per pattern) for ≤ 1 % (n = 33) / > 1 % (n = 25): ln q 22 / 2; ln q, first version 23 / 2; VC-GPWDF re-rank 22 / 4; WCC 1° 22 / 3; WCC 2° 21 / 3; cosine + zs 21 / 0; Pearson 19 / 0. Recorded temperatures known for both entries: n = 35, median |ΔT| 7 K; ln q top-1 0.45 for |ΔT| ≤ 50 K (n = 20) and 0.20 above (n = 15).
 
 Ground-truth audit: 454 wrong first-ranked entries (five classical scores, both answer sets) compared with the anchors by packing similarity (871 pairs); molecules matched (max over anchors): {'None': 441, '15': 5, '9': 2, '7': 1, '11': 2, '5': 2, '10': 1} (None = no comparable molecules). Same form: GOFWUV for pattern_100.json (QQQAUJ).
 
@@ -339,73 +339,94 @@ The first version sampled the ln q axis at points and used 16 zero offsets that 
 
 ## S10 Variable-cell re-rank (critic2 VC-GPWDF)
 
-critic2 1.4 COMPAREVC GLOBAL QUICK, α = 1, measurement wavelength, on the ln q top 50 of each of the 59 single-crystal patterns (2,950 comparisons, set-aside entries excluded). Median 2.2 CPU-minutes per comparison, maximum 2.96 CPU-hours, 400 CPU-hours in total; 1 comparison reached the 4-hour limit and counts as maximally dissimilar (pattern_730 against GOGZOU, whose shortlist does not hold the answer). The answer is in the shortlist for 36 patterns, the same number as in the ln q top 100 (36).
+critic2 1.4.155 COMPAREVC GLOBAL QUICK, α = 1, measurement wavelength, on the ln q top 50 of each of the 59 single-crystal patterns (2,950 comparisons, set-aside entries excluded). Median 2.2 CPU-minutes per comparison, maximum 2.96 CPU-hours, 400 CPU-hours in total; 1 comparison reached the 4-hour wall-time limit and counts as maximally dissimilar (pattern_730 against GOGZOU, whose shortlist does not hold the answer). The answer is in the shortlist for 36 patterns, the same number as in the ln q top 100 (36). Because the cost of a comparison was unknown, the top 10 was run first and then extended to 50.
 
-Compound-weighted top-1: re-rank 0.50 [0.32, 0.67], ln q 0.45 [0.28, 0.63], paired +0.05 [−0.11, +0.20]; top-10: 0.59 [0.42, 0.75] against 0.61 [0.44, 0.77], paired −0.02 [−0.15, +0.09].
+Disordered inputs: the CSD extraction writes CIFs without occupancies, so the first run passed every disorder component of the few disordered entries at full occupancy. One answer was affected (ROHWIX01 for pattern_1006: DIFF 0.261, the worst of its shortlist). All structures with a disorder model were replaced by their major component and the affected comparisons rerun; ROHWIX01 then scores 0.006, the best of its shortlist.
 
-**Table S18** The single-crystal patterns: largest relative cell-length difference between the own powder-study entry and the closest single-crystal same-form entry, ln q rank over the full library, and rank after the re-rank ('–': the answer is not in the ln q top 50).
+Compound-weighted top-1: re-rank 0.53 [0.37, 0.70], ln q 0.45 [0.28, 0.63], paired +0.08 [−0.05, +0.21]; top-10: 0.62 [0.45, 0.79] against 0.61 [0.44, 0.77], paired +0.01 [−0.09, +0.11].
 
-| opXRD pattern | CSD family | cell difference (%) | ln q rank | rank after the re-rank |
-|---|---|---|---|---|
-| pattern_949 | AKAFUR | 0.10 | 1 | 1 |
-| pattern_351 | AKAGIG | 0.08 | 1 | 1 |
-| pattern_880 | AZUDOP | 0.23 | 4 | 16 |
-| pattern_484 | BAPLOT | 0.00 | 1 | 1 |
-| pattern_1029 | CEHQEM | 29.04 | 1 | 1 |
-| pattern_816 | COUMAR | 2.75 | 40 | 3 |
-| pattern_297 | DEHKUA | 21.15 | 44 | 3 |
-| pattern_655 | DEHKUA | 1.15 | 9 | 1 |
-| pattern_730 | EPIVEF | 13.55 | 9,894 | – |
-| pattern_921 | EPIVEF | 6.18 | 1,419 | – |
-| pattern_252 | FOPKOK | 0.06 | 1 | 1 |
-| pattern_1041 | GOFWOP | 0.54 | 1,676 | – |
-| pattern_530 | GOFWUV | 0.24 | 22,004 | – |
-| pattern_326 | HOJQII | 17.61 | 21,136 | – |
-| pattern_1022 | HOJQII | 10.30 | 10,436 | – |
-| pattern_539 | HXACAN | 0.66 | 1 | 1 |
-| pattern_750 | HXACAN | 1.96 | 24,367 | – |
-| pattern_710 | IKIJER | 0.54 | 1 | 1 |
-| pattern_887 | IYESEO | 1.26 | 5,738 | – |
-| pattern_760 | LILRIJ | 8.92 | 187,487 | – |
-| pattern_213 | MEHNIY | 14.10 | 306,484 | – |
-| pattern_594 | MEHNIY | 1.62 | 1 | 22 |
-| pattern_623 | MEHNIY | 8.76 | 301,365 | – |
-| pattern_875 | MEHNIY | 9.76 | 302,001 | – |
-| pattern_891 | MEHNIY | 10.91 | 299,969 | – |
-| pattern_978 | MEHNIY | 6.68 | 166,952 | – |
-| pattern_1010 | MEHNIY | 4.56 | 1,884 | – |
-| pattern_917 | MIGQOJ | 6.14 | 3,541 | – |
-| pattern_16 | NAPHTA | 0.61 | 7 | 28 |
-| pattern_82 | NAPHTA | 0.28 | 7 | 23 |
-| pattern_91 | NAPHTA | 0.65 | 274 | – |
-| pattern_96 | NAPHTA | 0.04 | 23 | 47 |
-| pattern_511 | NAPHTA | 0.39 | 28 | 2 |
-| pattern_647 | NAPHTA | 0.88 | 107 | – |
-| pattern_726 | NAPHTA | 3.91 | 78,049 | – |
-| pattern_808 | NAPHTA | 3.07 | 15,104 | – |
-| pattern_1021 | NAPHTA | 0.48 | 118 | – |
-| pattern_1046 | NAPHTA | 1.59 | 1,308 | – |
-| pattern_519 | QILDAS | 0.40 | 1 | 1 |
-| pattern_1008 | QILZIX | 2.07 | 3 | 1 |
-| pattern_247 | QIQVAQ | 0.38 | 1 | 2 |
-| pattern_805 | QUWYIR | 0.11 | 1 | 1 |
-| pattern_914 | RIXNES | 1.84 | 28,191 | – |
-| pattern_1006 | ROHWIX | 0.13 | 1 | 50 |
-| pattern_77 | TAQBIY | 4.81 | 7 | 1 |
-| pattern_180 | UPOJER | 0.25 | 1 | 1 |
-| pattern_487 | VELWIV | 0.34 | 2 | 1 |
-| pattern_586 | ZIZRUX | 0.33 | 1 | 1 |
-| pattern_205 | ZZZIZM | 0.38 | 1 | 1 |
-| pattern_209 | ZZZIZM | 0.30 | 1 | 1 |
-| pattern_359 | ZZZIZM | 0.62 | 1 | 1 |
-| pattern_396 | ZZZIZM | 0.79 | 1 | 1 |
-| pattern_504 | ZZZIZM | 0.07 | 1 | 1 |
-| pattern_574 | ZZZIZM | 0.07 | 1 | 1 |
-| pattern_619 | ZZZIZM | 0.15 | 1 | 1 |
-| pattern_698 | ZZZIZM | 0.45 | 1 | 1 |
-| pattern_775 | ZZZIZM | 0.23 | 1 | 1 |
-| pattern_787 | ZZZIZM | 0.71 | 1 | 1 |
-| pattern_901 | ZZZIZM | 0.54 | 1 | 1 |
+Positive control: each pattern against its own powder-study entry (the structure refined against that pattern); its DIFF is ranked among the shortlist's. Injection: each answer missing from a shortlist (the single-crystal same-form entry closest in cell) compared with its pattern and ranked the same way. Pressure series: the pattern's own entry carries a CSD pressure, or another entry of its family from the same publication does, or it is flagged by hand with the evidence (scripts/34_sc_conditions.py; HOJQII01/02, compressed cells at 293 K from a pressure study). The cell difference is the largest relative difference of the primitive Niggli-reduced cell lengths of the own entry and the closest single-crystal entry; ΔT is the difference of their recorded temperatures.
+
+**Table S18** The single-crystal patterns. Ranks are 1-based; '–': the answer is not in the ln q top 50. Peaks: critic2 peak-fit count inside the d window.
+
+| opXRD pattern | CSD family | pressure series | cell difference (%) | ΔT (K) | peaks | ln q rank | rank after the re-rank | own entry, rank in shortlist | injected answer, rank |
+|---|---|---|---|---|---|---|---|---|---|
+| pattern_949 | AKAFUR |  | 0.10 | 25 | 250 | 1 | 1 | n/a | n/a |
+| pattern_351 | AKAGIG |  | 0.08 | 25 | 252 | 1 | 1 | 1 | n/a |
+| pattern_880 | AZUDOP |  | 0.23 | 0 | 148 | 4 | 16 | 18 | n/a |
+| pattern_484 | BAPLOT |  | n/a | n/a | 153 | 1 | 1 | n/a | n/a |
+| pattern_1029 | CEHQEM |  | 29.04 | n/a | 190 | 1 | 1 | n/a | n/a |
+| pattern_816 | COUMAR |  | 2.75 | 138 | 86 | 40 | 3 | 8 | n/a |
+| pattern_297 | DEHKUA |  | 3.79 | 110 | 138 | 44 | 3 | 4 | n/a |
+| pattern_655 | DEHKUA |  | 1.15 | 110 | 148 | 9 | 1 | 2 | n/a |
+| pattern_730 | EPIVEF | yes | 13.55 | 3 | 24 | 9,894 | – | 50 | 50 |
+| pattern_921 | EPIVEF | yes | 6.18 | 3 | 29 | 1,419 | – | 1 | 1 |
+| pattern_252 | FOPKOK |  | 0.06 | 2 | 176 | 1 | 1 | 1 | n/a |
+| pattern_1041 | GOFWOP |  | 0.54 | 101 | 211 | 1,676 | – | n/a | 1 |
+| pattern_530 | GOFWUV |  | 0.24 | 175 | 143 | 22,004 | – | 5 | 51 |
+| pattern_326 | HOJQII | yes | 17.61 | 193 | 46 | 21,136 | – | 10 | 48 |
+| pattern_1022 | HOJQII | yes | 10.30 | 193 | 49 | 10,436 | – | n/a | 19 |
+| pattern_539 | HXACAN |  | 0.66 | 0 | 285 | 1 | 1 | 2 | n/a |
+| pattern_750 | HXACAN |  | 1.96 | 193 | 164 | 24,367 | – | 16 | 25 |
+| pattern_710 | IKIJER |  | 0.35 | 150 | 100 | 1 | 1 | 1 | n/a |
+| pattern_887 | IYESEO |  | 0.60 | 193 | 287 | 5,738 | – | 1 | n/a |
+| pattern_760 | LILRIJ | yes | 8.92 | 3 | 11 | 187,487 | – | 32 | 40 |
+| pattern_213 | MEHNIY | yes | 8.62 | 0 | 11 | 306,484 | – | 49 | 37 |
+| pattern_594 | MEHNIY | yes | 1.07 | 0 | 18 | 1 | 22 | 21 | n/a |
+| pattern_623 | MEHNIY | yes | 5.55 | 0 | 12 | 301,365 | – | 11 | 12 |
+| pattern_875 | MEHNIY | yes | 6.27 | 0 | 11 | 302,001 | – | 14 | 25 |
+| pattern_891 | MEHNIY | yes | 6.78 | 0 | 13 | 299,969 | – | 10 | 10 |
+| pattern_978 | MEHNIY | yes | 4.24 | 0 | 15 | 166,952 | – | 17 | 29 |
+| pattern_1010 | MEHNIY | yes | 2.90 | 0 | 12 | 1,884 | – | n/a | 2 |
+| pattern_917 | MIGQOJ |  | 6.14 | 120 | 205 | 3,541 | – | n/a | 3 |
+| pattern_16 | NAPHTA | yes | 0.61 | n/a | 38 | 7 | 28 | 29 | n/a |
+| pattern_82 | NAPHTA | yes | 0.28 | n/a | 43 | 7 | 23 | 25 | n/a |
+| pattern_91 | NAPHTA | yes | 1.00 | n/a | 37 | 274 | – | 49 | 49 |
+| pattern_96 | NAPHTA | yes | 0.13 | n/a | 43 | 23 | 47 | 47 | n/a |
+| pattern_511 | NAPHTA | yes | 0.39 | n/a | 42 | 28 | 2 | 4 | n/a |
+| pattern_647 | NAPHTA | yes | 1.15 | n/a | 37 | 107 | – | 49 | 49 |
+| pattern_726 | NAPHTA | yes | 4.35 | n/a | 41 | 78,049 | – | 50 | 50 |
+| pattern_808 | NAPHTA | yes | 3.55 | n/a | 41 | 15,104 | – | 50 | 50 |
+| pattern_1021 | NAPHTA | yes | 0.48 | n/a | 41 | 118 | – | n/a | 49 |
+| pattern_1046 | NAPHTA | yes | 2.10 | n/a | 38 | 1,308 | – | n/a | 51 |
+| pattern_519 | QILDAS |  | 0.40 | 120 | 158 | 1 | 1 | 1 | n/a |
+| pattern_1008 | QILZIX |  | 2.07 | 112 | 131 | 3 | 1 | n/a | n/a |
+| pattern_247 | QIQVAQ |  | 0.38 | 7 | 294 | 1 | 2 | 1 | n/a |
+| pattern_805 | QUWYIR |  | 0.11 | 0 | 255 | 1 | 1 | 1 | n/a |
+| pattern_914 | RIXNES |  | 1.84 | 60 | 232 | 28,191 | – | 4 | n/a |
+| pattern_1006 | ROHWIX |  | 0.13 | 148 | 66 | 1 | 1 | n/a | n/a |
+| pattern_77 | TAQBIY |  | 4.81 | n/a | 213 | 7 | 1 | 2 | n/a |
+| pattern_180 | UPOJER |  | 0.25 | 0 | 296 | 1 | 1 | 1 | n/a |
+| pattern_487 | VELWIV |  | 0.34 | 3 | 157 | 2 | 1 | 1 | n/a |
+| pattern_586 | ZIZRUX |  | 0.30 | 0 | 82 | 1 | 1 | 1 | n/a |
+| pattern_205 | ZZZIZM |  | 0.38 | n/a | 167 | 1 | 1 | 1 | n/a |
+| pattern_209 | ZZZIZM |  | 0.30 | n/a | 146 | 1 | 1 | 1 | n/a |
+| pattern_359 | ZZZIZM |  | 0.62 | n/a | 147 | 1 | 1 | 1 | n/a |
+| pattern_396 | ZZZIZM |  | 0.79 | n/a | 166 | 1 | 1 | 1 | n/a |
+| pattern_504 | ZZZIZM |  | 0.07 | n/a | 154 | 1 | 1 | 1 | n/a |
+| pattern_574 | ZZZIZM |  | 0.07 | n/a | 147 | 1 | 1 | 1 | n/a |
+| pattern_619 | ZZZIZM |  | 0.15 | n/a | 149 | 1 | 1 | 1 | n/a |
+| pattern_698 | ZZZIZM |  | 0.45 | n/a | 147 | 1 | 1 | 1 | n/a |
+| pattern_775 | ZZZIZM |  | 0.23 | n/a | 146 | 1 | 1 | 1 | n/a |
+| pattern_787 | ZZZIZM |  | 0.71 | n/a | 140 | 1 | 1 | 1 | n/a |
+| pattern_901 | ZZZIZM |  | 0.54 | n/a | 153 | 1 | 1 | 1 | n/a |
+
+Positive control: own entry ranked first for 21 of 30 ambient-pressure and 1 of 18 pressure-series patterns (median rank 1 and 27.0). Injection: the missing answer would rank first for 1 of 4 ambient-pressure and 1 of 17 pressure-series patterns. Fitted peaks: 66–296 (ambient) and 11–49 (pressure series).
+
+**Table S18b** Single-crystal set without the pressure-series patterns (37 patterns, 25 compounds; a secondary split defined after the internal review): compound-weighted top-1 and patterns ranked first; the pressure-series column counts first places among the 22 pressure-series patterns.
+
+| score | macro top-1, ambient | first places, ambient | first places, pressure series |
+|---|---|---|---|
+| ln q lag + zero scan | 0.54 [0.34, 0.72] | 24 | 1 |
+| ln q, first version | 0.58 [0.40, 0.76] | 25 | 1 |
+| VC-GPWDF re-rank | 0.64 [0.46, 0.80] | 27 | 0 |
+| WCC, l = 1° + zero scan | 0.60 [0.42, 0.78] | 26 | 0 |
+| WCC, l = 2° + zero scan | 0.56 [0.36, 0.74] | 25 | 0 |
+| Cosine + zero scan | 0.47 [0.28, 0.67] | 20 | 2 |
+| Pearson, fixed grid | 0.35 [0.17, 0.53] | 15 | 5 |
+| Learned embedding | 0.00 [0.00, 0.00] |  |  |
+
+Patterns whose cells differ by more than 1 % (25): pressure series 16; recorded temperatures more than 50 K apart (not pressure series) 7; supercell description 1; none of these 1 (pattern_77).
 
 ## S11 Effect ladder
 
@@ -422,6 +443,7 @@ Each pattern's own library entry, rendered with effects estimated from its measu
 | + background | 0.24 [0.16, 0.31] / 0.18 / 130.0 | 0.25 [0.17, 0.33] / 0.18 / 21.5 | 1.00 | 0.82 / 0.92 |
 | + noise | 0.22 [0.15, 0.29] / 0.17 / 11.0 | 0.22 [0.15, 0.29] / 0.16 / 8.5 | 1.00 | 0.97 / 0.97 |
 | + zero offset | 0.26 [0.18, 0.33] / 0.21 / 5.5 | 0.26 [0.19, 0.34] / 0.23 / 7.5 | 0.75 | 1.00 / 1.00 |
+| + B | 0.07 [0.03, 0.12] / 0.07 / 45.5 | 0.34 [0.26, 0.42] / 0.30 / 4.5 | 1.00 | 0.97 / 1.00 |
 | all six | 0.15 [0.09, 0.22] / 0.11 / 175.5 | 0.16 [0.10, 0.23] / 0.14 / 40.0 | 0.87 | 0.85 / 0.94 |
 | all six + B | 0.05 [0.02, 0.09] / 0.04 / 743.5 | 0.23 [0.16, 0.30] / 0.21 / 33.5 | 0.87 | 0.65 / 0.94 |
 | all six + jitter 0.3 | 0.13 [0.07, 0.19] / 0.10 / 162.5 | 0.17 [0.11, 0.24] / 0.14 / 44.0 | 0.85 | 0.82 / 0.93 |
@@ -440,12 +462,24 @@ Each pattern's own library entry, rendered with effects estimated from its measu
 | + background | 0.12 [0.02, 0.23] / 0.07 / 739.0 | 0.20 [0.07, 0.33] / 0.10 / 39.0 | 0.43 | 0.52 / 0.61 |
 | + noise | 0.17 [0.05, 0.30] / 0.10 / 10.0 | 0.20 [0.07, 0.37] / 0.12 / 4.0 | 0.43 | 0.65 / 0.70 |
 | + zero offset | 0.19 [0.07, 0.33] / 0.15 / 6.0 | 0.32 [0.17, 0.49] / 0.29 / 8.0 | 0.29 | 0.71 / 0.77 |
+| + B | 0.07 [0.00, 0.15] / 0.05 / 19.0 | 0.38 [0.22, 0.55] / 0.39 / 4.0 | 0.43 | 0.58 / 0.77 |
 | all six | 0.12 [0.02, 0.23] / 0.07 / 560.0 | 0.17 [0.05, 0.30] / 0.17 / 29.0 | 0.42 | 0.55 / 0.70 |
 | all six + B | 0.00 [0.00, 0.00] / 0.00 / 926.0 | 0.29 [0.15, 0.46] / 0.31 / 17.0 | 0.39 | 0.35 / 0.72 |
 | all six + jitter 0.3 | 0.08 [0.00, 0.20] / 0.05 / 611.0 | 0.23 [0.10, 0.38] / 0.19 / 31.0 | 0.42 | 0.52 / 0.68 |
 | all six + jitter 0.5 | 0.08 [0.00, 0.20] / 0.05 / 802.0 | 0.16 [0.04, 0.30] / 0.12 / 37.0 | 0.37 | 0.37 / 0.60 |
 | all six + B + jitter 0.3 | 0.00 [0.00, 0.00] / 0.00 / 946.0 | 0.16 [0.05, 0.30] / 0.15 / 25.0 | 0.41 | 0.33 / 0.68 |
 | measured patterns | 0.00 [0.00, 0.00] / 0.00 / 18,725.0 | 0.00 [0.00, 0.00] / 0.00 / 10,989.0 | 0.30 | 0.07 / 0.13 |
+
+**Table S20b** Single-effect rungs with the background subtraction applied to every rung (the realism retrain saw only background-subtracted patterns in training); compound-weighted top-1 / median rank, any same-form entry.
+
+| variant | original model | original, subtraction everywhere | realism retrain | retrain, subtraction everywhere |
+|---|---|---|---|---|
+| clean | 0.27 / 5.0 | 0.26 / 5.0 | 0.27 / 7.0 | 0.28 / 7.0 |
+| + coverage | 0.26 / 6.0 | 0.25 / 6.0 | 0.26 / 7.0 | 0.26 / 7.5 |
+| + peak width | 0.27 / 7.0 | 0.27 / 8.0 | 0.26 / 6.0 | 0.31 / 6.0 |
+| + Kα2 | 0.18 / 33.0 | 0.17 / 32.0 | 0.11 / 27.0 | 0.13 / 27.0 |
+| + noise | 0.22 / 11.0 | 0.21 / 11.0 | 0.22 / 8.5 | 0.22 / 8.5 |
+| + zero offset | 0.26 / 5.5 | 0.25 / 5.0 | 0.26 / 7.5 | 0.27 / 8.0 |
 
 ## S12 A library closer to the measurements
 

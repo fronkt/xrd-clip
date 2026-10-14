@@ -320,7 +320,32 @@ C. Paper: paper_numbers.json -> manuscript/ESI/figs -> verify_claims -> internal
          and 4.7 open replica (R5); Discussion (variable-cell now tested; limitations); Conclusions; Data availability
    - [x] C4 ESI (25; S9-S13): ln q v1 vs v2, R2 ablations, critic2 per-pattern + cost, ladder table, COD replica table
    - [x] C5 verify_claims (169/169; coverage scan: uncovered numbers are design constants/labels): templates for every new number; 100 % verified
-   - [ ] C6 internal referee pass (powder + ML subagents), fixes applied
+   - [~] C6 internal referee pass (powder + ML subagents), fixes applied. Reports in 10-14 session (summarised
+         here). Both: main result stands; the new single-crystal and learned-side readings are overstated.
+         Analyses (local, no cost; claims verified before use):
+         - [x] cell metric was setting-dependent (sorted conventional lengths; DEHKUA 21 % -> 3.8 % reduced) and its
+               "own entry" could be an sc anchor (BAPLOT 0 %): now primitive Niggli cells, own = powder-study anchor
+               with lowest RMSD; dT for the SAME closest-cell entry (was closest-temperature). Groups 33/25 (n 58):
+               ln q 22/2, critic2 21/4; CEHQEM (one of ln q's 2) is a supercell (V ratio 1.98). dT > 50 K for 15 of
+               35 with both T, 9 of them in the cells-differ group -> "explains few" was wrong.
+         - [ ] pressure: powder referee says ~22 of 59 sc patterns are room-T compression series (MEHNIY, EPIVEF,
+               HOJQII, LILRIJ, NAPHTA). Verify with CSD pressure fields; tag every sc pattern (pressure / dT > 50 K /
+               setting / other); sc metrics with and without high-pressure queries (secondary, CIs)
+         - [ ] critic2: positive control vs own Rietveld entry (running); composition check of every CIF given to
+               critic2 (ROHWIX01: disorder read at full occupancy?); peaks + fit residual per pattern (0.41 A fits
+               13-31 peaks?); answer injection for the 23 missing answers (~1 h); ln q best-offset distribution
+         - [ ] ladder: retrain rungs with background removal everywhere (running; Kα2 "exception" may be an
+               artefact); B-alone rung; disclose B/jitter rungs were added after the first ladder
+         - [ ] COD sc set composition (20/35 ZZZUWK vs a 1950 structure the CSD sets aside; 8 naphthalene HP)
+         Text: soften "gap lies in effects we did not model" (one seed, clean-val checkpoint, rungs off the
+         retrain's input distribution); report the full R4c prediction (median-rank part failed too); "robust"
+         with multiplicity; data availability (model rows need the CSD checkpoint; versions); Kα2 assumed not
+         estimated; LP/package is query-side; Section 3.4 only the zero offset uses the own entry; 34-47 % wording;
+         K 10 -> 50 history in Section 3.8; critic2 build 1.4.155; Fig. 2 lacks WCC 0.5; S12 caption pointer.
+         DECISIONS FOR FRANK (not taken): (1) headline sc set: keep the pre-declared 59 (incl. high-pressure) as
+         primary + non-HP as secondary, or reframe; (2) more compute: critic2 refits of the DAC patterns,
+         zero-offset sensitivity, bin-averaged Cu-grid conversion for all scores (np.interp aliasing of fine
+         synchrotron steps, the R1 issue for every score; GPU rescore ~$0.5).
    - [ ] C7 build.sh -> docx (builds 10-14); plan Section 13c-e readouts written 10-14; check in with Frank
 After C (not R1-R5): R6 decisions, Zenodo deposit (code + open data; DD's data reviewer needs a DOI), cover
 letter, TOC graphic (at revision), Frank submits.

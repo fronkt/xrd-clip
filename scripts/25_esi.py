@@ -40,7 +40,8 @@ def table(head, rows):
 
 
 LADDER = [("own_clean", "clean"), ("own_mask", "+ coverage"), ("own_width", "+ peak width"), ("own_ka2", "+ Kα2"),
-          ("own_bkg", "+ background"), ("own_noise", "+ noise"), ("own_zero", "+ zero offset"), ("own_all", "all six"),
+          ("own_bkg", "+ background"), ("own_noise", "+ noise"), ("own_zero", "+ zero offset"), ("own_dw", "+ B"),
+          ("own_all", "all six"),
           ("own_all_dw", "all six + B"), ("own_all_int30", "all six + jitter 0.3"), ("own_all_int50", "all six + jitter 0.5"),
           ("own_all_dw_int30", "all six + B + jitter 0.3"), ("measured", "measured patterns")]
 CLS = ["lnq_bkg", "cos_zs_bkg", "pearson_bkg", "wcc_1_bkg", "wcc_2_bkg"]
@@ -80,24 +81,65 @@ def revision_sections() -> list:
                 "corrected − first, top-10", "patterns whose rank changes", "top-1 changes"], rows)
 
     c2, c2r = ex["critic2"], rev["r3_critic2"]
+    sp = ex["sc_ambient_split"]
     L += ["", "## S10 Variable-cell re-rank (critic2 VC-GPWDF)", "",
-          f"critic2 1.4 COMPAREVC GLOBAL QUICK, α = 1, measurement wavelength, on the ln q top {c2['k']} of each of the "
+          f"critic2 1.4.155 COMPAREVC GLOBAL QUICK, α = 1, measurement wavelength, on the ln q top {c2['k']} of each of the "
           f"{c2['n_patterns']} single-crystal patterns ({c2['n_comparisons']:,} comparisons, set-aside entries excluded). "
           f"Median {c2['cpu_min_median']:.1f} CPU-minutes per comparison, maximum {c2['cpu_h_max']:.2f} CPU-hours, "
-          f"{c2['cpu_h_total']:.0f} CPU-hours in total; {c2['n_failed']} comparison reached the 4-hour limit and counts as maximally "
-          f"dissimilar (" + "; ".join(f"{p} against {c}" for p, c, _ in c2r["meta"]["failed"]) + ", whose shortlist does not "
-          f"hold the answer). The answer is in the shortlist for {c2['n_answer_in_shortlist']} patterns, the same number as in the "
-          f"ln q top 100 ({c2['n_answer_in_lnq_top100']}).", "",
+          f"{c2['cpu_h_total']:.0f} CPU-hours in total; {c2['n_failed']} comparison reached the 4-hour wall-time limit and counts as "
+          f"maximally dissimilar (" + "; ".join(f"{p} against {c}" for p, c, _ in c2r["meta"]["failed"]) + ", whose shortlist "
+          f"does not hold the answer). The answer is in the shortlist for {c2['n_answer_in_shortlist']} patterns, the same number "
+          f"as in the ln q top 100 ({c2['n_answer_in_lnq_top100']}). Because the cost of a comparison was unknown, the top 10 was "
+          "run first and then extended to 50.", "",
+          "Disordered inputs: the CSD extraction writes CIFs without occupancies, so the first run passed every disorder "
+          "component of the few disordered entries at full occupancy. One answer was affected (ROHWIX01 for pattern_1006: DIFF "
+          "0.261, the worst of its shortlist). All structures with a disorder model were replaced by their major component and "
+          "the affected comparisons rerun; ROHWIX01 then scores 0.006, the best of its shortlist.", "",
           f"Compound-weighted top-1: re-rank {mci(c2r['critic2_vcgpwdf']['top1'])}, ln q {mci(c2r['lnq_v2_full_library']['top1'])}, "
           f"paired {dci(c2r['paired_critic2_minus_lnq']['top1'])}; top-10: {mci(c2r['critic2_vcgpwdf']['top10'])} against "
           f"{mci(c2r['lnq_v2_full_library']['top10'])}, paired {dci(c2r['paired_critic2_minus_lnq']['top10'])}.", "",
-          "**Table S18** The single-crystal patterns: largest relative cell-length difference between the own powder-study "
-          f"entry and the closest single-crystal same-form entry, ln q rank over the full library, and rank after the re-rank "
-          f"('–': the answer is not in the ln q top {c2['k']}).", ""]
-    L += table(["opXRD pattern", "CSD family", "cell difference (%)", "ln q rank", "rank after the re-rank"],
-               [[r["id"], r["stem"], "n/a" if r["cell_diff_pct"] is None else f"{r['cell_diff_pct']:.2f}", f"{r['lnq_rank']:,}",
-                 "–" if r["critic2_rank"] is None else r["critic2_rank"]]
+          "Positive control: each pattern against its own powder-study entry (the structure refined against that pattern); its "
+          "DIFF is ranked among the shortlist's. Injection: each answer missing from a shortlist (the single-crystal same-form "
+          "entry closest in cell) compared with its pattern and ranked the same way. Pressure series: the pattern's own entry "
+          "carries a CSD pressure, or another entry of its family from the same publication does, or it is flagged by hand "
+          "with the evidence (scripts/34_sc_conditions.py; HOJQII01/02, compressed cells at 293 K from a pressure study). The "
+          "cell difference is the largest relative difference of the primitive Niggli-reduced cell lengths of the own entry and "
+          "the closest single-crystal entry; ΔT is the difference of their recorded temperatures.", "",
+          "**Table S18** The single-crystal patterns. Ranks are 1-based; '–': the answer is not in the ln q top "
+          f"{c2['k']}. Peaks: critic2 peak-fit count inside the d window.", ""]
+
+    def cell(v, fmt):
+        return "n/a" if v is None else format(v, fmt)
+    L += table(["opXRD pattern", "CSD family", "pressure series", "cell difference (%)", "ΔT (K)", "peaks", "ln q rank",
+                "rank after the re-rank", "own entry, rank in shortlist", "injected answer, rank"],
+               [[r["id"], r["stem"], "yes" if r.get("pressure_series") else "", cell(r["cell_diff_pct"], ".2f"),
+                 cell(r.get("dT_K"), ".0f"), r["n_peaks"], f"{r['lnq_rank']:,}",
+                 "–" if r["critic2_rank"] is None else r["critic2_rank"],
+                 cell((r.get("control") or {}).get("rank_in_shortlist"), "d"),
+                 cell((r.get("injected") or {}).get("rank_if_shortlisted"), "d")]
                 for r in sorted(c2["per_pattern"], key=lambda r: (r["stem"], int(r["id"].split("_")[1])))])
+    cs, isu = c2["control_summary"], c2["injected_summary"]
+    L += ["", f"Positive control: own entry ranked first for {cs['ambient']['rank1']} of {cs['ambient']['n']} ambient-pressure and "
+          f"{cs['pressure_series']['rank1']} of {cs['pressure_series']['n']} pressure-series patterns (median rank "
+          f"{cs['ambient']['median_rank']:.0f} and {cs['pressure_series']['median_rank']:.1f}). Injection: the missing answer would "
+          f"rank first for {isu['ambient']['rank1']} of {isu['ambient']['n']} ambient-pressure and {isu['pressure_series']['rank1']} of "
+          f"{isu['pressure_series']['n']} pressure-series patterns. Fitted peaks: {c2['n_peaks_range']['ambient'][0]}–"
+          f"{c2['n_peaks_range']['ambient'][1]} (ambient) and {c2['n_peaks_range']['pressure_series'][0]}–"
+          f"{c2['n_peaks_range']['pressure_series'][1]} (pressure series).", "",
+          f"**Table S18b** Single-crystal set without the pressure-series patterns ({sp['n_ambient_patterns']} patterns, "
+          f"{sp['n_ambient_compounds']} compounds; a secondary split defined after the internal review): compound-weighted top-1 "
+          "and patterns ranked first; the pressure-series column counts first places among the "
+          f"{sp['n_pressure_series_patterns']} pressure-series patterns.", ""]
+    names = {"lnq": "ln q lag + zero scan", "lnq_v1": "ln q, first version", "critic2": "VC-GPWDF re-rank",
+             "wcc_1": "WCC, l = 1° + zero scan", "wcc_2": "WCC, l = 2° + zero scan", "cos_zs": "Cosine + zero scan",
+             "pearson": "Pearson, fixed grid"}
+    L += table(["score", "macro top-1, ambient", "first places, ambient", "first places, pressure series"],
+               [[nm_, mci(sp[k]["macro_top1"]), sp[k]["hits"], sp[k]["hits_pressure_series"]] for k, nm_ in names.items()] +
+               [["Learned embedding", mci(sp["model"]["macro_top1"]), "", ""]])
+    cd = sp["cells_differ"]
+    L += ["", f"Patterns whose cells differ by more than 1 % ({cd['n']}): pressure series {cd['pressure_series']}; recorded "
+          f"temperatures more than 50 K apart (not pressure series) {cd['dT_gt_50_not_pressure']}; supercell description "
+          f"{cd['supercell']}; none of these {cd['none_of_these']} ({', '.join(cd['none_of_these_ids'])})."]
 
     GA, GR = rev["r4_gap"]["results"], rev["r4c_realism"]["results"]
     est = rev["r4_gap"]["estimates"]
@@ -118,6 +160,15 @@ def revision_sections() -> list:
             rows.append([lab, cell(GA, "model"), cell(GR, "model"), f2(GA[f"{rung}|pearson|{td}"]["macro_top1"]["value"]),
                          f"{f2(GA[f'{rung}|p2p|{td}']['macro_top1']['value'])} / {f2(GR[f'{rung}|p2p|{td}']['macro_top1']['value'])}"])
         L += table(["variant", "original model", "realism retrain", "Pearson (macro)", "p2p macro, original / retrain"], rows) + [""]
+    # the retrain saw only background-subtracted inputs; the single-effect rungs rerun with the subtraction on every rung
+    ba, br = (json.load(open(f))["results"] for f in ("results/model_gap_bkgall.json", "results/model_gap_realism_bkgall.json"))
+    L += ["**Table S20b** Single-effect rungs with the background subtraction applied to every rung (the realism retrain saw "
+          "only background-subtracted patterns in training); compound-weighted top-1 / median rank, any same-form entry.", ""]
+    L += table(["variant", "original model", "original, subtraction everywhere", "realism retrain",
+                "retrain, subtraction everywhere"],
+               [[lab] + [f"{f2(res[f'{rung}|model|std']['macro_top1']['value'])} / {res[f'{rung}|model|std']['per_pattern']['median_rank']:,.1f}"
+                         for res in (GA, ba, GR, br)]
+                for rung, lab in LADDER if f"{rung}|model|std" in ba]) + [""]
 
     r2, r2a = rev["r2"], rev["r2_ablations"]
     L += ["## S12 A library closer to the measurements", "",
@@ -264,7 +315,7 @@ def main() -> int:
           "## S6 Simulated sweep, all conditions", "",
           f"**Table S12** Within-family top-1 over {P['g0']['n_families']:,} families ({P['g0']['n_queries']:,} queries); "
           f"95 % family-bootstrap CIs; composition-only chance {P['g0']['chance']:.2f}. The last column is the first version "
-          "of the ln q scan (Table S17) on the same draws.", ""]
+          "of the ln q scan (Section S9) on the same draws.", ""]
     L += table(["Condition", "model", "best classical", "best score", "Δ", "Pearson, fixed grid", "ln q", "ln q, first version"],
                [[r["condition"], f"{r['model']:.2f} {ci(r['model_ci'])}", r["best"], f"{r['best_top1']:.2f} {ci(r['best_ci'])}",
                  f"{r['delta']:+.2f}", f"{r['pearson_fixed']:.2f}", f"{r['lnq']:.2f}", f"{r['lnq_v1']:.2f}"] for r in P["g0"]["rows"]])

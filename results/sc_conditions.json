@@ -1,0 +1,760 @@
+{
+ "pattern_1006": {
+  "stem": "ROHWIX",
+  "own": "ROHWIX",
+  "pressure": null,
+  "temperature": "298 K",
+  "doi": "10.1039/c9ce00316a",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_1008": {
+  "stem": "QILZIX",
+  "own": "QIMBOG",
+  "pressure": null,
+  "temperature": "407 K",
+  "doi": "10.1039/c8ce01338a",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_1010": {
+  "stem": "MEHNIY",
+  "own": "MEHNIY02",
+  "pressure": "2.0 GPa",
+  "temperature": "293 K",
+  "doi": "10.1021/jacs.5b08254",
+  "same_publication_with_pressure": [
+   "MEHNIY01",
+   "MEHNIY02",
+   "MEHNIY03",
+   "MEHNIY04",
+   "MEHNIY05",
+   "MEHNIY06",
+   "MEHNIY07"
+  ],
+  "manual_flag": null,
+  "pressure_series": true
+ },
+ "pattern_1021": {
+  "stem": "NAPHTA",
+  "own": "NAPHTA42",
+  "pressure": "2.65 GPa",
+  "temperature": "?",
+  "doi": "10.1107/s1600576714005937",
+  "same_publication_with_pressure": [
+   "NAPHTA39",
+   "NAPHTA40",
+   "NAPHTA41",
+   "NAPHTA42",
+   "NAPHTA43",
+   "NAPHTA44",
+   "NAPHTA45",
+   "NAPHTA46",
+   "NAPHTA48"
+  ],
+  "manual_flag": null,
+  "pressure_series": true
+ },
+ "pattern_1022": {
+  "stem": "HOJQII",
+  "own": "HOJQII01",
+  "pressure": null,
+  "temperature": "293 K",
+  "doi": "10.1021/ja502753t",
+  "same_publication_with_pressure": [],
+  "manual_flag": "compressed cell at 293 K (a 4.12 vs 4.55 A at 100 K), pressure study",
+  "pressure_series": true
+ },
+ "pattern_1029": {
+  "stem": "CEHQEM",
+  "own": "CEHQEM",
+  "pressure": null,
+  "temperature": null,
+  "doi": "10.1021/cg0601094",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_1041": {
+  "stem": "GOFWOP",
+  "own": "GOFWOP",
+  "pressure": null,
+  "temperature": "294 K",
+  "doi": "10.1021/jp401547f",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_1046": {
+  "stem": "NAPHTA",
+  "own": "NAPHTA40",
+  "pressure": "3.7 GPa",
+  "temperature": "?",
+  "doi": "10.1107/s1600576714005937",
+  "same_publication_with_pressure": [
+   "NAPHTA39",
+   "NAPHTA40",
+   "NAPHTA41",
+   "NAPHTA42",
+   "NAPHTA43",
+   "NAPHTA44",
+   "NAPHTA45",
+   "NAPHTA46",
+   "NAPHTA48"
+  ],
+  "manual_flag": null,
+  "pressure_series": true
+ },
+ "pattern_16": {
+  "stem": "NAPHTA",
+  "own": "NAPHTA46",
+  "pressure": "0.41 GPa",
+  "temperature": "?",
+  "doi": "10.1107/s1600576714005937",
+  "same_publication_with_pressure": [
+   "NAPHTA39",
+   "NAPHTA40",
+   "NAPHTA41",
+   "NAPHTA42",
+   "NAPHTA43",
+   "NAPHTA44",
+   "NAPHTA45",
+   "NAPHTA46",
+   "NAPHTA48"
+  ],
+  "manual_flag": null,
+  "pressure_series": true
+ },
+ "pattern_180": {
+  "stem": "UPOJER",
+  "own": "UPOJER01",
+  "pressure": null,
+  "temperature": "293 K",
+  "doi": "10.1039/d0ce01730b",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_205": {
+  "stem": "ZZZIZM",
+  "own": "ZZZIZM07",
+  "pressure": null,
+  "temperature": null,
+  "doi": "10.1021/jp2010138",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_209": {
+  "stem": "ZZZIZM",
+  "own": "ZZZIZM06",
+  "pressure": null,
+  "temperature": null,
+  "doi": "10.1021/jp2010138",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_213": {
+  "stem": "MEHNIY",
+  "own": "MEHNIY07",
+  "pressure": "8.9 GPa",
+  "temperature": "293 K",
+  "doi": "10.1021/jacs.5b08254",
+  "same_publication_with_pressure": [
+   "MEHNIY01",
+   "MEHNIY02",
+   "MEHNIY03",
+   "MEHNIY04",
+   "MEHNIY05",
+   "MEHNIY06",
+   "MEHNIY07"
+  ],
+  "manual_flag": null,
+  "pressure_series": true
+ },
+ "pattern_247": {
+  "stem": "QIQVAQ",
+  "own": "QIQVAQ",
+  "pressure": null,
+  "temperature": "293 K",
+  "doi": "10.1039/c8ce01727a",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_252": {
+  "stem": "FOPKOK",
+  "own": "QIKZUH",
+  "pressure": null,
+  "temperature": "293 K",
+  "doi": "10.1107/s2052252513026511",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_297": {
+  "stem": "DEHKUA",
+  "own": "DEHKUA01",
+  "pressure": null,
+  "temperature": "300 K",
+  "doi": "10.1107/s205252062000373x",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_326": {
+  "stem": "HOJQII",
+  "own": "HOJQII02",
+  "pressure": null,
+  "temperature": "293 K",
+  "doi": "10.1021/ja502753t",
+  "same_publication_with_pressure": [],
+  "manual_flag": "compressed cell at 293 K (a 3.87 vs 4.55 A at 100 K), pressure study",
+  "pressure_series": true
+ },
+ "pattern_351": {
+  "stem": "AKAGIG",
+  "own": "KAWBER",
+  "pressure": null,
+  "temperature": "at 298 K",
+  "doi": "10.1039/c2ce06427h",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_359": {
+  "stem": "ZZZIZM",
+  "own": "ZZZIZM10",
+  "pressure": null,
+  "temperature": null,
+  "doi": "10.1021/jp2010138",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_396": {
+  "stem": "ZZZIZM",
+  "own": "ZZZIZM12",
+  "pressure": null,
+  "temperature": null,
+  "doi": "10.1021/jp2010138",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_484": {
+  "stem": "BAPLOT",
+  "own": null,
+  "pressure_series": false
+ },
+ "pattern_487": {
+  "stem": "VELWIV",
+  "own": "VELWIV01",
+  "pressure": null,
+  "temperature": "298 K",
+  "doi": "10.1039/d2ce00476c",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_504": {
+  "stem": "ZZZIZM",
+  "own": "ZZZIZM02",
+  "pressure": null,
+  "temperature": null,
+  "doi": "10.1021/jp2010138",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_511": {
+  "stem": "NAPHTA",
+  "own": "NAPHTA44",
+  "pressure": "1.31 GPa",
+  "temperature": "?",
+  "doi": "10.1107/s1600576714005937",
+  "same_publication_with_pressure": [
+   "NAPHTA39",
+   "NAPHTA40",
+   "NAPHTA41",
+   "NAPHTA42",
+   "NAPHTA43",
+   "NAPHTA44",
+   "NAPHTA45",
+   "NAPHTA46",
+   "NAPHTA48"
+  ],
+  "manual_flag": null,
+  "pressure_series": true
+ },
+ "pattern_519": {
+  "stem": "QILDAS",
+  "own": "QILDAS",
+  "pressure": null,
+  "temperature": "293 K",
+  "doi": "10.1107/s2052252513026511",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_530": {
+  "stem": "GOFWUV",
+  "own": "QQQAUJ04",
+  "pressure": null,
+  "temperature": "295 K",
+  "doi": "10.1021/jp401547f",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_539": {
+  "stem": "HXACAN",
+  "own": "HXACAN40",
+  "pressure": null,
+  "temperature": "293 K",
+  "doi": "10.1107/s2053229618002619",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_574": {
+  "stem": "ZZZIZM",
+  "own": "ZZZIZM03",
+  "pressure": null,
+  "temperature": null,
+  "doi": "10.1021/jp2010138",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_586": {
+  "stem": "ZIZRUX",
+  "own": "ZIZRUX",
+  "pressure": null,
+  "temperature": "293 K",
+  "doi": "10.1107/s2052520613033167",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_594": {
+  "stem": "MEHNIY",
+  "own": "MEHNIY01",
+  "pressure": "1.0 GPa",
+  "temperature": "293 K",
+  "doi": "10.1021/jacs.5b08254",
+  "same_publication_with_pressure": [
+   "MEHNIY01",
+   "MEHNIY02",
+   "MEHNIY03",
+   "MEHNIY04",
+   "MEHNIY05",
+   "MEHNIY06",
+   "MEHNIY07"
+  ],
+  "manual_flag": null,
+  "pressure_series": true
+ },
+ "pattern_619": {
+  "stem": "ZZZIZM",
+  "own": "ZZZIZM04",
+  "pressure": null,
+  "temperature": null,
+  "doi": "10.1021/jp2010138",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_623": {
+  "stem": "MEHNIY",
+  "own": "MEHNIY04",
+  "pressure": "4.3 GPa",
+  "temperature": "293 K",
+  "doi": "10.1021/jacs.5b08254",
+  "same_publication_with_pressure": [
+   "MEHNIY01",
+   "MEHNIY02",
+   "MEHNIY03",
+   "MEHNIY04",
+   "MEHNIY05",
+   "MEHNIY06",
+   "MEHNIY07"
+  ],
+  "manual_flag": null,
+  "pressure_series": true
+ },
+ "pattern_647": {
+  "stem": "NAPHTA",
+  "own": "NAPHTA43",
+  "pressure": "1.9 GPa",
+  "temperature": "?",
+  "doi": "10.1107/s1600576714005937",
+  "same_publication_with_pressure": [
+   "NAPHTA39",
+   "NAPHTA40",
+   "NAPHTA41",
+   "NAPHTA42",
+   "NAPHTA43",
+   "NAPHTA44",
+   "NAPHTA45",
+   "NAPHTA46",
+   "NAPHTA48"
+  ],
+  "manual_flag": null,
+  "pressure_series": true
+ },
+ "pattern_655": {
+  "stem": "DEHKUA",
+  "own": "DEHKUA",
+  "pressure": null,
+  "temperature": "300 K",
+  "doi": "10.1107/s205252062000373x",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_698": {
+  "stem": "ZZZIZM",
+  "own": "ZZZIZM08",
+  "pressure": null,
+  "temperature": null,
+  "doi": "10.1021/jp2010138",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_710": {
+  "stem": "IKIJER",
+  "own": "IKIJER01",
+  "pressure": null,
+  "temperature": "at 100 K",
+  "doi": "10.1021/cg101619y",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_726": {
+  "stem": "NAPHTA",
+  "own": "NAPHTA48",
+  "pressure": "5.6 GPa",
+  "temperature": "?",
+  "doi": "10.1107/s1600576714005937",
+  "same_publication_with_pressure": [
+   "NAPHTA39",
+   "NAPHTA40",
+   "NAPHTA41",
+   "NAPHTA42",
+   "NAPHTA43",
+   "NAPHTA44",
+   "NAPHTA45",
+   "NAPHTA46",
+   "NAPHTA48"
+  ],
+  "manual_flag": null,
+  "pressure_series": true
+ },
+ "pattern_730": {
+  "stem": "EPIVEF",
+  "own": "EPIVEF02",
+  "pressure": "5.5 GPa",
+  "temperature": "293 K",
+  "doi": "10.1021/jacs.5b08254",
+  "same_publication_with_pressure": [
+   "EPIVEF01",
+   "EPIVEF02",
+   "EPIVEF03",
+   "EPIVEF04"
+  ],
+  "manual_flag": null,
+  "pressure_series": true
+ },
+ "pattern_750": {
+  "stem": "HXACAN",
+  "own": "HXACAN39",
+  "pressure": null,
+  "temperature": "100 K",
+  "doi": "10.1107/s2053229618002619",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_760": {
+  "stem": "LILRIJ",
+  "own": "LILRIJ01",
+  "pressure": "1.8 GPa",
+  "temperature": "293 K",
+  "doi": "10.1021/ja411057x",
+  "same_publication_with_pressure": [
+   "LILRIJ01",
+   "LILRIJ02",
+   "LILRIJ03",
+   "LILRIJ04",
+   "LILRIJ05",
+   "LILRIJ06"
+  ],
+  "manual_flag": null,
+  "pressure_series": true
+ },
+ "pattern_77": {
+  "stem": "TAQBIY",
+  "own": "TAQBIY",
+  "pressure": null,
+  "temperature": null,
+  "doi": "10.1039/c2cc17203h",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_775": {
+  "stem": "ZZZIZM",
+  "own": "ZZZIZM05",
+  "pressure": null,
+  "temperature": null,
+  "doi": "10.1021/jp2010138",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_787": {
+  "stem": "ZZZIZM",
+  "own": "ZZZIZM11",
+  "pressure": null,
+  "temperature": null,
+  "doi": "10.1021/jp2010138",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_805": {
+  "stem": "QUWYIR",
+  "own": "QUWYIR",
+  "pressure": null,
+  "temperature": "at 293 K",
+  "doi": "10.1107/s0108270110019190",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_808": {
+  "stem": "NAPHTA",
+  "own": "NAPHTA39",
+  "pressure": "4.85 GPa",
+  "temperature": "?",
+  "doi": "10.1107/s1600576714005937",
+  "same_publication_with_pressure": [
+   "NAPHTA39",
+   "NAPHTA40",
+   "NAPHTA41",
+   "NAPHTA42",
+   "NAPHTA43",
+   "NAPHTA44",
+   "NAPHTA45",
+   "NAPHTA46",
+   "NAPHTA48"
+  ],
+  "manual_flag": null,
+  "pressure_series": true
+ },
+ "pattern_816": {
+  "stem": "COUMAR",
+  "own": "COUMAR13",
+  "pressure": null,
+  "temperature": "298 K",
+  "doi": "10.1039/c7sc00168a",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_82": {
+  "stem": "NAPHTA",
+  "own": "NAPHTA45",
+  "pressure": "0.78 GPa",
+  "temperature": "?",
+  "doi": "10.1107/s1600576714005937",
+  "same_publication_with_pressure": [
+   "NAPHTA39",
+   "NAPHTA40",
+   "NAPHTA41",
+   "NAPHTA42",
+   "NAPHTA43",
+   "NAPHTA44",
+   "NAPHTA45",
+   "NAPHTA46",
+   "NAPHTA48"
+  ],
+  "manual_flag": null,
+  "pressure_series": true
+ },
+ "pattern_875": {
+  "stem": "MEHNIY",
+  "own": "MEHNIY05",
+  "pressure": "5.0 GPa",
+  "temperature": "293 K",
+  "doi": "10.1021/jacs.5b08254",
+  "same_publication_with_pressure": [
+   "MEHNIY01",
+   "MEHNIY02",
+   "MEHNIY03",
+   "MEHNIY04",
+   "MEHNIY05",
+   "MEHNIY06",
+   "MEHNIY07"
+  ],
+  "manual_flag": null,
+  "pressure_series": true
+ },
+ "pattern_880": {
+  "stem": "AZUDOP",
+  "own": "AZUDOP01",
+  "pressure": null,
+  "temperature": "293 K",
+  "doi": "10.1021/cg4014009",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_887": {
+  "stem": "IYESEO",
+  "own": "QIQVAQ01",
+  "pressure": null,
+  "temperature": "293 K",
+  "doi": "10.1039/c8ce01727a",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_891": {
+  "stem": "MEHNIY",
+  "own": "MEHNIY06",
+  "pressure": "6.1 GPa",
+  "temperature": "293 K",
+  "doi": "10.1021/jacs.5b08254",
+  "same_publication_with_pressure": [
+   "MEHNIY01",
+   "MEHNIY02",
+   "MEHNIY03",
+   "MEHNIY04",
+   "MEHNIY05",
+   "MEHNIY06",
+   "MEHNIY07"
+  ],
+  "manual_flag": null,
+  "pressure_series": true
+ },
+ "pattern_901": {
+  "stem": "ZZZIZM",
+  "own": "ZZZIZM09",
+  "pressure": null,
+  "temperature": null,
+  "doi": "10.1021/jp2010138",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_91": {
+  "stem": "NAPHTA",
+  "own": "NAPHTA41",
+  "pressure": "3.1 GPa",
+  "temperature": "?",
+  "doi": "10.1107/s1600576714005937",
+  "same_publication_with_pressure": [
+   "NAPHTA39",
+   "NAPHTA40",
+   "NAPHTA41",
+   "NAPHTA42",
+   "NAPHTA43",
+   "NAPHTA44",
+   "NAPHTA45",
+   "NAPHTA46",
+   "NAPHTA48"
+  ],
+  "manual_flag": null,
+  "pressure_series": true
+ },
+ "pattern_914": {
+  "stem": "RIXNES",
+  "own": "RIXNES03",
+  "pressure": null,
+  "temperature": "353 K",
+  "doi": "10.1039/c7cp05233b",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_917": {
+  "stem": "MIGQOJ",
+  "own": "MIGQOJ03",
+  "pressure": null,
+  "temperature": "383 K",
+  "doi": "10.1039/c4tc01882f",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_921": {
+  "stem": "EPIVEF",
+  "own": "EPIVEF01",
+  "pressure": "2.6 GPa",
+  "temperature": "293 K",
+  "doi": "10.1021/jacs.5b08254",
+  "same_publication_with_pressure": [
+   "EPIVEF01",
+   "EPIVEF02",
+   "EPIVEF03",
+   "EPIVEF04"
+  ],
+  "manual_flag": null,
+  "pressure_series": true
+ },
+ "pattern_949": {
+  "stem": "AKAFUR",
+  "own": "KAWBAN",
+  "pressure": null,
+  "temperature": "at 298 K",
+  "doi": "10.1039/c2ce06427h",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
+ "pattern_96": {
+  "stem": "NAPHTA",
+  "own": "NAPHTA47",
+  "pressure": null,
+  "temperature": "?",
+  "doi": "10.1107/s1600576714005937",
+  "same_publication_with_pressure": [
+   "NAPHTA39",
+   "NAPHTA40",
+   "NAPHTA41",
+   "NAPHTA42",
+   "NAPHTA43",
+   "NAPHTA44",
+   "NAPHTA45",
+   "NAPHTA46",
+   "NAPHTA48"
+  ],
+  "manual_flag": null,
+  "pressure_series": true
+ },
+ "pattern_978": {
+  "stem": "MEHNIY",
+  "own": "MEHNIY03",
+  "pressure": "2.9 GPa",
+  "temperature": "293 K",
+  "doi": "10.1021/jacs.5b08254",
+  "same_publication_with_pressure": [
+   "MEHNIY01",
+   "MEHNIY02",
+   "MEHNIY03",
+   "MEHNIY04",
+   "MEHNIY05",
+   "MEHNIY06",
+   "MEHNIY07"
+  ],
+  "manual_flag": null,
+  "pressure_series": true
+ }
+}

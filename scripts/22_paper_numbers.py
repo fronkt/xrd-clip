@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from collections import Counter
 from importlib import import_module
@@ -90,6 +91,31 @@ def paired_macro(ra: np.ndarray, rb_: np.ndarray, stems: np.ndarray, kk: int = 1
     bs = d[boot_idx(len(d))].mean(axis=1)
     return {"n_compounds": int(keep.sum()), "diff": rd(d.mean()),
             "ci": [rd(np.percentile(bs, 2.5)), rd(np.percentile(bs, 97.5))]}
+
+
+# primitive cell from the conventional one by the centring letter of the space-group symbol (hexagonal R: obverse)
+CENTRING = {"P": np.eye(3), "C": np.array([[.5, .5, 0], [-.5, .5, 0], [0, 0, 1]]),
+            "A": np.array([[1, 0, 0], [0, .5, .5], [0, -.5, .5]]), "B": np.array([[.5, 0, .5], [0, 1, 0], [-.5, 0, .5]]),
+            "I": np.array([[-.5, .5, .5], [.5, -.5, .5], [.5, .5, -.5]]),
+            "F": np.array([[0, .5, .5], [.5, 0, .5], [.5, .5, 0]]),
+            "R": np.array([[2 / 3, 1 / 3, 1 / 3], [-1 / 3, 1 / 3, 1 / 3], [-1 / 3, -2 / 3, 1 / 3]])}
+
+
+def reduced_cell(cell: np.ndarray, spacegroup: str):
+    """Niggli-reduced primitive lattice (pymatgen) of a conventional CSD cell (a, b, c, alpha, beta, gamma)."""
+    from pymatgen.core import Lattice
+    a, b, c, al, be, ga = (float(x) for x in cell)
+    lat = Lattice.from_parameters(a, b, c, al, be, ga)
+    s = spacegroup.strip()[:1].upper()
+    if s == "R" and not (abs(ga - 120) < 0.5 and abs(a - b) < 1e-3):
+        s = "P"                                   # rhombohedral setting: already primitive
+    return Lattice(CENTRING.get(s, np.eye(3)) @ lat.matrix).get_niggli_reduced_lattice()
+
+
+def cell_mismatch(l1, l2) -> float:
+    """Largest relative difference of the sorted reduced cell lengths of two lattices."""
+    a1, a2 = np.sort(l1.abc), np.sort(l2.abc)
+    return float(np.max(np.abs(a1 - a2) / a2))
 
 
 def rnd(o):
@@ -364,20 +390,6 @@ def main() -> int:
     def tK(s):
         mm = __import__("re").search(r"([\d.]+)\s*K", str(s or ""))
         return float(mm.group(1)) if mm else None
-    dts = []
-    for m, r in zip(meta, R["none|sc|lnq_bkg"]):
-        t = truth[m["id"]]
-        anc = [tK(x["temperature"]) for x in t["same_form"] if x["is_anchor"]]
-        scs = [tK(x["temperature"]) for x in t["same_form"] if not x["is_powder_study"]]
-        if r >= 0 and anc and anc[0] and any(scs):
-            dts.append((min(abs(anc[0] - s) for s in scs if s), int(r)))
-    if dts:
-        dt = np.array(dts)
-        ex["sc_temperature_gap"] = {"n": len(dts), "median_dT_K": float(np.median(dt[:, 0])),
-                                    "top1_dT_le_50": rd((dt[dt[:, 0] <= 50, 1] == 0).mean()) if (dt[:, 0] <= 50).any() else None,
-                                    "n_dT_le_50": int((dt[:, 0] <= 50).sum()),
-                                    "top1_dT_gt_50": rd((dt[dt[:, 0] > 50, 1] == 0).mean()) if (dt[:, 0] > 50).any() else None,
-                                    "n_dT_gt_50": int((dt[:, 0] > 50).sum())}
     # own entry disordered (simulated through the occupancy fallback when the strict parse fails)
     dis = np.array([any(x["has_disorder"] for x in truth[m["id"]]["same_form"] if x["is_anchor"]) for m in meta])
     ex["own_entry_disordered"] = {"n_patterns": int(dis.sum()), "n_compounds": int(len(set(stems[dis])))}
@@ -386,7 +398,10 @@ def main() -> int:
         for k in KEYS:
             r = np.where(sel, R[f"none|std|{k}"], -1)
             ex["subgroups"][gname][k] = {"top1": rd((r[sel] == 0).mean()), "macro_top1": macro(r, 1, stems, cboot)["value"]}
-    # cell mismatch between the own (powder) entry and the closest single-crystal same-form entry
+    # cell mismatch between the own powder-study entry (the powder-study anchor closest to the deposited structure)
+    # and the closest single-crystal same-form entry. Cells are compared as primitive Niggli-reduced cells, so the
+    # measure does not depend on the setting (10-14 referee: the as-deposited lengths gave e.g. 21 % for a P-1
+    # pair that differs by 3.8 %); a volume ratio near an integer >= 2 marks a supercell description.
     hubm = import_module("21_hubness")
     shards = bench.shard_table(None)
     lib_rc = hubm.library_refcodes(shards)
@@ -394,17 +409,28 @@ def main() -> int:
     need, rows_c = set(), []
     for m in meta:
         t = truth[m["id"]]
-        anc = [x["refcode"] for x in t["same_form"] if x["is_anchor"] and x["refcode"] in gidx]
+        ps = [x["refcode"] for x in t["same_form"] if x["is_powder_study"] and x["is_anchor"] and x["refcode"] in gidx]
+        own = [min(ps, key=lambda rc: (t["anchors"][rc]["rmsd"], rc))] if ps else []
         scs = [x["refcode"] for x in t["same_form"] if not x["is_powder_study"] and x["refcode"] in gidx]
-        rows_c.append((anc[:1], scs))
-        need |= set(anc[:1]) | set(scs)
+        rows_c.append((own, scs))
+        need |= set(own) | set(scs)
     need = sorted(need)
-    cell = {rc: np.asarray(r["cell"], float) for rc, r in zip(need, hubm.records_at(shards, [gidx[rc] for rc in need], ("cell",)))}
-    dq = np.full(nq, np.nan)                      # per query: max relative cell-length difference, closest sc entry
-    for qi, (anc, scs) in enumerate(rows_c):
-        if anc and scs:
-            a = cell[anc[0]]
-            dq[qi] = min(float(np.max(np.abs(np.sort(cell[s][:3]) - np.sort(a[:3])) / np.sort(a[:3]))) for s in scs)
+    recs_c = dict(zip(need, hubm.records_at(shards, [gidx[rc] for rc in need], ("cell", "spacegroup"))))
+    red = {rc: reduced_cell(np.asarray(r["cell"], float), str(r["spacegroup"])) for rc, r in recs_c.items()}
+    dq, dvol, dT = np.full(nq, np.nan), np.full(nq, np.nan), np.full(nq, np.nan)
+    closest = {}
+    tK_of = lambda t, rc: next((tK(x["temperature"]) for x in t["same_form"] if x["refcode"] == rc), None)
+    for qi, (own, scs) in enumerate(rows_c):
+        if own and scs:
+            a = red[own[0]]
+            best = min(scs, key=lambda s: (cell_mismatch(red[s], a), s))
+            dq[qi] = cell_mismatch(red[best], a)
+            dvol[qi] = red[best].volume / a.volume
+            closest[meta[qi]["id"].replace(".json", "")] = best
+            t = truth[meta[qi]["id"]]
+            ta, ts = tK_of(t, own[0]), tK_of(t, best)
+            if ta and ts:
+                dT[qi] = abs(ta - ts)
     c2 = json.load(open("results/critic2_rerank.json"))
     qpos = {m["id"].replace(".json", ""): i for i, m in enumerate(meta)}
     rank_c2 = np.full(nq, -1)
@@ -422,6 +448,22 @@ def main() -> int:
         ex["sc_cell_mismatch"][f"{name}_top1_large"] = rd((r[large] == 0).mean())
         ex["sc_cell_mismatch"][f"{name}_hits_small"] = int((r[small] == 0).sum())
         ex["sc_cell_mismatch"][f"{name}_hits_large"] = int((r[large] == 0).sum())
+    vr = np.where(dvol >= 1, dvol, 1 / dvol)
+    superc = sel & (np.round(vr) >= 2) & (np.abs(vr - np.round(vr)) < 0.05)
+    ex["sc_cell_mismatch"]["supercell"] = [{"id": meta[i]["id"].replace(".json", ""), "stem": str(stems[i]),
+                                            "volume_ratio": rd(float(vr[i])), "lnq_rank": int(R["none|sc|lnq_bkg"][i]) + 1}
+                                           for i in np.nonzero(superc)[0]]
+    ex["sc_cell_mismatch"]["closest_sc_entry"] = {k: v for k, v in closest.items() if sel[qpos[k]]}
+    ex["sc_cell_mismatch"]["per_query_pct"] = {meta[i]["id"].replace(".json", ""): rd(100 * dq[i]) for i in np.nonzero(sel)[0]}
+    # recorded temperatures of the same two entries (own powder study, closest-cell single-crystal entry)
+    tsel = sel & ~np.isnan(dT)
+    hot, cold = tsel & (dT > 50), tsel & (dT <= 50)
+    rl_ = R["none|sc|lnq_bkg"]
+    ex["sc_temperature_gap"] = {"n": int(tsel.sum()), "median_dT_K": float(np.median(dT[tsel])),
+                                "n_dT_gt_50": int(hot.sum()), "n_dT_le_50": int(cold.sum()),
+                                "top1_dT_gt_50": rd((rl_[hot] == 0).mean()), "top1_dT_le_50": rd((rl_[cold] == 0).mean()),
+                                "n_dT_gt_50_cells_differ": int((hot & large).sum()), "n_dT_gt_50_cells_agree": int((hot & small).sum()),
+                                "n_cells_differ_with_T": int((tsel & large).sum()), "n_cells_agree_with_T": int((tsel & small).sum())}
     # ln q v1 (the first version, ESI) on the same queries, and the paired v2 - v1 change
     R1 = np.load(HUB_RANKS_V1)
     hub1 = json.load(open(HUB_V1))
@@ -453,12 +495,86 @@ def main() -> int:
                      "loss_c2_ranks": sorted(int(x) + 1 for x in rc[(rc != 0) & (rl == 0)]),
                      "per_pattern": [{"id": meta[i]["id"].replace(".json", ""), "stem": str(stems[i]),
                                       "cell_diff_pct": None if np.isnan(dq[i]) else rd(100 * dq[i]),
+                                      "dT_K": None if np.isnan(dT[i]) else rd(float(dT[i])),
                                       "lnq_rank": int(R["none|sc|lnq_bkg"][i]) + 1,
                                       "critic2_rank": int(rank_c2[i]) + 1 if rank_c2[i] < k_c2 else None}
                                      for i in np.nonzero(rank_c2 >= 0)[0]],
                      "n_comparisons": c2["meta"]["n_comparisons"], "n_failed": c2["meta"]["n_failed_comparisons"],
                      "cpu_min_median": rd(c2["meta"]["cpu_s_median"] / 60), "cpu_h_max": rd(c2["meta"]["cpu_s_max"] / 3600),
                      "cpu_h_total": rd(c2["meta"]["cpu_h_total"])}
+    # fitted peaks per pattern (critic2 XRPD FIT, inside the d window) and the fit's final RMS (absolute counts)
+    import re as _re
+    for row in ex["critic2"]["per_pattern"]:
+        d_ = f"cache/critic2/{row['id']}"
+        row["n_peaks"] = sum(1 for ln in open(f"{d_}/fit.peaks") if ln[:1].isdigit())
+        m_ = _re.search(r"RMS of the fit \(final\)\s*=\s*([0-9.eE+-]+)", open(f"{d_}/fit.cro", errors="replace").read())
+        row["fit_rms"] = float(m_.group(1)) if m_ else None
+    # positive control (29 control): each pattern against its own powder-study entry, the structure refined
+    # against this very pattern; rank = 1 + shortlist candidates with a smaller DIFF
+    if os.path.exists("cache/critic2/control.jsonl"):
+        dd = {}
+        for ln in open("cache/critic2/diffs.jsonl"):
+            r_ = json.loads(ln)
+            dd[(r_["pid"], r_["cand"])] = r_["diff"] if r_["diff"] is not None else 1.0
+        plan_ = json.load(open("cache/critic2/plan.json"))
+        ctl = {}
+        for ln in open("cache/critic2/control.jsonl"):
+            r_ = json.loads(ln)
+            od = r_["diff"] if r_["diff"] is not None else 1.0
+            sl = [dd[(r_["pid"], c)] for c in plan_[r_["pid"]]["shortlist"][:k_c2]]
+            ctl[r_["pid"]] = {"own": r_["cand"], "diff": rd(od), "rank_in_shortlist": int(sum(x < od for x in sl)) + 1,
+                              "shortlist_best_diff": rd(min(sl))}
+        for row in ex["critic2"]["per_pattern"]:
+            row["control"] = ctl.get(row["id"])
+        # answer injection (29 inject): the closest-cell answer of each pattern whose shortlist misses it
+        if os.path.exists("cache/critic2/inject.jsonl"):
+            inj = {}
+            for ln in open("cache/critic2/inject.jsonl"):
+                r_ = json.loads(ln)
+                od = r_["diff"] if r_["diff"] is not None else 1.0
+                sl = [dd[(r_["pid"], c)] for c in plan_[r_["pid"]]["shortlist"][:k_c2]]
+                inj[r_["pid"]] = {"answer": r_["cand"], "diff": rd(od), "rank_if_shortlisted": int(sum(x < od for x in sl)) + 1}
+            for row in ex["critic2"]["per_pattern"]:
+                row["injected"] = inj.get(row["id"])
+    # secondary split (fixed after the 10-14 referee pass): patterns from variable-pressure studies (scripts/34)
+    if os.path.exists("results/sc_conditions.json"):
+        scc = json.load(open("results/sc_conditions.json"))
+        hp = np.array([scc.get(m["id"].replace(".json", ""), {}).get("pressure_series", False) for m in meta])
+        amb = (R["none|sc|lnq_bkg"] >= 0) & ~hp
+        split = {"n_pressure_series_patterns": int((hp & (R["none|sc|lnq_bkg"] >= 0)).sum()),
+                 "n_pressure_series_compounds": int(len(set(stems[hp & (R["none|sc|lnq_bkg"] >= 0)]))),
+                 "n_ambient_patterns": int(amb.sum()), "n_ambient_compounds": int(len(set(stems[amb])))}
+        for name, r in split_ranks.items():
+            ra = np.where(amb, r, -1)
+            split[name] = {"macro_top1": macro(ra, 1, stems, cboot), "hits": int((r[amb] == 0).sum()),
+                           "hits_pressure_series": int((r[hp & (r >= 0)] == 0).sum())}
+        split["model"] = {"macro_top1": macro(np.where(amb, R["none|sc|model_bkg"], -1), 1, stems, cboot)}
+        # why the cells differ: pressure series, recorded temperatures > 50 K apart, supercell description
+        sup = np.zeros(nq, bool)
+        sup[[qpos[s["id"]] for s in ex["sc_cell_mismatch"]["supercell"]]] = True
+        hot_ = ~np.isnan(dT) & (dT > 50)
+        split["cells_differ"] = {"n": int(large.sum()), "pressure_series": int((large & hp).sum()),
+                                 "dT_gt_50_not_pressure": int((large & ~hp & hot_).sum()),
+                                 "supercell": int((large & sup).sum()),
+                                 "none_of_these": int((large & ~hp & ~hot_ & ~sup).sum()),
+                                 "none_of_these_ids": [meta[i]["id"].replace(".json", "") for i in np.nonzero(large & ~hp & ~hot_ & ~sup)[0]]}
+        split["paired_critic2_minus_lnq"] = paired_macro(np.where(amb, rank_c2, -1), np.where(amb, R["none|sc|lnq_bkg"], -1), stems)
+        for row in ex["critic2"]["per_pattern"]:
+            row["pressure_series"] = bool(scc.get(row["id"], {}).get("pressure_series", False))
+        ex["sc_ambient_split"] = split
+        # control and injection summaries by pressure series (patterns with results only)
+        pp_ = ex["critic2"]["per_pattern"]
+        for key, field in (("control", "rank_in_shortlist"), ("injected", "rank_if_shortlisted")):
+            summ = {}
+            for tag, want in (("ambient", False), ("pressure_series", True)):
+                rows_ = [r_ for r_ in pp_ if r_.get(key) and r_["pressure_series"] == want]
+                summ[tag] = {"n": len(rows_), "rank1": sum(r_[key][field] == 1 for r_ in rows_),
+                             "top3": sum(r_[key][field] <= 3 for r_ in rows_),
+                             "median_rank": float(np.median([r_[key][field] for r_ in rows_])) if rows_ else None}
+            ex["critic2"][f"{key}_summary"] = summ
+        npk = {t_: [r_["n_peaks"] for r_ in pp_ if r_["pressure_series"] == (t_ == "pressure_series")]
+               for t_ in ("ambient", "pressure_series")}
+        ex["critic2"]["n_peaks_range"] = {t_: [int(min(v)), int(max(v)), float(np.median(v))] for t_, v in npk.items()}
     # chance level of the real within-family task: one random score per candidate
     wf_rows = [m for m in meta if m["n_other"] > 0]
     ex["within_family_chance"] = rd(np.mean([m["n_same_in_lib"] / (m["n_same_in_lib"] + m["n_other"]) for m in wf_rows]))
@@ -475,7 +591,10 @@ def main() -> int:
                  "n_identified_both": sum(1 for x in ident if truth[x["id"]]["true_stems"]),
                  "n_identified_cod_only": sum(1 for x in ident if not truth[x["id"]]["true_stems"]),
                  "n_other_compound": sum(x["n_other_compound"] for x in tc),
-                 "n_unknown_same_formula": sum(len(x["unknown"]) for x in tc)}
+                 "n_unknown_same_formula": sum(len(x["unknown"]) for x in tc),
+                 # single-crystal set of the replica: patterns with a non-powder same-form COD entry, by compound
+                 "sc_composition": dict(Counter((x["true_stems"] or ["?"])[0] for x in tc
+                                                if any(not s["is_powder_study"] for s in x["same_form"])))}
     out["extra"] = ex
     out["revision"] = revision(stems, R)
 

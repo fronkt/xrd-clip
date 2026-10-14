@@ -149,14 +149,54 @@ def cmd_fit(args) -> int:
     return 0
 
 
+def compare(pid: str, cand: str, wavelength: float, timeout: int) -> dict:
+    """One COMPAREVC of candidate CIF cache/critic2/cif/<cand>.cif against the pattern's fitted peaks."""
+    d = os.path.join(ROOT, pid)
+    tag = f"cmp_{cand}"
+    cif = os.path.relpath(os.path.join(ROOT, "cif", cand + ".cif"), d).replace("\\", "/")
+    with open(os.path.join(d, tag + ".cri"), "w") as fh:
+        fh.write(f"comparevc {cif} {PEAKS} global quick alpha 1 lambda {wavelength:.6f}\n")
+    t0 = time.time()
+    try:
+        txt = critic2(os.path.join(d, tag + ".cri"), d, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        txt = ""
+    m = DIFF_RE.findall(txt)
+    cpu = re.search(r"Elapsed CPU time:\s*(.*)", txt)
+    for ext in (".cri", ".cro"):
+        try:
+            os.remove(os.path.join(d, tag + ext))
+        except OSError:
+            pass
+    return {"pid": pid, "cand": cand, "diff": float(m[-1]) if m else None, "wall_s": round(time.time() - t0, 1),
+            "cpu": cpu.group(1).strip() if cpu else None, "status": "ok" if m else ("timeout/empty" if not txt else "no DIFF")}
+
+
+def run_jobs(jobs, plan: dict, res_path: str, procs: int, timeout: int, tag: str = "run") -> None:
+    """Run (pid, cand) comparisons in parallel, appending one JSON row per comparison to res_path."""
+    t0 = time.time()
+    with ThreadPoolExecutor(procs) as ex, open(res_path, "a") as out:
+        futs = [ex.submit(compare, pid, cand, plan[pid]["wavelength"], timeout) for pid, cand in jobs]
+        for i, f in enumerate(as_completed(futs)):
+            r = f.result()
+            out.write(json.dumps(r) + "\n")
+            out.flush()
+            if i % 20 == 0:
+                el = time.time() - t0
+                print(f"[{tag}] {i + 1}/{len(jobs)} {el / 60:.1f} min, eta {el / (i + 1) * (len(jobs) - i - 1) / 60:.0f} min; "
+                      f"last {r}", flush=True)
+
+
+def done_pairs(res_path: str) -> set:
+    if not os.path.exists(res_path):
+        return set()
+    return {(r["pid"], r["cand"]) for r in map(json.loads, open(res_path))}
+
+
 def cmd_run(args) -> int:
     plan = json.load(open(os.path.join(ROOT, "plan.json")))
     res_path = os.path.join(ROOT, "diffs.jsonl")
-    done = set()
-    if os.path.exists(res_path):
-        for line in open(res_path):
-            r = json.loads(line)
-            done.add((r["pid"], r["cand"]))
+    done = done_pairs(res_path)
     # rank-major order (every pattern's 1st candidate, then every 2nd, ...): a run stopped early still leaves a
     # complete re-rank of a shorter shortlist, which `eval --k` scores (10-13: local throughput unknown)
     only = set(args.pids.split(",")) if args.pids else set(plan)
@@ -164,40 +204,72 @@ def cmd_run(args) -> int:
             if pid in only and r < len(p["shortlist"]) and (pid, p["shortlist"][r]) not in done
             and os.path.exists(os.path.join(ROOT, pid, PEAKS))]
     print(f"[run] {len(jobs)} comparisons to run ({len(done)} done) on {args.procs} processes", flush=True)
+    run_jobs(jobs, plan, res_path, args.procs, args.timeout)
+    return 0
 
-    def one(job):
-        pid, cand = job
-        d = os.path.join(ROOT, pid)
-        tag = f"cmp_{cand}"
-        cif = os.path.relpath(os.path.join(ROOT, "cif", cand + ".cif"), d).replace("\\", "/")
-        with open(os.path.join(d, tag + ".cri"), "w") as fh:
-            fh.write(f"comparevc {cif} {PEAKS} global quick alpha 1 lambda {plan[pid]['wavelength']:.6f}\n")
-        t0 = time.time()
-        try:
-            txt = critic2(os.path.join(d, tag + ".cri"), d, timeout=args.timeout)
-        except subprocess.TimeoutExpired:
-            txt = ""
-        m = DIFF_RE.findall(txt)
-        cpu = re.search(r"Elapsed CPU time:\s*(.*)", txt)
-        for ext in (".cri", ".cro"):
-            try:
-                os.remove(os.path.join(d, tag + ext))
-            except OSError:
-                pass
-        return {"pid": pid, "cand": cand, "diff": float(m[-1]) if m else None, "wall_s": round(time.time() - t0, 1),
-                "cpu": cpu.group(1).strip() if cpu else None, "status": "ok" if m else ("timeout/empty" if not txt else "no DIFF")}
 
-    t0 = time.time()
-    with ThreadPoolExecutor(args.procs) as ex, open(res_path, "a") as out:
-        futs = [ex.submit(one, j) for j in jobs]
-        for i, f in enumerate(as_completed(futs)):
-            r = f.result()
-            out.write(json.dumps(r) + "\n")
-            out.flush()
-            if i % 20 == 0:
-                el = time.time() - t0
-                print(f"[run] {i + 1}/{len(jobs)} {el / 60:.1f} min, eta {el / (i + 1) * (len(jobs) - i - 1) / 60:.0f} min; "
-                      f"last {r}", flush=True)
+def write_cifs(refcodes: set) -> None:
+    """CIFs of library entries into cache/critic2/cif/ from the CSD extraction shards (licensed, gitignored)."""
+    todo = set(refcodes) - {f[:-4] for f in os.listdir(os.path.join(ROOT, "cif"))}
+    for src in CIF_SOURCES:
+        if not todo:
+            break
+        with gzip.open(src, "rt", encoding="utf-8") as fh:
+            for line in fh:
+                r = json.loads(line)
+                if r["refcode"] in todo:
+                    with open(os.path.join(ROOT, "cif", r["refcode"] + ".cif"), "w", encoding="utf-8") as out:
+                        out.write(r["cif"])
+                    todo.discard(r["refcode"])
+    assert not todo, todo
+
+
+def cmd_inject(args) -> int:
+    """Answer injection (10-14 referee check): for each pattern whose ln q shortlist misses the answer, compare the
+    closest-cell single-crystal answer entry (22's sc_cell_mismatch.closest_sc_entry) and see where its DIFF would
+    fall among the shortlist's. Separates 'not shortlisted' from 'not recognised'. -> inject.jsonl"""
+    plan = json.load(open(os.path.join(ROOT, "plan.json")))
+    res = json.load(open(args.out))
+    closest = json.load(open("results/paper_numbers.json"))["extra"]["sc_cell_mismatch"]["closest_sc_entry"]
+    miss = {pid: closest[pid] for pid, v in res["rank_by_pattern"].items() if v["lnq_shortlist"] >= args.k and pid in closest}
+    write_cifs(set(miss.values()))
+    res_path = os.path.join(ROOT, "inject.jsonl")
+    done = done_pairs(res_path)
+    jobs = [(pid, rc) for pid, rc in miss.items() if (pid, rc) not in done]
+    print(f"[inject] {len(jobs)} injected answers ({len(miss)} patterns miss) on {args.procs} processes", flush=True)
+    run_jobs(jobs, plan, res_path, args.procs, args.timeout, tag="inject")
+    return 0
+
+
+def cmd_control(args) -> int:
+    """Positive control (10-14 referee check): each pattern against its OWN powder-study entry, the structure
+    refined against this very pattern, which the pipeline should find nearly identical. -> control.jsonl"""
+    plan = json.load(open(os.path.join(ROOT, "plan.json")))
+    truth = {t["id"].replace(".json", ""): t for t in json.load(open(args.truth))}
+    shards = bench.shard_table(None)
+    gidx = {rc: i for i, rc in enumerate(hubm.library_refcodes(shards))}
+    def own_entry(t):    # the powder-study anchor closest to the deposited structure (its own Rietveld refinement)
+        ps = [x["refcode"] for x in t["same_form"] if x["is_powder_study"] and x["is_anchor"] and x["refcode"] in gidx]
+        return min(ps, key=lambda rc: (t["anchors"][rc]["rmsd"], rc)) if ps else None
+    own = {pid: own_entry(truth[pid]) for pid in plan}
+    own = {pid: rc for pid, rc in own.items() if rc is not None}     # pattern_484 (BAPLOT) has no powder study
+    todo = set(own.values()) - {f[:-4] for f in os.listdir(os.path.join(ROOT, "cif"))}
+    for src in CIF_SOURCES:
+        if not todo:
+            break
+        with gzip.open(src, "rt", encoding="utf-8") as fh:
+            for line in fh:
+                r = json.loads(line)
+                if r["refcode"] in todo:
+                    with open(os.path.join(ROOT, "cif", r["refcode"] + ".cif"), "w", encoding="utf-8") as out:
+                        out.write(r["cif"])
+                    todo.discard(r["refcode"])
+    assert not todo, todo
+    res_path = os.path.join(ROOT, "control.jsonl")
+    done = done_pairs(res_path)
+    jobs = [(pid, rc) for pid, rc in own.items() if (pid, rc) not in done]
+    print(f"[control] {len(jobs)} own-entry comparisons on {args.procs} processes", flush=True)
+    run_jobs(jobs, plan, res_path, args.procs, args.timeout, tag="control")
     return 0
 
 
@@ -260,7 +332,7 @@ def cmd_eval(args) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=("prep", "fit", "run", "eval"))
+    ap.add_argument("cmd", choices=("prep", "fit", "run", "control", "inject", "eval"))
     ap.add_argument("--truth", default=f"{bench.DATA}/opxrd/opxrd_truth.json")
     ap.add_argument("--patterns", default=f"{bench.DATA}/opxrd/opxrd_cnrs_organic.json")
     # K = 50, not the pre-declared 100: ln q v2's single-crystal shortlist holds the answer for the same patterns at
@@ -275,7 +347,7 @@ def main() -> int:
     ap.add_argument("--fit_timeout", type=int, default=3600, help="per peak fit (s)")
     ap.add_argument("--out", default="results/critic2_rerank.json")
     args = ap.parse_args()
-    return {"prep": cmd_prep, "fit": cmd_fit, "run": cmd_run, "eval": cmd_eval}[args.cmd](args)
+    return {"prep": cmd_prep, "fit": cmd_fit, "run": cmd_run, "control": cmd_control, "inject": cmd_inject, "eval": cmd_eval}[args.cmd](args)
 
 
 if __name__ == "__main__":

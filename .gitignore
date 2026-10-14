@@ -103,3 +103,6 @@ paper/*.synctex.gz
 !/results/critic2_rerank.json
 !/results/real_bench_hub_lnq2.json
 !/results/cod_*.json
+!/results/model_gap_bkgall.json
+!/results/model_gap_realism_bkgall.json
+!/results/sc_conditions.json

@@ -34,13 +34,15 @@ STYLE = {
     "pearson": dict(color="#777777", label="Pearson, fixed grid"),
     "zs":      dict(color="#0072B2", label="l = 0 + zero scan"),
     "wcc_1":   dict(color="#E69F00", label="WCC, l = 1° + zero scan"),
+    "wcc_05":  dict(color="#000000", label="WCC, l = 0.5° + zero scan"),
     "wcc_2":   dict(color="#56B4E9", label="WCC, l = 2° + zero scan"),
     "lnq":     dict(color="#009E73", label=r"$\ln q$ lag + zero scan"),
     "critic2": dict(color="#CC79A7", label=r"VC-GPWDF re-rank of the $\ln q$ top 50"),
 }
 REAL = {"model_bkg": "model", "pearson_bkg": "pearson", "cos_zs_bkg": "zs", "wcc_1_bkg": "wcc_1",
         "wcc_2_bkg": "wcc_2", "lnq_bkg": "lnq"}
-SWEEP = {"pearson": "pearson", "pearson_zs": "zs", "wcc_1": "wcc_1", "wcc_2": "wcc_2", "lnq": "lnq", "model": "model"}
+SWEEP = {"pearson": "pearson", "pearson_zs": "zs", "wcc_0.5": "wcc_05", "wcc_1": "wcc_1", "wcc_2": "wcc_2", "lnq": "lnq",
+         "model": "model"}
 
 
 def label(ax, i, x=-0.16, y=1.04):
@@ -117,7 +119,7 @@ def fig_sweep(sb: dict) -> None:
             ys = np.array([p[1][meth]["top1"] for p in pts])
             lo = np.array([p[1][meth]["ci95"][0] for p in pts])
             hi = np.array([p[1][meth]["ci95"][1] for p in pts])
-            ls = ":" if meth == "pearson" else "-"
+            ls = ":" if meth == "pearson" else "-." if meth == "wcc_0.5" else "-"
             lw = 1.5 if meth == "model" else 1.0
             lab = "Pearson + zero scan" if meth == "pearson_zs" else st["label"]
             ax.plot(xs, ys, ls=ls, lw=lw, marker="o", ms=2.2, color=st["color"], label=lab)
@@ -133,8 +135,8 @@ def fig_sweep(sb: dict) -> None:
         ax.set_ylabel("Within-family top-1")
     axs[0, 0].text(0.30, sb["chance_top1"] + 0.015, "chance", ha="right", va="bottom", fontsize=6)
     h, lab = axs[0, 0].get_legend_handles_labels()
-    fig.legend(h, lab, loc="upper center", ncol=6, frameon=False, bbox_to_anchor=(0.5, 1.03))
-    fig.tight_layout(rect=(0, 0, 1, 0.95))
+    fig.legend(h, lab, loc="upper center", ncol=4, frameon=False, bbox_to_anchor=(0.5, 1.05))
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
     save(fig, "fig2_simulated_sweep")
 
 
@@ -265,7 +267,7 @@ def fig_ranks(R) -> None:
 
 # ---- Fig. 6: effect ladder (own entries rendered with the measurement's effects) ----------------------------
 LADDER = [("own_clean", "clean"), ("own_mask", "+ coverage"), ("own_width", "+ peak width"), ("own_ka2", "+ Kα2"),
-          ("own_bkg", "+ background"), ("own_noise", "+ noise"), ("own_zero", "+ zero offset"), ("own_all", "all six"),
+          ("own_bkg", "+ background"), ("own_noise", "+ noise"), ("own_zero", "+ zero offset"), ("own_dw", "+ B"), ("own_all", "all six"),
           ("own_all_dw", "all six + B"), ("own_all_int30", "all six + jitter 0.3"),
           ("own_all_int50", "all six + jitter 0.5"), ("own_all_dw_int30", "all six + B + jitter 0.3"),
           ("measured", "measured")]
