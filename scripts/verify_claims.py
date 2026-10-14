@@ -387,9 +387,10 @@ CLAIMS = [
          f"{C2['n_patterns'] - C2['n_answer_in_shortlist']}\nanswers would rank first"),
     f"the fit finds {PK['pressure_series'][0]}–{PK['pressure_series'][1]} peaks (median {PK['pressure_series'][2]:.0f}), against "
     f"{PK['ambient'][0]}–{PK['ambient'][1]} (median {PK['ambient'][2]:.0f}) on the\nothers",
-    need(CTL["pressure_series"]["rank1"] == 0,
-         f"ranks that entry first among the shortlist for {CTL['ambient']['rank1']} of {CTL['ambient']['n']} ambient-pressure patterns "
-         f"but for none of the {CTL['pressure_series']['n']}\npressure-series patterns (median rank {med(CTL['pressure_series']['median_rank'])})"),
+    need(CTL["pressure_series"]["rank1"] <= 0.1 * CTL["pressure_series"]["n"] and CTL["ambient"]["rank1"] >= 0.75 * CTL["ambient"]["n"],
+         f"ranks that entry above every wrong entry of the shortlist for {CTL['ambient']['rank1']} of {CTL['ambient']['n']} "
+         f"ambient-pressure patterns but for\nonly {CTL['pressure_series']['rank1']} of the {CTL['pressure_series']['n']} pressure-series "
+         f"patterns (median rank {med(CTL['pressure_series']['median_rank'])})"),
     f"Without the pressure-series patterns, the re-rank reaches {mci(AS['critic2']['macro_top1'])} against "
     f"{mci(AS['lnq']['macro_top1'])} for\nthe ln q scan (paired {sgn(AS['paired_critic2_minus_lnq']['diff'])} "
     f"{ci(AS['paired_critic2_minus_lnq']['ci'])})",

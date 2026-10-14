@@ -521,7 +521,8 @@ def main() -> int:
         for ln in open("cache/critic2/control.jsonl"):
             r_ = json.loads(ln)
             od = r_["diff"] if r_["diff"] is not None else 1.0
-            sl = [dd[(r_["pid"], c)] for c in plan_[r_["pid"]]["shortlist"][:k_c2]]
+            # rank among the WRONG shortlist candidates (a correct single-crystal entry that scores better is no failure)
+            sl = [dd[(r_["pid"], c)] for c in plan_[r_["pid"]]["shortlist"][:k_c2] if c not in plan_[r_["pid"]]["truth"]]
             ctl[r_["pid"]] = {"own": r_["cand"], "diff": rd(od), "rank_in_shortlist": int(sum(x < od for x in sl)) + 1,
                               "shortlist_best_diff": rd(min(sl))}
         for row in ex["critic2"]["per_pattern"]:

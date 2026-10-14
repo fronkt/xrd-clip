@@ -4840,7 +4840,7 @@
      "control": {
       "own": "NAPHTA46",
       "diff": 0.0766,
-      "rank_in_shortlist": 29,
+      "rank_in_shortlist": 28,
       "shortlist_best_diff": 0.018
      },
      "injected": null,
@@ -4858,8 +4858,8 @@
      "control": {
       "own": "TAQBIY",
       "diff": 0.051,
-      "rank_in_shortlist": 2,
-      "shortlist_best_diff": 0.0493
+      "rank_in_shortlist": 1,
+      "shortlist_best_diff": 0.0663
      },
      "injected": null,
      "pressure_series": false
@@ -4876,7 +4876,7 @@
      "control": {
       "own": "NAPHTA45",
       "diff": 0.1051,
-      "rank_in_shortlist": 25,
+      "rank_in_shortlist": 24,
       "shortlist_best_diff": 0.039
      },
      "injected": null,
@@ -4935,7 +4935,7 @@
       "own": "UPOJER01",
       "diff": 0.0112,
       "rank_in_shortlist": 1,
-      "shortlist_best_diff": 0.012
+      "shortlist_best_diff": 0.0797
      },
      "injected": null,
      "pressure_series": false
@@ -4953,7 +4953,7 @@
       "own": "ZZZIZM07",
       "diff": 0.0137,
       "rank_in_shortlist": 1,
-      "shortlist_best_diff": 0.0157
+      "shortlist_best_diff": 0.0635
      },
      "injected": null,
      "pressure_series": false
@@ -4971,7 +4971,7 @@
       "own": "ZZZIZM06",
       "diff": 0.01,
       "rank_in_shortlist": 1,
-      "shortlist_best_diff": 0.0117
+      "shortlist_best_diff": 0.0652
      },
      "injected": null,
      "pressure_series": false
@@ -5029,7 +5029,7 @@
       "own": "QIKZUH",
       "diff": 0.003,
       "rank_in_shortlist": 1,
-      "shortlist_best_diff": 0.0036
+      "shortlist_best_diff": 0.0652
      },
      "injected": null,
      "pressure_series": false
@@ -5046,7 +5046,7 @@
      "control": {
       "own": "DEHKUA01",
       "diff": 0.0514,
-      "rank_in_shortlist": 4,
+      "rank_in_shortlist": 3,
       "shortlist_best_diff": 0.0357
      },
      "injected": null,
@@ -5087,7 +5087,7 @@
       "own": "KAWBER",
       "diff": 0.084,
       "rank_in_shortlist": 1,
-      "shortlist_best_diff": 0.0874
+      "shortlist_best_diff": 0.0925
      },
      "injected": null,
      "pressure_series": false
@@ -5105,7 +5105,7 @@
       "own": "ZZZIZM10",
       "diff": 0.0112,
       "rank_in_shortlist": 1,
-      "shortlist_best_diff": 0.0143
+      "shortlist_best_diff": 0.0459
      },
      "injected": null,
      "pressure_series": false
@@ -5123,7 +5123,7 @@
       "own": "ZZZIZM12",
       "diff": 0.008,
       "rank_in_shortlist": 1,
-      "shortlist_best_diff": 0.0116
+      "shortlist_best_diff": 0.0498
      },
      "injected": null,
      "pressure_series": false
@@ -5154,7 +5154,7 @@
       "own": "VELWIV01",
       "diff": 0.0138,
       "rank_in_shortlist": 1,
-      "shortlist_best_diff": 0.014
+      "shortlist_best_diff": 0.0613
      },
      "injected": null,
      "pressure_series": false
@@ -5172,7 +5172,7 @@
       "own": "ZZZIZM02",
       "diff": 0.0153,
       "rank_in_shortlist": 1,
-      "shortlist_best_diff": 0.0167
+      "shortlist_best_diff": 0.0664
      },
      "injected": null,
      "pressure_series": false
@@ -5189,7 +5189,7 @@
      "control": {
       "own": "NAPHTA44",
       "diff": 0.0229,
-      "rank_in_shortlist": 4,
+      "rank_in_shortlist": 3,
       "shortlist_best_diff": 0.0188
      },
      "injected": null,
@@ -5208,7 +5208,7 @@
       "own": "QILDAS",
       "diff": 0.0043,
       "rank_in_shortlist": 1,
-      "shortlist_best_diff": 0.0051
+      "shortlist_best_diff": 0.0556
      },
      "injected": null,
      "pressure_series": false
@@ -5247,8 +5247,8 @@
      "control": {
       "own": "HXACAN40",
       "diff": 0.014,
-      "rank_in_shortlist": 2,
-      "shortlist_best_diff": 0.0137
+      "rank_in_shortlist": 1,
+      "shortlist_best_diff": 0.0361
      },
      "injected": null,
      "pressure_series": false
@@ -5266,7 +5266,7 @@
       "own": "ZZZIZM03",
       "diff": 0.0121,
       "rank_in_shortlist": 1,
-      "shortlist_best_diff": 0.0132
+      "shortlist_best_diff": 0.0644
      },
      "injected": null,
      "pressure_series": false
@@ -5284,7 +5284,7 @@
       "own": "ZIZRUX",
       "diff": 0.0032,
       "rank_in_shortlist": 1,
-      "shortlist_best_diff": 0.023
+      "shortlist_best_diff": 0.0807
      },
      "injected": null,
      "pressure_series": false
@@ -5320,7 +5320,7 @@
       "own": "ZZZIZM04",
       "diff": 0.0102,
       "rank_in_shortlist": 1,
-      "shortlist_best_diff": 0.0116
+      "shortlist_best_diff": 0.0672
      },
      "injected": null,
      "pressure_series": false
@@ -5381,8 +5381,8 @@
      "control": {
       "own": "DEHKUA",
       "diff": 0.0175,
-      "rank_in_shortlist": 2,
-      "shortlist_best_diff": 0.0172
+      "rank_in_shortlist": 1,
+      "shortlist_best_diff": 0.0306
      },
      "injected": null,
      "pressure_series": false
@@ -5400,7 +5400,7 @@
       "own": "ZZZIZM08",
       "diff": 0.0122,
       "rank_in_shortlist": 1,
-      "shortlist_best_diff": 0.0142
+      "shortlist_best_diff": 0.0459
      },
      "injected": null,
      "pressure_series": false
@@ -5418,7 +5418,7 @@
       "own": "IKIJER01",
       "diff": 0.0024,
       "rank_in_shortlist": 1,
-      "shortlist_best_diff": 0.0028
+      "shortlist_best_diff": 0.019
      },
      "injected": null,
      "pressure_series": false
@@ -5524,7 +5524,7 @@
       "own": "ZZZIZM05",
       "diff": 0.0097,
       "rank_in_shortlist": 1,
-      "shortlist_best_diff": 0.0111
+      "shortlist_best_diff": 0.0646
      },
      "injected": null,
      "pressure_series": false
@@ -5542,7 +5542,7 @@
       "own": "ZZZIZM11",
       "diff": 0.0083,
       "rank_in_shortlist": 1,
-      "shortlist_best_diff": 0.0118
+      "shortlist_best_diff": 0.0474
      },
      "injected": null,
      "pressure_series": false
@@ -5560,7 +5560,7 @@
       "own": "QUWYIR",
       "diff": 0.0033,
       "rank_in_shortlist": 1,
-      "shortlist_best_diff": 0.0051
+      "shortlist_best_diff": 0.0504
      },
      "injected": null,
      "pressure_series": false
@@ -5599,7 +5599,7 @@
      "control": {
       "own": "COUMAR13",
       "diff": 0.0313,
-      "rank_in_shortlist": 8,
+      "rank_in_shortlist": 7,
       "shortlist_best_diff": 0.0172
      },
      "injected": null,
@@ -5639,7 +5639,7 @@
      "control": {
       "own": "AZUDOP01",
       "diff": 0.0637,
-      "rank_in_shortlist": 18,
+      "rank_in_shortlist": 17,
       "shortlist_best_diff": 0.0367
      },
      "injected": null,
@@ -5660,7 +5660,11 @@
       "rank_in_shortlist": 1,
       "shortlist_best_diff": 0.0615
      },
-     "injected": null,
+     "injected": {
+      "answer": "IYESEO",
+      "diff": 0.1807,
+      "rank_if_shortlisted": 50
+     },
      "pressure_series": false
     },
     {
@@ -5698,7 +5702,7 @@
       "own": "ZZZIZM09",
       "diff": 0.0124,
       "rank_in_shortlist": 1,
-      "shortlist_best_diff": 0.0158
+      "shortlist_best_diff": 0.0442
      },
      "injected": null,
      "pressure_series": false
@@ -5718,7 +5722,11 @@
       "rank_in_shortlist": 4,
       "shortlist_best_diff": 0.0669
      },
-     "injected": null,
+     "injected": {
+      "answer": "RIXNES",
+      "diff": 0.0986,
+      "rank_if_shortlisted": 5
+     },
      "pressure_series": false
     },
     {
@@ -5730,7 +5738,12 @@
      "critic2_rank": null,
      "n_peaks": 205,
      "fit_rms": 53.7105,
-     "control": null,
+     "control": {
+      "own": "MIGQOJ03",
+      "diff": 0.0491,
+      "rank_in_shortlist": 3,
+      "shortlist_best_diff": 0.0407
+     },
      "injected": {
       "answer": "MIGQOJ",
       "diff": 0.0497,
@@ -5769,7 +5782,12 @@
      "critic2_rank": 1,
      "n_peaks": 250,
      "fit_rms": 1.5703,
-     "control": null,
+     "control": {
+      "own": "KAWBAN",
+      "diff": 0.0523,
+      "rank_in_shortlist": 1,
+      "shortlist_best_diff": 0.0725
+     },
      "injected": null,
      "pressure_series": false
     },
@@ -5804,7 +5822,12 @@
      "critic2_rank": 1,
      "n_peaks": 66,
      "fit_rms": 436.3672,
-     "control": null,
+     "control": {
+      "own": "ROHWIX",
+      "diff": 0.0055,
+      "rank_in_shortlist": 1,
+      "shortlist_best_diff": 0.0474
+     },
      "injected": null,
      "pressure_series": false
     },
@@ -5817,7 +5840,12 @@
      "critic2_rank": 1,
      "n_peaks": 131,
      "fit_rms": 25.3137,
-     "control": null,
+     "control": {
+      "own": "QIMBOG",
+      "diff": 0.0075,
+      "rank_in_shortlist": 1,
+      "shortlist_best_diff": 0.016
+     },
      "injected": null,
      "pressure_series": false
     },
@@ -5830,7 +5858,12 @@
      "critic2_rank": null,
      "n_peaks": 12,
      "fit_rms": 1979.7069,
-     "control": null,
+     "control": {
+      "own": "MEHNIY02",
+      "diff": 0.2896,
+      "rank_in_shortlist": 2,
+      "shortlist_best_diff": 0.2132
+     },
      "injected": {
       "answer": "MEHNIY",
       "diff": 0.3023,
@@ -5847,7 +5880,12 @@
      "critic2_rank": null,
      "n_peaks": 41,
      "fit_rms": 29.6979,
-     "control": null,
+     "control": {
+      "own": "NAPHTA42",
+      "diff": 0.1057,
+      "rank_in_shortlist": 49,
+      "shortlist_best_diff": 0.0202
+     },
      "injected": {
       "answer": "NAPHTA22",
       "diff": 0.1057,
@@ -5864,7 +5902,12 @@
      "critic2_rank": null,
      "n_peaks": 49,
      "fit_rms": 65.1348,
-     "control": null,
+     "control": {
+      "own": "HOJQII01",
+      "diff": 0.0666,
+      "rank_in_shortlist": 10,
+      "shortlist_best_diff": 0.0531
+     },
      "injected": {
       "answer": "HOJQII",
       "diff": 0.0715,
@@ -5881,7 +5924,12 @@
      "critic2_rank": 1,
      "n_peaks": 190,
      "fit_rms": 1031.2095,
-     "control": null,
+     "control": {
+      "own": "CEHQEM",
+      "diff": 0.0096,
+      "rank_in_shortlist": 1,
+      "shortlist_best_diff": 0.0295
+     },
      "injected": null,
      "pressure_series": false
     },
@@ -5894,7 +5942,12 @@
      "critic2_rank": null,
      "n_peaks": 211,
      "fit_rms": 189.4455,
-     "control": null,
+     "control": {
+      "own": "GOFWOP",
+      "diff": 0.0465,
+      "rank_in_shortlist": 1,
+      "shortlist_best_diff": 0.0962
+     },
      "injected": {
       "answer": "GOFWOP03",
       "diff": 0.0525,
@@ -5911,7 +5964,12 @@
      "critic2_rank": null,
      "n_peaks": 38,
      "fit_rms": 31.8383,
-     "control": null,
+     "control": {
+      "own": "NAPHTA40",
+      "diff": 0.1334,
+      "rank_in_shortlist": 51,
+      "shortlist_best_diff": 0.0251
+     },
      "injected": {
       "answer": "NAPHTA22",
       "diff": 0.13,
@@ -5927,24 +5985,24 @@
    "cpu_h_total": 399.7997,
    "control_summary": {
     "ambient": {
-     "n": 30,
-     "rank1": 21,
-     "top3": 24,
+     "n": 36,
+     "rank1": 29,
+     "top3": 31,
      "median_rank": 1.0
     },
     "pressure_series": {
-     "n": 18,
+     "n": 22,
      "rank1": 1,
-     "top3": 1,
-     "median_rank": 27.0
+     "top3": 3,
+     "median_rank": 26.0
     }
    },
    "injected_summary": {
     "ambient": {
-     "n": 4,
+     "n": 6,
      "rank1": 1,
      "top3": 2,
-     "median_rank": 14.0
+     "median_rank": 15.0
     },
     "pressure_series": {
      "n": 17,

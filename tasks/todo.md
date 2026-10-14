@@ -320,7 +320,7 @@ C. Paper: paper_numbers.json -> manuscript/ESI/figs -> verify_claims -> internal
          and 4.7 open replica (R5); Discussion (variable-cell now tested; limitations); Conclusions; Data availability
    - [x] C4 ESI (25; S9-S13): ln q v1 vs v2, R2 ablations, critic2 per-pattern + cost, ladder table, COD replica table
    - [x] C5 verify_claims (169/169; coverage scan: uncovered numbers are design constants/labels): templates for every new number; 100 % verified
-   - [~] C6 internal referee pass (powder + ML subagents), fixes applied. Reports in 10-14 session (summarised
+   - [x] C6 internal referee pass (powder + ML subagents), fixes applied (10-14; verify 186/186, build OK). Reports in 10-14 session (summarised
          here). Both: main result stands; the new single-crystal and learned-side readings are overstated.
          Analyses (local, no cost; claims verified before use):
          - [x] cell metric was setting-dependent (sorted conventional lengths; DEHKUA 21 % -> 3.8 % reduced) and its
@@ -328,25 +328,37 @@ C. Paper: paper_numbers.json -> manuscript/ESI/figs -> verify_claims -> internal
                with lowest RMSD; dT for the SAME closest-cell entry (was closest-temperature). Groups 33/25 (n 58):
                ln q 22/2, critic2 21/4; CEHQEM (one of ln q's 2) is a supercell (V ratio 1.98). dT > 50 K for 15 of
                35 with both T, 9 of them in the cells-differ group -> "explains few" was wrong.
-         - [ ] pressure: powder referee says ~22 of 59 sc patterns are room-T compression series (MEHNIY, EPIVEF,
+         - [x] pressure: powder referee says ~22 of 59 sc patterns are room-T compression series (MEHNIY, EPIVEF,
                HOJQII, LILRIJ, NAPHTA). Verify with CSD pressure fields; tag every sc pattern (pressure / dT > 50 K /
                setting / other); sc metrics with and without high-pressure queries (secondary, CIs)
-         - [ ] critic2: positive control vs own Rietveld entry (running); composition check of every CIF given to
+         - [x] critic2: positive control vs own Rietveld entry (running); composition check of every CIF given to
                critic2 (ROHWIX01: disorder read at full occupancy?); peaks + fit residual per pattern (0.41 A fits
                13-31 peaks?); answer injection for the 23 missing answers (~1 h); ln q best-offset distribution
-         - [ ] ladder: retrain rungs with background removal everywhere (running; Kα2 "exception" may be an
+         - [x] ladder: retrain rungs with background removal everywhere (running; Kα2 "exception" may be an
                artefact); B-alone rung; disclose B/jitter rungs were added after the first ladder
-         - [ ] COD sc set composition (20/35 ZZZUWK vs a 1950 structure the CSD sets aside; 8 naphthalene HP)
+         - [x] COD sc set composition (20/35 ZZZUWK vs a 1950 structure the CSD sets aside; 8 naphthalene HP)
          Text: soften "gap lies in effects we did not model" (one seed, clean-val checkpoint, rungs off the
          retrain's input distribution); report the full R4c prediction (median-rank part failed too); "robust"
          with multiplicity; data availability (model rows need the CSD checkpoint; versions); Kα2 assumed not
          estimated; LP/package is query-side; Section 3.4 only the zero offset uses the own entry; 34-47 % wording;
          K 10 -> 50 history in Section 3.8; critic2 build 1.4.155; Fig. 2 lacks WCC 0.5; S12 caption pointer.
+         RESULTS (10-14): pressure series CONFIRMED by CSD/COD: 22 of 59 sc patterns, 5 compounds (scripts/34 ->
+         results/sc_conditions.json; 20 by CSD pressure/same-publication rule + HOJQII01/02 by hand); of the 25 cells-
+         differ patterns 16 pressure series, 7 dT > 50 K, 1 supercell (CEHQEM), 1 unexplained (TAQBIY). critic2:
+         ROHWIX01 loss was a disorder-input bug (all components at full occupancy; 4+1 disordered inputs fixed to the
+         major component; DIFF 0.261 -> 0.006) -> re-rank 0.53 [0.37, 0.70] vs ln q 0.45, paired +0.08 [-0.05, +0.21];
+         positive control (own Rietveld entry vs wrong shortlist entries): rank 1 for 29/36 ambient but 1/22 pressure
+         series (median 26); peak fits 11-49 peaks on pressure series vs 66-296; injection: 2 of 23 missing answers
+         would rank first. Ambient split (37 patterns, 25 cpds): classical 0.35-0.60, re-rank 0.64 vs ln q 0.54
+         (paired +0.10 [-0.04, +0.26]), model 0. Ladder: B alone is the model's largest single cost (0.27 -> 0.07),
+         Pearson 1.00; background-everywhere rerun changes rungs by <= 0.05 (Kα2 retrain 0.13, not an artefact).
+         Text: abstract (250 w), 2.3, 2.5 primary comparison, 3.2, 3.4, 3.7, 3.8, 4.2, 4.5, 4.6, 4.7, discussion,
+         limitations, conclusions, data availability (versions), Fig. 2 (+WCC 0.5), Fig. 6 (+B rung), ESI S10/S11.
          DECISIONS FOR FRANK (not taken): (1) headline sc set: keep the pre-declared 59 (incl. high-pressure) as
          primary + non-HP as secondary, or reframe; (2) more compute: critic2 refits of the DAC patterns,
          zero-offset sensitivity, bin-averaged Cu-grid conversion for all scores (np.interp aliasing of fine
          synchrotron steps, the R1 issue for every score; GPU rescore ~$0.5).
-   - [ ] C7 build.sh -> docx (builds 10-14); plan Section 13c-e readouts written 10-14; check in with Frank
+   - [~] C7 build.sh -> docx (builds 10-14, after the referee fixes); plan Section 13c-f readouts; check in with Frank
 After C (not R1-R5): R6 decisions, Zenodo deposit (code + open data; DD's data reviewer needs a DOI), cover
 letter, TOC graphic (at revision), Frank submits.
 

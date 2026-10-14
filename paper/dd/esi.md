@@ -345,31 +345,31 @@ Disordered inputs: the CSD extraction writes CIFs without occupancies, so the fi
 
 Compound-weighted top-1: re-rank 0.53 [0.37, 0.70], ln q 0.45 [0.28, 0.63], paired +0.08 [−0.05, +0.21]; top-10: 0.62 [0.45, 0.79] against 0.61 [0.44, 0.77], paired +0.01 [−0.09, +0.11].
 
-Positive control: each pattern against its own powder-study entry (the structure refined against that pattern); its DIFF is ranked among the shortlist's. Injection: each answer missing from a shortlist (the single-crystal same-form entry closest in cell) compared with its pattern and ranked the same way. Pressure series: the pattern's own entry carries a CSD pressure, or another entry of its family from the same publication does, or it is flagged by hand with the evidence (scripts/34_sc_conditions.py; HOJQII01/02, compressed cells at 293 K from a pressure study). The cell difference is the largest relative difference of the primitive Niggli-reduced cell lengths of the own entry and the closest single-crystal entry; ΔT is the difference of their recorded temperatures.
+Positive control: each pattern against its own powder-study entry (the structure refined against that pattern); its DIFF is ranked among the wrong entries of the shortlist. Injection: each answer missing from a shortlist (the single-crystal same-form entry closest in cell) compared with its pattern and ranked the same way. Pressure series: the pattern's own entry carries a CSD pressure, or another entry of its family from the same publication does, or it is flagged by hand with the evidence (scripts/34_sc_conditions.py; HOJQII01/02, compressed cells at 293 K from a pressure study). The cell difference is the largest relative difference of the primitive Niggli-reduced cell lengths of the own entry and the closest single-crystal entry; ΔT is the difference of their recorded temperatures.
 
 **Table S18** The single-crystal patterns. Ranks are 1-based; '–': the answer is not in the ln q top 50. Peaks: critic2 peak-fit count inside the d window.
 
-| opXRD pattern | CSD family | pressure series | cell difference (%) | ΔT (K) | peaks | ln q rank | rank after the re-rank | own entry, rank in shortlist | injected answer, rank |
+| opXRD pattern | CSD family | pressure series | cell difference (%) | ΔT (K) | peaks | ln q rank | rank after the re-rank | own entry, rank among wrong entries | injected answer, rank |
 |---|---|---|---|---|---|---|---|---|---|
-| pattern_949 | AKAFUR |  | 0.10 | 25 | 250 | 1 | 1 | n/a | n/a |
+| pattern_949 | AKAFUR |  | 0.10 | 25 | 250 | 1 | 1 | 1 | n/a |
 | pattern_351 | AKAGIG |  | 0.08 | 25 | 252 | 1 | 1 | 1 | n/a |
-| pattern_880 | AZUDOP |  | 0.23 | 0 | 148 | 4 | 16 | 18 | n/a |
+| pattern_880 | AZUDOP |  | 0.23 | 0 | 148 | 4 | 16 | 17 | n/a |
 | pattern_484 | BAPLOT |  | n/a | n/a | 153 | 1 | 1 | n/a | n/a |
-| pattern_1029 | CEHQEM |  | 29.04 | n/a | 190 | 1 | 1 | n/a | n/a |
-| pattern_816 | COUMAR |  | 2.75 | 138 | 86 | 40 | 3 | 8 | n/a |
-| pattern_297 | DEHKUA |  | 3.79 | 110 | 138 | 44 | 3 | 4 | n/a |
-| pattern_655 | DEHKUA |  | 1.15 | 110 | 148 | 9 | 1 | 2 | n/a |
+| pattern_1029 | CEHQEM |  | 29.04 | n/a | 190 | 1 | 1 | 1 | n/a |
+| pattern_816 | COUMAR |  | 2.75 | 138 | 86 | 40 | 3 | 7 | n/a |
+| pattern_297 | DEHKUA |  | 3.79 | 110 | 138 | 44 | 3 | 3 | n/a |
+| pattern_655 | DEHKUA |  | 1.15 | 110 | 148 | 9 | 1 | 1 | n/a |
 | pattern_730 | EPIVEF | yes | 13.55 | 3 | 24 | 9,894 | – | 50 | 50 |
 | pattern_921 | EPIVEF | yes | 6.18 | 3 | 29 | 1,419 | – | 1 | 1 |
 | pattern_252 | FOPKOK |  | 0.06 | 2 | 176 | 1 | 1 | 1 | n/a |
-| pattern_1041 | GOFWOP |  | 0.54 | 101 | 211 | 1,676 | – | n/a | 1 |
+| pattern_1041 | GOFWOP |  | 0.54 | 101 | 211 | 1,676 | – | 1 | 1 |
 | pattern_530 | GOFWUV |  | 0.24 | 175 | 143 | 22,004 | – | 5 | 51 |
 | pattern_326 | HOJQII | yes | 17.61 | 193 | 46 | 21,136 | – | 10 | 48 |
-| pattern_1022 | HOJQII | yes | 10.30 | 193 | 49 | 10,436 | – | n/a | 19 |
-| pattern_539 | HXACAN |  | 0.66 | 0 | 285 | 1 | 1 | 2 | n/a |
+| pattern_1022 | HOJQII | yes | 10.30 | 193 | 49 | 10,436 | – | 10 | 19 |
+| pattern_539 | HXACAN |  | 0.66 | 0 | 285 | 1 | 1 | 1 | n/a |
 | pattern_750 | HXACAN |  | 1.96 | 193 | 164 | 24,367 | – | 16 | 25 |
 | pattern_710 | IKIJER |  | 0.35 | 150 | 100 | 1 | 1 | 1 | n/a |
-| pattern_887 | IYESEO |  | 0.60 | 193 | 287 | 5,738 | – | 1 | n/a |
+| pattern_887 | IYESEO |  | 0.60 | 193 | 287 | 5,738 | – | 1 | 50 |
 | pattern_760 | LILRIJ | yes | 8.92 | 3 | 11 | 187,487 | – | 32 | 40 |
 | pattern_213 | MEHNIY | yes | 8.62 | 0 | 11 | 306,484 | – | 49 | 37 |
 | pattern_594 | MEHNIY | yes | 1.07 | 0 | 18 | 1 | 22 | 21 | n/a |
@@ -377,25 +377,25 @@ Positive control: each pattern against its own powder-study entry (the structure
 | pattern_875 | MEHNIY | yes | 6.27 | 0 | 11 | 302,001 | – | 14 | 25 |
 | pattern_891 | MEHNIY | yes | 6.78 | 0 | 13 | 299,969 | – | 10 | 10 |
 | pattern_978 | MEHNIY | yes | 4.24 | 0 | 15 | 166,952 | – | 17 | 29 |
-| pattern_1010 | MEHNIY | yes | 2.90 | 0 | 12 | 1,884 | – | n/a | 2 |
-| pattern_917 | MIGQOJ |  | 6.14 | 120 | 205 | 3,541 | – | n/a | 3 |
-| pattern_16 | NAPHTA | yes | 0.61 | n/a | 38 | 7 | 28 | 29 | n/a |
-| pattern_82 | NAPHTA | yes | 0.28 | n/a | 43 | 7 | 23 | 25 | n/a |
+| pattern_1010 | MEHNIY | yes | 2.90 | 0 | 12 | 1,884 | – | 2 | 2 |
+| pattern_917 | MIGQOJ |  | 6.14 | 120 | 205 | 3,541 | – | 3 | 3 |
+| pattern_16 | NAPHTA | yes | 0.61 | n/a | 38 | 7 | 28 | 28 | n/a |
+| pattern_82 | NAPHTA | yes | 0.28 | n/a | 43 | 7 | 23 | 24 | n/a |
 | pattern_91 | NAPHTA | yes | 1.00 | n/a | 37 | 274 | – | 49 | 49 |
 | pattern_96 | NAPHTA | yes | 0.13 | n/a | 43 | 23 | 47 | 47 | n/a |
-| pattern_511 | NAPHTA | yes | 0.39 | n/a | 42 | 28 | 2 | 4 | n/a |
+| pattern_511 | NAPHTA | yes | 0.39 | n/a | 42 | 28 | 2 | 3 | n/a |
 | pattern_647 | NAPHTA | yes | 1.15 | n/a | 37 | 107 | – | 49 | 49 |
 | pattern_726 | NAPHTA | yes | 4.35 | n/a | 41 | 78,049 | – | 50 | 50 |
 | pattern_808 | NAPHTA | yes | 3.55 | n/a | 41 | 15,104 | – | 50 | 50 |
-| pattern_1021 | NAPHTA | yes | 0.48 | n/a | 41 | 118 | – | n/a | 49 |
-| pattern_1046 | NAPHTA | yes | 2.10 | n/a | 38 | 1,308 | – | n/a | 51 |
+| pattern_1021 | NAPHTA | yes | 0.48 | n/a | 41 | 118 | – | 49 | 49 |
+| pattern_1046 | NAPHTA | yes | 2.10 | n/a | 38 | 1,308 | – | 51 | 51 |
 | pattern_519 | QILDAS |  | 0.40 | 120 | 158 | 1 | 1 | 1 | n/a |
-| pattern_1008 | QILZIX |  | 2.07 | 112 | 131 | 3 | 1 | n/a | n/a |
+| pattern_1008 | QILZIX |  | 2.07 | 112 | 131 | 3 | 1 | 1 | n/a |
 | pattern_247 | QIQVAQ |  | 0.38 | 7 | 294 | 1 | 2 | 1 | n/a |
 | pattern_805 | QUWYIR |  | 0.11 | 0 | 255 | 1 | 1 | 1 | n/a |
-| pattern_914 | RIXNES |  | 1.84 | 60 | 232 | 28,191 | – | 4 | n/a |
-| pattern_1006 | ROHWIX |  | 0.13 | 148 | 66 | 1 | 1 | n/a | n/a |
-| pattern_77 | TAQBIY |  | 4.81 | n/a | 213 | 7 | 1 | 2 | n/a |
+| pattern_914 | RIXNES |  | 1.84 | 60 | 232 | 28,191 | – | 4 | 5 |
+| pattern_1006 | ROHWIX |  | 0.13 | 148 | 66 | 1 | 1 | 1 | n/a |
+| pattern_77 | TAQBIY |  | 4.81 | n/a | 213 | 7 | 1 | 1 | n/a |
 | pattern_180 | UPOJER |  | 0.25 | 0 | 296 | 1 | 1 | 1 | n/a |
 | pattern_487 | VELWIV |  | 0.34 | 3 | 157 | 2 | 1 | 1 | n/a |
 | pattern_586 | ZIZRUX |  | 0.30 | 0 | 82 | 1 | 1 | 1 | n/a |
@@ -411,7 +411,7 @@ Positive control: each pattern against its own powder-study entry (the structure
 | pattern_787 | ZZZIZM |  | 0.71 | n/a | 140 | 1 | 1 | 1 | n/a |
 | pattern_901 | ZZZIZM |  | 0.54 | n/a | 153 | 1 | 1 | 1 | n/a |
 
-Positive control: own entry ranked first for 21 of 30 ambient-pressure and 1 of 18 pressure-series patterns (median rank 1 and 27.0). Injection: the missing answer would rank first for 1 of 4 ambient-pressure and 1 of 17 pressure-series patterns. Fitted peaks: 66–296 (ambient) and 11–49 (pressure series).
+Positive control: own entry ranked first for 29 of 36 ambient-pressure and 1 of 22 pressure-series patterns (median rank 1 and 26.0). Injection: the missing answer would rank first for 1 of 6 ambient-pressure and 1 of 17 pressure-series patterns. Fitted peaks: 66–296 (ambient) and 11–49 (pressure series).
 
 **Table S18b** Single-crystal set without the pressure-series patterns (37 patterns, 25 compounds; a secondary split defined after the internal review): compound-weighted top-1 and patterns ranked first; the pressure-series column counts first places among the 22 pressure-series patterns.
 

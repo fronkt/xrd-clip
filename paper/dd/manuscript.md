@@ -452,8 +452,9 @@ they agree, for 22 of 33, against 22. Its reach is limited in two ways. First, t
 answers would rank first. Second, the peak fits. On the pressure-series patterns, measured at short
 wavelengths at high pressure, the fit finds 11–49 peaks (median 37), against 66–296 (median 154) on the
 others. Compared with its own powder-study entry, the structure refined against the same data, the pipeline
-ranks that entry first among the shortlist for 20 of 29 ambient-pressure patterns but for none of the 16
-pressure-series patterns (median rank 30.5), so on those patterns the re-rank carries little information.
+ranks that entry above every wrong entry of the shortlist for 29 of 36 ambient-pressure patterns but for
+only 1 of the 22 pressure-series patterns (median rank 26), so on those patterns the re-rank carries little
+information.
 Without the pressure-series patterns, the re-rank reaches 0.64 [0.46, 0.80] against 0.54 [0.34, 0.72] for
 the ln q scan (paired +0.10 [−0.04, 0.26]).
 
@@ -628,7 +629,8 @@ top-1, against 0.57–0.82 for the same scores on the full library.
 
 **Fig. 5** Cumulative distribution of the rank of the first correct entry over the full library when
 (a) any same-form entry is correct and (b) only independent single-crystal entries are correct.
-Background-subtracted queries, no hubness correction.
+Background-subtracted queries, no hubness correction. The variable-cell re-rank is not shown, since it ranks
+only the ln q top 50.
 
 ![](figs/fig6_effect_ladder.pdf)
 

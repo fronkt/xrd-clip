@@ -666,3 +666,24 @@ set aside. 190 patterns scored (results/rescore_main_cod.json). Any same form (1
 0.77-0.90 (ln q 0.90 [0.85, 0.95]), model 0.02 [0, 0.04]. Single crystal: 35 patterns but 9 compounds; classical
 0.26-0.58, model 0. **Prediction held** (same ordering, classical >> model). Manuscript Section 4.7 + Table 2,
 ESI S13. Draft v2 (all five folded in): commits 2803c54, 7a4c833 and the ESI commit; verify_claims 169/169.
+
+### 13f. Internal referee pass on draft v2 (2026-10-14)
+
+Two independent referees (powder diffraction, ML/benchmarking). Both: the headline (classical >> model on measured
+organic patterns) stands; the new single-crystal and learned-side readings were overstated. Verified and fixed:
+(1) the cell-mismatch metric used sorted conventional lengths (setting-dependent; DEHKUA 21 % -> 3.8 % reduced) and
+could take an sc anchor as the "own" entry; now primitive Niggli cells, own = powder-study anchor, dT for the same
+entry. (2) 22 of the 59 sc patterns (5 compounds: NAPHTA, MEHNIY, EPIVEF, HOJQII, LILRIJ) are room-T compression
+series (CSD pressure fields + publications; scripts/34); with dT > 50 K and one supercell they explain 24 of the
+25 cells-differ patterns. "Temperature explains few" was wrong. (3) critic2: the ROHWIX "loss" was a disorder
+input bug (CIFs carry no occupancies); major-component inputs give DIFF 0.006 -> re-rank 0.53 vs ln q 0.45 (+0.08
+[-0.05, +0.21]). Positive control: own Rietveld entry beats every wrong shortlist entry for 29/36 ambient but 1/22
+pressure-series patterns (peak fits 11-49 vs 66-296 peaks): the automated pipeline fails on the DAC data.
+Injection: 2 of 23 missing answers would rank first. Ambient-only (secondary, post hoc): re-rank 0.64 vs ln q 0.54.
+(4) Ladder: the Debye-Waller factor alone is the model's largest single cost (0.27 -> 0.07; Pearson 1.00); the
+retrain fixes it (0.34). Background-everywhere rerun: rungs move <= 0.05, Kα2 result holds. (5) R4c prediction now
+reported in full (top-1 AND median-rank parts failed); conclusion softened to "differences our simulation does not
+reproduce", one seed / clean-val checkpoint caveats. (6) COD sc set = 20 ZZZUWK (1950 structure the CSD sets aside)
++ 8 NAPHTA pressure + 7 singletons: cannot test the CSD sc result; the replica now claims the any-same-form result
+only. Open for Frank: headline sc set (pre-declared 59 kept primary; ambient split secondary), further compute
+(DAC peak refits, zero-offset sensitivity, bin-averaged Cu-grid conversion for all scores).

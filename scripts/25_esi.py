@@ -99,7 +99,7 @@ def revision_sections() -> list:
           f"paired {dci(c2r['paired_critic2_minus_lnq']['top1'])}; top-10: {mci(c2r['critic2_vcgpwdf']['top10'])} against "
           f"{mci(c2r['lnq_v2_full_library']['top10'])}, paired {dci(c2r['paired_critic2_minus_lnq']['top10'])}.", "",
           "Positive control: each pattern against its own powder-study entry (the structure refined against that pattern); its "
-          "DIFF is ranked among the shortlist's. Injection: each answer missing from a shortlist (the single-crystal same-form "
+          "DIFF is ranked among the wrong entries of the shortlist. Injection: each answer missing from a shortlist (the single-crystal same-form "
           "entry closest in cell) compared with its pattern and ranked the same way. Pressure series: the pattern's own entry "
           "carries a CSD pressure, or another entry of its family from the same publication does, or it is flagged by hand "
           "with the evidence (scripts/34_sc_conditions.py; HOJQII01/02, compressed cells at 293 K from a pressure study). The "
@@ -111,7 +111,7 @@ def revision_sections() -> list:
     def cell(v, fmt):
         return "n/a" if v is None else format(v, fmt)
     L += table(["opXRD pattern", "CSD family", "pressure series", "cell difference (%)", "ΔT (K)", "peaks", "ln q rank",
-                "rank after the re-rank", "own entry, rank in shortlist", "injected answer, rank"],
+                "rank after the re-rank", "own entry, rank among wrong entries", "injected answer, rank"],
                [[r["id"], r["stem"], "yes" if r.get("pressure_series") else "", cell(r["cell_diff_pct"], ".2f"),
                  cell(r.get("dT_K"), ".0f"), r["n_peaks"], f"{r['lnq_rank']:,}",
                  "–" if r["critic2_rank"] is None else r["critic2_rank"],
