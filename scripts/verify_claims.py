@@ -148,6 +148,7 @@ TOL = ["cos_zs_bkg", "wcc_1_bkg", "wcc_2_bkg", "lnq_bkg"]                 # shif
 AMB_CLS = ["pearson", "cos_zs", "wcc_1", "wcc_2", "lnq"]                 # keys of the ambient split
 AMB_TOL = ["cos_zs", "wcc_1", "wcc_2", "lnq", "critic2"]
 INJ, CTL, PK = C2["injected_summary"], C2["control_summary"], C2["n_peaks_range"]
+X1 = REV["x1_binavg"]["paired_vs_main"]                                  # bin-averaged Cu grid (Frank's X1)
 
 
 def mci(v):           # a compound-weighted value with its CI
@@ -452,6 +453,11 @@ CLAIMS = [
          and sum(CODX["sc_composition"].values()) == COD["per_pattern"]["sc|lnq_bkg"]["n"],
          f"20 of its {COD['per_pattern']['sc|lnq_bkg']['n']} patterns are ZZZUWK"),
     f"{AS['n_pressure_series_patterns']} of its {D['n_sc_patterns']} patterns come from variable-pressure studies",
+    need(max(X1[f"{td}|{k}"]["n_top1_changed"] for td in ("std", "sc") for k in CLS) <= 1
+         and max(abs(X1[f"{td}|model_bkg"]["top1"]["diff"]) for td in ("std", "sc")) < 0.01,
+         f"changes the classical\nscores by {sgn(min(X1[f'{td}|{k}']['top1']['diff'] for td in ('std', 'sc') for k in CLS))} to "
+         f"{sgn(max(X1[f'{td}|{k}']['top1']['diff'] for td in ('std', 'sc') for k in CLS))} (at most one first place per score and "
+         f"answer set) and the model by less than 0.01"),
     # ---- 4.7 open replica + Table 2
     f"Against the {COD['meta']['n_library']:,} COD entries, the {COD['meta']['n_queries']} patterns reproduce the main result",
     f"the classical scores reach a compound-weighted top-1 of {rng([cod_m('std', k)['value'] for k in CLS])} "

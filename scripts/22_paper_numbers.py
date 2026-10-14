@@ -142,6 +142,14 @@ def revision(stems: np.ndarray, R) -> dict:
            "r2_ablations": {}, "r3_critic2": rnd(load("results/critic2_rerank.json")),
            "r4_gap": rnd(load("results/model_gap.json")), "r4c_realism": rnd(load("results/model_gap_realism.json")),
            "r5_cod": slim(load("results/rescore_main_cod.json"))}
+    # X1 (10-14, Frank): measured patterns put on the Cu grid by bin averaging instead of interpolation
+    rev["x1_binavg"] = slim(load("results/rescore_binavg.json"))
+    xb = "cache/real_bench/rescore_binavg/ranks.npz"
+    if rev["x1_binavg"] is not None and os.path.exists(xb):
+        f = np.load(xb)
+        rev["x1_binavg"]["paired_vs_main"] = {k: {"top1": paired_macro(f[k], R[f"none|{k}"], stems),
+                                                  "n_top1_changed": int(((f[k] == 0) != (R[f"none|{k}"] == 0)).sum())}
+                                              for k in f.files if "@" not in k}
     full = "cache/real_bench/rescore_r2/ranks.npz"
     if rev["r2"] is not None and os.path.exists(full):
         f = np.load(full)

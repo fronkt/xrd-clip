@@ -357,7 +357,9 @@ those against a Kα1 library and a Kα1 + Kα2 library (I₂/I₁ = 0.5), becaus
 the beam was monochromated. (d) For the 46 patterns that do not cover 5–50°, comparison over the measured
 range only (reference norms over the query's coverage, not shifted with the zero scan). Each change was also
 removed on its own to give one-off ablations. None of the four was selected after seeing results. Changes
-(b) and (d) act on the queries rather than on the library.
+(b) and (d) act on the queries rather than on the library. A separate check, fixed before it was run, puts the
+measured patterns on the Cu grid by averaging over each grid step instead of interpolating, which keeps the
+area of narrow synchrotron peaks.
 
 ### 3.8 Variable-cell re-rank
 
@@ -654,7 +656,8 @@ rise; they move by −0.04 to +0.04, with every interval including zero. Two of 
 rather than the library (the Lorentz–polarisation conversion and the measured range), which is why the
 learned model, whose library embeddings are unchanged, scores 0.00 with the package on both sets. The
 classical results are robust to these choices of library simulation, which do not explain the single-crystal
-failures.
+failures. Averaging the measured patterns over each grid step instead of interpolating changes the classical
+scores by 0.00 to +0.03 (at most one first place per score and answer set) and the model by less than 0.01.
 
 ### 4.7 The open replica
 
@@ -728,7 +731,7 @@ their own entry was refined against. The single-crystal set has 30 compounds, so
 package of such changes moved little (Section 4.6) but does not exhaust them, uses one Debye–Waller factor
 for every temperature, and disordered entries are simulated only approximately. The measured patterns have a
 simple background removal and are interpolated onto the Cu grid, which can miss the tops of narrow
-synchrotron peaks. The zero scans use fixed offset grids (0.02°, and 0.04° for the ln q scan). The effect
+synchrotron peaks, although averaging over each grid step instead changes little (Section 4.6). The zero scans use fixed offset grids (0.02°, and 0.04° for the ln q scan). The effect
 ladder adds Kα2 to every laboratory Cu pattern and does not estimate the intensity jitter. The variable-cell
 re-rank covers a shortlist of 50 with a 4-hour limit per comparison, uses no zero-offset correction, reaches
 only cell differences within ±10 % and ±5°, and fits peaks poorly on the high-pressure synchrotron patterns.

@@ -185,6 +185,15 @@ def revision_sections() -> list:
                         [dci(r2a[t]["paired_vs_r2"][key]) if key in r2a[t]["paired_vs_r2"] else "n/a"     # the model was
                          for t in ("r2_noB", "r2_nolp", "r2_noka2", "r2_nomask")])                      # not ablated
     L += table(["score", "answer set", "main", "package", "package − main", "− B", "− LP", "− Kα2", "− range"], rows)
+    x1 = rev["x1_binavg"]
+    L += ["", "**Table S21b** Measured patterns put on the Cu grid by averaging over each 0.02° grid step instead of "
+          "interpolating (the design and a decision rule were fixed before the run: a change above 0.05 would have made it "
+          "the primary preprocessing). Compound-weighted top-1, paired against the main benchmark; first places that "
+          "change.", ""]
+    L += table(["score", "answer set", "main", "bin-averaged", "difference", "first places changed"],
+               [[NAMES[k], nm_, f2(B_[f"none|{td}|{k}"]["macro_top1"]), mci(x1["macro"][f"{td}|{k}"]["top1"]),
+                 dci(x1["paired_vs_main"][f"{td}|{k}"]["top1"]), x1["paired_vs_main"][f"{td}|{k}"]["n_top1_changed"]]
+                for k in CLS + ["model_bkg"] for td, nm_ in SETS])
 
     cod, cx = rev["r5_cod"], ex["cod"]
     L += ["", "## S13 The open replica (COD)", "",

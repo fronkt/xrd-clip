@@ -361,7 +361,10 @@ C. Paper: paper_numbers.json -> manuscript/ESI/figs -> verify_claims -> internal
          FRANK 10-14 (AskUserQuestion): "Keep all 59" as headline; run ALL THREE: "Refit critic2 on DAC data,
          critic2 zero-offset test, Bin-averaged Cu grid".
    - C8 Frank's three extra checks. Designs + predictions fixed here BEFORE any number (10-14):
-     - [ ] X1 bin-averaged Cu grid (sensitivity, pre-declared rule). Each measured pattern goes onto the Cu
+     - [x] X1 bin-averaged Cu grid (sensitivity, pre-declared rule). DONE 10-14 (results/rescore_binavg.json,
+           local 37 min): classical macro top-1 changes 0.00 to +0.03 (sc WCC 2 deg +0.03 = 1 first place; all
+           others <= 0.008), model -0.004; no interval excludes 0 -> below the 0.05 rule: sensitivity check
+           (Section 4.6 sentence, ESI Table S21b). Prediction (+-0.02) held except sc WCC 2 deg (+0.03). Each measured pattern goes onto the Cu
            grid by area-preserving bin averaging (the mean of the native pattern over each Cu grid point's
            d-range, as R1 did for ln q) instead of np.interp; behind a flag, interp stays the default. Score
            every classical score + the model with 28 (new tag, ln q v2, no R2 switches) locally; paired macro

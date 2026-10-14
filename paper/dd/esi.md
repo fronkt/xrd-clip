@@ -502,6 +502,23 @@ Package (Section 3.7 of the article): Debye–Waller B = 4.45 Å², Lorentz–po
 | Learned embedding | any same-form | 0.02 | 0.00 [0.00, 0.00] | −0.02 [−0.04, 0.00] | n/a | n/a | n/a | n/a |
 | Learned embedding | single-crystal | 0.00 | 0.00 [0.00, 0.00] | 0.00 [0.00, 0.00] | n/a | n/a | n/a | n/a |
 
+**Table S21b** Measured patterns put on the Cu grid by averaging over each 0.02° grid step instead of interpolating (the design and a decision rule were fixed before the run: a change above 0.05 would have made it the primary preprocessing). Compound-weighted top-1, paired against the main benchmark; first places that change.
+
+| score | answer set | main | bin-averaged | difference | first places changed |
+|---|---|---|---|---|---|
+| ln q lag + zero scan | any same-form | 0.87 | 0.87 [0.82, 0.93] | 0.00 [0.00, 0.00] | 0 |
+| ln q lag + zero scan | single-crystal | 0.45 | 0.45 [0.28, 0.63] | 0.00 [0.00, 0.00] | 0 |
+| Cosine + zero scan | any same-form | 0.84 | 0.84 [0.78, 0.90] | 0.00 [0.00, 0.00] | 0 |
+| Cosine + zero scan | single-crystal | 0.40 | 0.40 [0.24, 0.57] | 0.00 [0.00, 0.00] | 0 |
+| Pearson, fixed grid | any same-form | 0.83 | 0.83 [0.77, 0.89] | 0.00 [0.00, 0.00] | 1 |
+| Pearson, fixed grid | single-crystal | 0.30 | 0.30 [0.15, 0.48] | 0.00 [0.00, 0.00] | 0 |
+| WCC, l = 1° + zero scan | any same-form | 0.83 | 0.84 [0.77, 0.90] | +0.01 [0.00, +0.02] | 1 |
+| WCC, l = 1° + zero scan | single-crystal | 0.50 | 0.50 [0.32, 0.67] | 0.00 [0.00, 0.00] | 0 |
+| WCC, l = 2° + zero scan | any same-form | 0.71 | 0.71 [0.64, 0.79] | +0.01 [0.00, +0.02] | 1 |
+| WCC, l = 2° + zero scan | single-crystal | 0.47 | 0.50 [0.33, 0.67] | +0.03 [0.00, +0.10] | 1 |
+| Learned embedding | any same-form | 0.02 | 0.01 [0.00, 0.03] | 0.00 [−0.02, +0.01] | 2 |
+| Learned embedding | single-crystal | 0.00 | 0.00 [0.00, 0.00] | 0.00 [0.00, 0.00] | 0 |
+
 ## S13 The open replica (COD)
 
 Library: 108,716 COD entries pass the corpus filter and 854 candidate entries of the queries are added (109,570); 108,902 gave stick patterns. Identified: 191 of 196 patterns (189 also identified in the CSD, 2 only in the COD). Other-compound candidates kept as library entries: 2,670; same-formula candidates set aside as not comparable: 23. Scored: 190 patterns. ln q is the corrected version; no hubness correction and no package of Section S12.
