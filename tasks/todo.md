@@ -236,6 +236,14 @@ B. Box session (manual mode, one CSD-derived upload): R4c training; ln q CSLS re
      Windows refit of pattern_655 gives RMS 0.556 vs 0.567, same 1.4.155) + 4 fitted locally. Local run:
      2,750 + 200 comparisons, 6-8 critic2 processes, unthrottled children (19 unthrottle(pid)); resumable.
      R5: COD sticks 108,902/109,570 (99.4 %); scripts/33_cod_embed.py + 28 main score/eval running locally.
+   - 10-13 ~19:00: Claude Code's memory reaper killed all four local jobs (R4c pemb at 172k/309k, R5 embed after
+     shards 000-001, critic2 run after 2 comparisons). Cause found on restart: 33 reused one worker for every
+     shard (~1.8 GB growth per shard; 19 uses maxtasksperchild=1) -> fixed 4fd49c1. Fits: 57/59 have fit.peaks;
+     pattern_887/949 hit the 1-h cap (they add ~1,000-1,400 peaks one at a time; pattern_180 took 1 h 45 min).
+     20:40 restart (Frank "Go ahead"): chain R5 embed -> score -> eval -> R4c pemb -> eval, one torch job at a
+     time (scratchpad chain_r5_r4c.sh, log cache/chain_r5_r4c.log); critic2 run --procs 3 (2,848 comparisons,
+     cache/critic2_run.log); fit retry 887/949 --fit_timeout 14400 (cache/critic2_fit_retry.log). When the two
+     fits land: stop the run (driver + critic2 children) and restart it so rank-major order picks them up.
    - [ ] CSLS ln q v2: mkdir cache/real_bench_lnq2; copy hub_ctx.npz + ranks.npz; out_retry.tar's
          cache/real_bench_lnq2r/full -> cache/real_bench_lnq2/full (check its DONE file);
          LNQ_VERSION=2 python scripts/21_hubness.py eval --work cache/real_bench_lnq2 --emb_dir cache/real_bench

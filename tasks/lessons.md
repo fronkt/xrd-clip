@@ -31,3 +31,11 @@
 - **Rule:** in manual mode, the command that launches a box queue also starts the local pull loop (wait for
   RUN_DONE, pull, md5, touch PULLED), so nothing after launch needs an approval.
 - **Rule:** budget GPU memory per concurrent job on a box (21 score OOMed beside a 17 GB train on 24 GB).
+
+## 2026-10-13 — local jobs reaped; a copied worker lost its pool setting
+- **What happened:** four local jobs ran at once (R4c pemb, R5 embed, critic2 fits + run) and Claude Code's memory
+  reaper killed all of them. 33_cod_embed called 19's _embed_shard through a plain ProcessPoolExecutor, so one
+  worker embedded every shard and grew ~1.8 GB per shard; 19 runs the same function with maxtasksperchild=1.
+- **Rule:** when a new script reuses a worker function, copy the pool settings its original caller uses (and read
+  the function's docstring for them).
+- **Rule:** on the laptop, run one heavy torch job at a time; chain them in one script, CPU-light jobs alongside.
