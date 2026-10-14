@@ -252,8 +252,8 @@ B. Box session (manual mode, one CSD-derived upload): R4c training; ln q CSLS re
      CPU box (~490 CPU-h) vs K = 5 + 1-h cap locally (28 % capped). Local run continues rank-major meanwhile.
      Frank topped up Vast ($11.22) -> K = 10 box route (6702b7e: 29 --k 10 default, --timeout 14400, --pids;
      scripts/box/critic2_k10_box.sh). ln q v2 sc recall@10 0.542 (32/59) vs @50 0.61 (36/59), top-1 0.424.
-     Local run stopped (3 comparisons kept). Upload cache/box_rev/c2k10.tar (13.7 MB, md5 47e53088..., 420
-     CIFs, 58 peak lists; 887 refits on the box). Launch = scratchpad launch_c2k10.sh <id> (upload, verify,
+     Local run stopped (3 comparisons kept). Upload cache/box_rev/c2k10.tar (13.7 MB, md5 c1f0d1b5..., 420
+     CIFs, 59 peak lists: 887 landed locally 21:38, RMS 11.06; 587 comparisons). Launch = scratchpad launch_c2k10.sh <id> (upload, verify,
      launch, pull loop -> cache/box_rev/pullC/). Needs MANUAL mode (CSD CIFs). Offer seen: 51326865, 128-core
      EPYC 7B12, $0.31/h; onstart guard: stop if not launched in 2 h, hard stop at 24 h.
    - [ ] CSLS ln q v2: mkdir cache/real_bench_lnq2; copy hub_ctx.npz + ranks.npz; out_retry.tar's
