@@ -244,6 +244,12 @@ B. Box session (manual mode, one CSD-derived upload): R4c training; ln q CSLS re
      time (scratchpad chain_r5_r4c.sh, log cache/chain_r5_r4c.log); critic2 run --procs 3 (2,848 comparisons,
      cache/critic2_run.log); fit retry 887/949 --fit_timeout 14400 (cache/critic2_fit_retry.log). When the two
      fits land: stop the run (driver + critic2 children) and restart it so rank-major order picks them up.
+     21:24 R5 DONE (250632d): results/rescore_main_cod.json, 190 queries vs 108,902 COD entries. std (125
+     compounds) ln q top-1 0.901 [0.849, 0.952], cos_zs 0.885, model 0.016 [0, 0.040]; sc only 9 compounds (ln q
+     0.556 [0.222, 0.889], model 0). Same picture as the CSD benchmark (CSD r1 std ln q 0.875). pattern_949 fit
+     landed (RMS 1.57). critic2 COST PROBLEM: comparevc global cost ~ V^2.15 (16 s at 223 A^3, 230 s at 770,
+     QOGHOL 5,264 A^3 > 40 min); K = 50 ~ 3,100 CPU-h uncapped -> asked Frank: K = 10 + 4-h cap on a rented
+     CPU box (~490 CPU-h) vs K = 5 + 1-h cap locally (28 % capped). Local run continues rank-major meanwhile.
    - [ ] CSLS ln q v2: mkdir cache/real_bench_lnq2; copy hub_ctx.npz + ranks.npz; out_retry.tar's
          cache/real_bench_lnq2r/full -> cache/real_bench_lnq2/full (check its DONE file);
          LNQ_VERSION=2 python scripts/21_hubness.py eval --work cache/real_bench_lnq2 --emb_dir cache/real_bench
