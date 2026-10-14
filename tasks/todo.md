@@ -262,6 +262,17 @@ B. Box session (manual mode, one CSD-derived upload): R4c training; ln q CSLS re
      background launch_c2k10.sh (log cache/box_rev/launch_c2k10.log, polls every 10 min) -> cache/box_rev/pullC/
      out.tar; the box self-stops on PULLED. AFTER: back up cache/critic2/diffs.jsonl, take the box's (a
      superset), 29 eval --k 10 -> results/critic2_rerank.json, destroy 55845149.
+     10-13 23:55: K = 10 done but 1 (pattern_730/GOGZOU; answer EPIVEF not in its top 10, so it moves no metric).
+     589 rows all ok, 76 CPU-h total (median 2.3 CPU-min, max 1.95 h), ~6x below my two-point estimate (refit cost
+     ~V^1.8). Preview eval (58 patterns, cache/box_rev/preview/): critic2 sc macro top-1 0.533 [0.35, 0.70] vs ln q
+     0.455 [0.276, 0.633], paired +0.079 [-0.055, +0.212]; per pattern 27 vs 25 of 58. Local diffs.jsonl backed up
+     to cache/critic2/diffs_local_3.jsonl and replaced by the preview.
+     Frank (AskUserQuestion): "Extend to K = 50". 00:01 K = 50 extension on the SAME box (8bad8fa): K = 10 runner
+     shells (PIDs 431/432) killed, its python + GOGZOU left running; c2k50.tar (1,603 more CIFs, md5 b44ac0c7...)
+     + scripts/box/critic2_k50_box.sh (log /workspace/box50.log); ~2,360 comparisons, predicted ~260 CPU-h, ~1 h +
+     4-h-cap tail. Pull loop = launch_c2k50.sh (cache/box_rev/launch_c2k50.log -> pullC/). AFTER: take the box
+     diffs.jsonl, 29 eval (K = 50 default) -> results/critic2_rerank.json; fill Section 3.8 TBDs (c2_cpu_median,
+     c2_cpu_max, c2_capped); destroy 55845149.
      22:05 R4c DONE (7e61008): results/model_gap_realism.json. Measured: std macro top-1 0.024 [0, 0.057] vs
      original 0.016 [0, 0.041]; sc 0 vs 0. Own-pattern nuisances: own_all_dw std 0.231 vs 0.053, sc 0.294 vs 0;
      own_clean sc 0.317 vs 0.150; own_ka2 std 0.109 vs 0.178 (worse). Reading: the retrain fixes the simulated
