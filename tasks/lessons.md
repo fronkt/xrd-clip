@@ -39,3 +39,10 @@
 - **Rule:** when a new script reuses a worker function, copy the pool settings its original caller uses (and read
   the function's docstring for them).
 - **Rule:** on the laptop, run one heavy torch job at a time; chain them in one script, CPU-light jobs alongside.
+
+## 2026-10-13 — a two-point cost extrapolation cut the critic2 shortlist for nothing
+- **What happened:** two finished comparisons (16 s, 230 s) gave cost ~V^2.15 in cell volume and priced K = 50 at
+  ~3,100 CPU-h, so K was cut to 10. The K = 10 run measured 76 CPU-h for 589 comparisons (~6x below the estimate;
+  refit ~V^1.8 on 589 points), and K went back to 50 on the same box.
+- **Rule:** before cutting a declared protocol on cost, time a stratified sample (e.g. 20 jobs across the size
+  range) on the target hardware; never extrapolate an exponent from two points, and say how many points it rests on.
