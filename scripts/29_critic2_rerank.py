@@ -51,6 +51,13 @@ DIFF_RE = re.compile(r"DIFF\s*=\s*([-+0-9.eE]+)")
 PEAKS = "fit.peaks"
 
 
+def cpu_seconds(s: str | None) -> float | None:
+    """critic2's 'Elapsed CPU time' string ('1h 11m 40s', '16s') in seconds."""
+    if s is None:
+        return None
+    return sum(float(v) * {"h": 3600, "m": 60, "s": 1}[u] for v, u in re.findall(r"([0-9.]+)\s*([hms])", s))
+
+
 def critic2(cri_path: str, cwd: str, timeout: int = 3600) -> str:
     """Run critic2 on an input file (single-threaded); returns the output text."""
     out = cri_path[:-4] + ".cro"
@@ -204,13 +211,14 @@ def cmd_eval(args) -> int:
     nq = len(qinfo)
     rank_c2 = np.full(nq, -1, np.int64)
     rank_lnq_short = np.full(nq, -1, np.int64)
-    status, n_fail = {}, 0
+    status, n_fail, used = {}, 0, []
     for pid, p in plan.items():
         short = p["shortlist"][:args.k]
         rows = [diffs.get((pid, c)) for c in short]
         if any(r is None for r in rows):
             status[pid] = "incomplete"
             continue
+        used += rows
         # a failed comparison counts as maximally dissimilar (DIFF = 1)
         dv = np.array([r["diff"] if r["diff"] is not None else 1.0 for r in rows])
         n_fail += sum(r["diff"] is None for r in rows)
@@ -225,10 +233,17 @@ def cmd_eval(args) -> int:
     stems = np.array([q["stem"] for q in qinfo])
     r1 = np.load("cache/real_bench/rescore_r1/ranks.npz")["sc|lnq_bkg"]
     sel = rank_c2 >= 0
-    res = {"meta": {"k": args.k, "n_queries": int(sel.sum()), "n_planned": len(plan), "n_failed_comparisons": n_fail,
+    cpu = np.array([cpu_seconds(r["cpu"]) for r in used if r["cpu"] is not None])
+    res = {"meta": {"k": args.k, "n_queries": int(sel.sum()), "n_planned": len(plan), "n_comparisons": len(used),
+                    "n_failed_comparisons": n_fail,
+                    "failed": [[r["pid"], r["cand"], r["status"]] for r in used if r["diff"] is None],
                     "incomplete": [k for k, v in status.items() if v == "incomplete"],
                     "recall_at_k": float((rank_c2[sel] < args.k).mean()) if sel.any() else None,
-                    "timing_wall_s_median": float(np.median([r["wall_s"] for r in diffs.values()])) if diffs else None}}
+                    "timing_wall_s_median": float(np.median([r["wall_s"] for r in used])) if used else None,
+                    # completed comparisons only (a timed-out one reports no CPU time)
+                    "cpu_s_median": float(np.median(cpu)) if len(cpu) else None,
+                    "cpu_s_max": float(cpu.max()) if len(cpu) else None,
+                    "cpu_h_total": float(cpu.sum() / 3600) if len(cpu) else None}}
     cboot = np.random.default_rng(0).integers(0, len(np.unique(stems)), (2000, len(np.unique(stems))))
     for name, r in (("critic2_vcgpwdf", rank_c2), ("lnq_v2_full_library", np.where(sel, r1, -1))):
         res[name] = {f"top{kk}": pn.macro(r, kk, stems, cboot) for kk in (1, 10)}

@@ -46,3 +46,10 @@
   refit ~V^1.8 on 589 points), and K went back to 50 on the same box.
 - **Rule:** before cutting a declared protocol on cost, time a stratified sample (e.g. 20 jobs across the size
   range) on the target hardware; never extrapolate an exponent from two points, and say how many points it rests on.
+
+## 2026-10-14 — an extension run re-queued a job still running from the previous run
+- **What happened:** the critic2 K = 50 run was started on the box while the K = 10 run's last comparison
+  (pattern_730/GOGZOU) was still in flight. `29 run` skips only pairs already written to diffs.jsonl, so it
+  queued GOGZOU again; both copies ran the full 4-h cap and diffs.jsonl got a duplicate row (cheap here: one core).
+- **Rule:** when an extension starts beside stragglers, pass the in-flight jobs as excluded (or wait for them);
+  after any merge, count duplicate keys before scoring.

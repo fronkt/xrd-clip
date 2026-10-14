@@ -1,0 +1,78 @@
+{
+ "meta": {
+  "k": 50,
+  "n_queries": 59,
+  "n_planned": 59,
+  "n_comparisons": 2950,
+  "n_failed_comparisons": 1,
+  "failed": [
+   [
+    "pattern_730",
+    "GOGZOU",
+    "timeout/empty"
+   ]
+  ],
+  "incomplete": [],
+  "recall_at_k": 0.6101694915254238,
+  "timing_wall_s_median": 137.25,
+  "cpu_s_median": 132.0,
+  "cpu_s_max": 10666.0,
+  "cpu_h_total": 399.70166666666665
+ },
+ "critic2_vcgpwdf": {
+  "top1": {
+   "n_compounds": 30,
+   "value": 0.5,
+   "ci": [
+    0.3167,
+    0.6667
+   ]
+  },
+  "top10": {
+   "n_compounds": 30,
+   "value": 0.5867,
+   "ci": [
+    0.4166,
+    0.7533
+   ]
+  },
+  "per_pattern_top1": 0.4406779661016949
+ },
+ "lnq_v2_full_library": {
+  "top1": {
+   "n_compounds": 30,
+   "value": 0.4548,
+   "ci": [
+    0.2762,
+    0.6333
+   ]
+  },
+  "top10": {
+   "n_compounds": 30,
+   "value": 0.6114,
+   "ci": [
+    0.4448,
+    0.7714
+   ]
+  },
+  "per_pattern_top1": 0.423728813559322
+ },
+ "paired_critic2_minus_lnq": {
+  "top1": {
+   "n_compounds": 30,
+   "diff": 0.0452,
+   "ci": [
+    -0.1095,
+    0.1952
+   ]
+  },
+  "top10": {
+   "n_compounds": 30,
+   "diff": -0.0248,
+   "ci": [
+    -0.1462,
+    0.0919
+   ]
+  }
+ }
+}

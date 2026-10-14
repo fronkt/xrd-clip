@@ -348,8 +348,9 @@ pattern is the 50 best entries of ln q, with set-aside entries excluded; a patte
 its shortlist counts as a miss, and a comparison that fails or runs past a 4-hour limit counts as maximally
 dissimilar. We had planned a shortlist of 100, but the shortlist holds the answer for the same 36 of the 59
 patterns at 50 as at 100, so the further entries could only have added competitors; the shorter list is, if
-anything, favourable to the re-rank. A comparison took a median of TBD(c2_cpu_median) CPU-minutes and up to
-TBD(c2_cpu_max) CPU-hours for the largest cells (TBD(c2_capped) reached the limit).
+anything, favourable to the re-rank. A comparison took a median of 2.2 CPU-minutes and up to 3.0 CPU-hours
+for the largest cells; one of the 2,950 comparisons reached the limit, in a shortlist that does not hold the
+answer, so it changes no result.
 
 ## 4. Results
 

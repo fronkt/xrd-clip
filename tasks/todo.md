@@ -277,17 +277,31 @@ B. Box session (manual mode, one CSD-derived upload): R4c training; ln q CSLS re
      original 0.016 [0, 0.041]; sc 0 vs 0. Own-pattern nuisances: own_all_dw std 0.231 vs 0.053, sc 0.294 vs 0;
      own_clean sc 0.317 vs 0.150; own_ka2 std 0.109 vs 0.178 (worse). Reading: the retrain fixes the simulated
      nuisances it saw (B damping most) and leaves measured patterns at ~0 -> the gap is not the modelled ones.
-   - [ ] CSLS ln q v2: mkdir cache/real_bench_lnq2; copy hub_ctx.npz + ranks.npz; out_retry.tar's
+     10-14 04:05 R3 DONE: K = 50 pulled (out.tar md5 845dee12... OK), 2,951 rows = all 2,950 planned pairs + one
+     duplicate (pattern_730/GOGZOU: the K = 50 run re-queued the K = 10 straggler still in flight; both hit 4 h).
+     Run end 08:01Z (exactly the cap). 29 eval now writes cpu_s_median/max/total + the failed list. results/
+     critic2_rerank.json (K = 50, 59 patterns, recall 0.61): critic2 sc macro top-1 0.500 [0.317, 0.667] vs ln q
+     0.455 [0.276, 0.633], paired +0.045 [-0.110, +0.195]; top-10 0.587 vs 0.611, paired -0.025 [-0.146, +0.092];
+     per pattern 26 vs 25 of 59. Inside the 36 shortlists holding the answer: both top-1 22; critic2 gains 4
+     (77, 487, 655, 1008: ln q ranks 6, 1, 8, 2), loses 3 (247 -> 1; 594 -> 21; 1006 -> 49, where ln q's correct
+     first choice gets the WORST DIFF of the 50, 0.261 vs best 0.047); neither 7, of which 297/511/816 jump from ln q
+     43/27/39 to 2/1/2 and 16/82/96/880 drop (6->27, 6->22, 22->46, 3->15). K = 10 on all 59 (cache/box_rev/
+     critic2_rerank_k10_full.json): 0.533, paired +0.079 [-0.055, +0.212] -> the longer list costs the re-rank a
+     little, as Section 3.8 says. Cost: 2,949 completed, median 2.2 CPU-min, max 2.96 CPU-h, 400 CPU-h total
+     (forecast 260); 1 capped (no answer in that shortlist). Section 3.8 TBDs filled. Box 55845149 self-stopped on
+     PULLED, then DESTROYED; Vast credit left $6.84 (R3 box total ~$4.4). Previous local diffs ->
+     cache/critic2/diffs_k10_preview.jsonl.
+   - [x] CSLS ln q v2 (86def71): mkdir cache/real_bench_lnq2; copy hub_ctx.npz + ranks.npz; out_retry.tar's
          cache/real_bench_lnq2r/full -> cache/real_bench_lnq2/full (check its DONE file);
          LNQ_VERSION=2 python scripts/21_hubness.py eval --work cache/real_bench_lnq2 --emb_dir cache/real_bench
          --out results/real_bench_hub_lnq2.json --table results/real_bench_hub_lnq2_table.md
          CHECK: its none|*|lnq_bkg top-1 == rescore_r1 (same v2 scores, GPU vs CPU torch)
-   - [ ] R2 ablations: results/rescore_r2_no*.json; 22 computes paired diffs vs r2
-   - [ ] R4c: 30 pemb + eval with --ckpt runs/xrdclip_realism/best.pt --emb_dir cache/real_bench_realism
+   - [x] R2 ablations: results/rescore_r2_no*.json; 22 computes paired diffs vs r2
+   - [x] R4c (7e61008): 30 pemb + eval with --ckpt runs/xrdclip_realism/best.pt --emb_dir cache/real_bench_realism
          -> results/model_gap_realism.json; check train.log best epoch / clean val vs the original run
-   - [ ] B out.tar -> cache/critic2/diffs.jsonl; python scripts/29_critic2_rerank.py eval -> results/critic2_rerank.json
-   - [ ] B cod_out.tar -> cod/sticks; touch PULLED + COD_PULLED; destroy B
-   - [ ] R5: 31 truth; 19's _embed_shard over shard_table (orig ckpt; the rev_gpu_box.sh snippet) with
+   - [x] box out.tar -> cache/critic2/diffs.jsonl; python scripts/29_critic2_rerank.py eval -> results/critic2_rerank.json
+   - [x] B cod_out.tar -> cod/sticks; touch PULLED + COD_PULLED; destroy B
+   - [x] R5 (250632d): 31 truth; 19's _embed_shard over shard_table (orig ckpt; the rev_gpu_box.sh snippet) with
          XRD_STICK_DIRS=cod/sticks into cache/real_bench_cod; XRD_STICK_DIRS=cod/sticks
          28 score + eval --tag main --work cache/real_bench_cod --truth <data>/cod/opxrd_truth_cod.json --base ""
          --out results/rescore_main_cod.json
