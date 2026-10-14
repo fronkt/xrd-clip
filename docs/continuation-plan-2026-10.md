@@ -618,3 +618,51 @@ each query's measured range (46 partial-coverage queries). Full library, local C
 classical numbers are robust to these library-fidelity choices; the single-crystal failures are not a
 simulation-fidelity problem. Non-Cu single-crystal patterns (25, mostly synchrotron temperature series) stay at
 top-1 0.04-0.24 under every variant. One-off ablations run on the GPU box (R2 package minus one switch).
+
+R2 ablations (box A, 10-13; paired macro top-1 of "package minus one switch" against the full package): only two
+clear zero. Without K-alpha2, cosine (any form) -0.03 [-0.07, -0.01], so the K-alpha2 nuisance is what lifts cosine;
+without the measured-range mask, WCC l = 2 deg (any form) +0.05 [+0.02, +0.09], so the mask costs it. B and LP are
+null everywhere. Against the main benchmark (ln q v2; 28's own paired_vs_base is against v1): -0.04 to +0.04, only
+cosine (any form) +0.04 [+0.01, +0.08] resolved. Manuscript Section 4.6 + Table 2, ESI S12.
+
+### 13c. R3 critic2 VC-GPWDF re-rank (2026-10-13/14)
+
+critic2 1.4.155 COMPAREVC GLOBAL QUICK ALPHA 1 on the ln q v2 top 50 of the 59 sc patterns (2,950 comparisons,
+4-h cap, failures = DIFF 1). K: declared 100; ln q v2 recall is 36/59 at both 50 and 100, so K = 50 (only
+competitors dropped). A two-point cost extrapolation first cut K to 10 (lesson 10-13); the K = 10 run measured 76
+CPU-h for 589 comparisons, so K went back to 50 on the same rented 256-core box (Vast 55845149, ~$4.4, destroyed).
+Cost: median 2.2 CPU-min, max 2.96 CPU-h, 400 CPU-h; 1 capped (pattern_730/GOGZOU, answer not in its list).
+results/critic2_rerank.json:
+
+| sc set (30 compounds) | critic2 re-rank | ln q v2 | paired |
+|---|---|---|---|
+| macro top-1 | 0.50 [0.32, 0.67] | 0.45 [0.28, 0.63] | +0.05 [-0.11, +0.20] |
+| macro top-10 | 0.59 | 0.61 | -0.02 [-0.15, +0.09] |
+| per pattern top-1 | 26/59 | 25/59 | |
+| cells differ > 1 % (25) | 4 | 2 | |
+| cells within 1 % (34) | 22 | 23 | |
+
+Gains 4 (ln q ranks 2, 3, 7, 9 -> 1), losses 3 (-> 2, 22, 50; for pattern_1006 ln q's correct first choice gets
+the worst DIFF of its 50). K = 10 on all 59: 0.533, paired +0.08 [-0.05, +0.21]. **Prediction partly right:** it
+lifts the > 1 % group (2 -> 4 of 25) but is capped by recall (23/59 answers outside the list); no resolved gain.
+
+### 13d. R4 learned side (2026-10-12/13)
+
+R4a effect ladder (results/model_gap.json), compound-weighted top-1 / median rank, any same form: own clean
+0.27 / 5; single effects 0.18-0.27 (K-alpha2 0.18 / 33 and background 0.24 / 130 the costly ones); all six 0.15 /
+176; + B 0.05 / 744; + B + jitter 0.04 / 746; measured 0.02 / 5,988. Fixed-grid Pearson's ladder ends at 0.83 =
+its measured 0.83. R4b pattern-to-pattern (measured vs clean library patterns in the pattern space): 0.13 / 1,622.
+R4c realism retrain (design + prediction fixed in 3b77818 before training; best val 0.911): own entries all six
++ B 0.05 -> 0.23 (median 744 -> 34), K-alpha2 alone 0.18 -> 0.11; measured 0.02 [0, 0.06] vs 0.02 [0, 0.04],
+sc 0.00, median 5,988 -> 2,981; p2p 0.21 / 267. **Prediction wrong** (per-pattern measured top-1 0.05-0.20
+predicted; 0.016), so by the pre-declared branch the remaining gap is not the modelled effects. Manuscript
+Section 4.5 + Fig. 6, ESI S11.
+
+### 13e. R5 open replica on the COD (2026-10-13)
+
+COD library 108,716 selected + 854 query candidates = 109,570, 108,902 simulated; truth 191/196 identified (189
+as in the CSD + 2 COD-only); 2,670 other-compound candidates kept as library entries, 23 same-formula unknowns
+set aside. 190 patterns scored (results/rescore_main_cod.json). Any same form (125 compounds): classical
+0.77-0.90 (ln q 0.90 [0.85, 0.95]), model 0.02 [0, 0.04]. Single crystal: 35 patterns but 9 compounds; classical
+0.26-0.58, model 0. **Prediction held** (same ordering, classical >> model). Manuscript Section 4.7 + Table 2,
+ESI S13. Draft v2 (all five folded in): commits 2803c54, 7a4c833 and the ESI commit; verify_claims 169/169.
