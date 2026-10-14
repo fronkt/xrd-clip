@@ -384,6 +384,16 @@ C. Paper: paper_numbers.json -> manuscript/ESI/figs -> verify_claims -> internal
            local). Report the re-rank with refitted pressure-series patterns as a sensitivity. PREDICTION: the
            control improves (own entry first for a majority), the re-rank's sc top-1 rises by <= 0.03 because
            most pressure-series answers are outside the shortlist (injection: 1 of 17 first with old fits).
+           TUNING PROTOCOL (fixed 10-14 before any tuning run, after looking at 3 fits): the 20-knot David-Sivia
+           background oscillates by +-30,000 counts on pattern_213 (MEHNIY 8.9 GPa), whose cut pattern starts
+           with zero-intensity points; critic2's only fit settings are XRPD BACKGROUND nknot (default 20) and
+           XRPD FIT ymax_peakdetect (default: median intensity) and nadj (1 or 2, default 2). Every setting
+           first drops leading/trailing zero-intensity points. Grid: nknot in {10, 20, 40} x ymax in {default,
+           0.02, 0.05 x max of the background-subtracted profile}; nadj 2. Criterion: the lowest median DIFF of
+           the 22 patterns against their OWN powder-study entry (no sc answer, no shortlist used); ties -> the
+           setting closest to the default. The chosen setting refits all 22; then their full shortlists (1,100
+           comparisons, for the control and injection ranks too), controls and injections are rerun with it
+           (box session together with X2). Code: scripts/35_critic2_dac.py.
    - [~] C7 build.sh -> docx (builds 10-14, after the referee fixes); plan Section 13c-f readouts; check in with Frank
 After C (not R1-R5): R6 decisions, Zenodo deposit (code + open data; DD's data reviewer needs a DOI), cover
 letter, TOC graphic (at revision), Frank submits.
