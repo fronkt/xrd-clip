@@ -256,6 +256,12 @@ B. Box session (manual mode, one CSD-derived upload): R4c training; ln q CSLS re
      CIFs, 59 peak lists: 887 landed locally 21:38, RMS 11.06; 587 comparisons). Launch = scratchpad launch_c2k10.sh <id> (upload, verify,
      launch, pull loop -> cache/box_rev/pullC/). Needs MANUAL mode (CSD CIFs). Offer seen: 51326865, 128-core
      EPYC 7B12, $0.31/h; onstart guard: stop if not launched in 2 h, hard stop at 24 h.
+     LAUNCHED 10-13 21:42 local (01:42Z), manual mode: 51326865 was gone -> offer 49717811 = instance 55845149
+     (EPYC 7W83, 256-core cgroup, 251 GB, Taiwan, $0.681/h), root@211.21.106.81 -p 46075. Hard stop lowered to
+     14 h (credit $11.22 lasts ~16 h). Box: critic2 1.4.155, 0 missing fits, 254 critic2 processes. Pull loop =
+     background launch_c2k10.sh (log cache/box_rev/launch_c2k10.log, polls every 10 min) -> cache/box_rev/pullC/
+     out.tar; the box self-stops on PULLED. AFTER: back up cache/critic2/diffs.jsonl, take the box's (a
+     superset), 29 eval --k 10 -> results/critic2_rerank.json, destroy 55845149.
    - [ ] CSLS ln q v2: mkdir cache/real_bench_lnq2; copy hub_ctx.npz + ranks.npz; out_retry.tar's
          cache/real_bench_lnq2r/full -> cache/real_bench_lnq2/full (check its DONE file);
          LNQ_VERSION=2 python scripts/21_hubness.py eval --work cache/real_bench_lnq2 --emb_dir cache/real_bench
