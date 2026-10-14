@@ -262,6 +262,10 @@ B. Box session (manual mode, one CSD-derived upload): R4c training; ln q CSLS re
      background launch_c2k10.sh (log cache/box_rev/launch_c2k10.log, polls every 10 min) -> cache/box_rev/pullC/
      out.tar; the box self-stops on PULLED. AFTER: back up cache/critic2/diffs.jsonl, take the box's (a
      superset), 29 eval --k 10 -> results/critic2_rerank.json, destroy 55845149.
+     22:05 R4c DONE (7e61008): results/model_gap_realism.json. Measured: std macro top-1 0.024 [0, 0.057] vs
+     original 0.016 [0, 0.041]; sc 0 vs 0. Own-pattern nuisances: own_all_dw std 0.231 vs 0.053, sc 0.294 vs 0;
+     own_clean sc 0.317 vs 0.150; own_ka2 std 0.109 vs 0.178 (worse). Reading: the retrain fixes the simulated
+     nuisances it saw (B damping most) and leaves measured patterns at ~0 -> the gap is not the modelled ones.
    - [ ] CSLS ln q v2: mkdir cache/real_bench_lnq2; copy hub_ctx.npz + ranks.npz; out_retry.tar's
          cache/real_bench_lnq2r/full -> cache/real_bench_lnq2/full (check its DONE file);
          LNQ_VERSION=2 python scripts/21_hubness.py eval --work cache/real_bench_lnq2 --emb_dir cache/real_bench
