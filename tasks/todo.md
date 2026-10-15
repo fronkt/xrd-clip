@@ -452,6 +452,15 @@ C. Paper: paper_numbers.json -> manuscript/ESI/figs -> verify_claims -> internal
          form III (2021) needs the form; albuterol sulfate (2014 data report) has no supplement (PDF route).
          Waiting on Frank: OK to download the form template + the 18 public CIFs; then reply draft to Nicole
          narrowing the request to donepezil (filler: scratchpad fill_pdj_form.py).
+         10-15 OUTCOME: ICDD declined raw instrument data (Executive Director), but sent the deposited donepezil
+         CIFs; DONEPEZIL-Rietveld-Final.cif HAS the measured profile (_pd_meas_counts_total, 1500 pts, 5-34.98 deg,
+         Cu Ka1 1.54059, Stoe StadiP capillary) -> cache/icdd_donepezil/ (gitignored; do not redistribute).
+         Citalopram (EZIQEL): no profile anywhere (supp has sup001 + sup003 only; sup002 returns 500) -> out.
+         Albuterol sulfate (SALBUT02): no supplement -> out. USABLE SET = 19 measured patterns, 18 compounds
+         (trandolapril IQISAE has 2): 14 at 11-BM ~0.414 A, curcumin 0.6888 A, saxagliptin (wavelength not in
+         the CIF), 3 lab Cu Ka1. Caveat: most refcodes are the powder entries refined against these same
+         patterns, so an honest test must also score with that entry excluded. Thank-you reply = Gmail DRAFT
+         (r1376547760379262224), unsent. NEXT: Frank decides whether to add the set (ESI-only vs not at all).
    - [~] C7 build.sh -> docx (builds 10-14, after the referee fixes); plan Section 13c-f readouts; check in with Frank
 After C (not R1-R5): R6 decisions, Zenodo deposit (code + open data; DD's data reviewer needs a DOI), cover
 letter, TOC graphic (at revision), Frank submits.
