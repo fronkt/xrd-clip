@@ -149,6 +149,16 @@ AMB_CLS = ["pearson", "cos_zs", "wcc_1", "wcc_2", "lnq"]                 # keys 
 AMB_TOL = ["cos_zs", "wcc_1", "wcc_2", "lnq", "critic2"]
 INJ, CTL, PK = C2["injected_summary"], C2["control_summary"], C2["n_peaks_range"]
 X1 = REV["x1_binavg"]["paired_vs_main"]                                  # bin-averaged Cu grid (Frank's X1)
+X2, X3 = EX["x2_zero_offset"], EX["x3_dac_refit"]                       # re-rank variants (Frank's X2, X3)
+X2R = json.load(open("results/critic2_rerank_zs.json"))["rank_by_pattern"]
+X2_MOVES = [X2R[p]["critic2"] - c2r["rank_by_pattern"][p]["critic2"] for p in X2R
+            if X2R[p]["critic2"] != c2r["rank_by_pattern"][p]["critic2"]]
+X3C = {r["id"]: r for r in X3["control"]}
+X3_IN = [r for r in X3["control"] if r["old_rerank_rank"] is not None]  # refitted patterns whose shortlist holds the answer
+X3_PK_OLD, X3_PK_NEW = [r["old_n_peaks"] for r in X3["control"]], list(X3["n_peaks"].values())
+PS_OTHER = [r for r in C2["per_pattern"] if r["pressure_series"] and r["id"] not in X3C]
+X_NO_CHANGE = all(not v["gains"] and not v["losses"] and v["paired_minus_main"]["top1"]["diff"] == 0
+                  and v["paired_minus_main"]["top1"]["ci"] == [0.0, 0.0] for v in (X2, X3))
 
 
 def mci(v):           # a compound-weighted value with its CI
@@ -395,6 +405,29 @@ CLAIMS = [
     f"Without the pressure-series patterns, the re-rank reaches {mci(AS['critic2']['macro_top1'])} against "
     f"{mci(AS['lnq']['macro_top1'])} for\nthe ln q scan (paired {sgn(AS['paired_critic2_minus_lnq']['diff'])} "
     f"{ci(AS['paired_critic2_minus_lnq']['ci'])})",
+    # ---- 3.8 + 4.2: the two re-rank variants (X2 answer-blind zero offset, X3 refits of zero-padded patterns)
+    need(all(next(r for r in C2["per_pattern"] if r["id"] == i)["pressure_series"] for i in X3C),
+         f"new fits, with the default settings, of the {len(X3C)} patterns whose measured range begins with\n"
+         f"zero-intensity points, after dropping those points"),
+    need(X_NO_CHANGE, "Neither variant of Section 3.8 changes a first place"),
+    f"The answer-blind zero offset (median {X2['delta']['median_abs_lab_cu_deg']:.2f}° on the {X2['delta']['n_lab_cu']}\n"
+    f"laboratory Cu patterns) gives a paired difference of {sgn(X2['paired_minus_main']['top1']['diff'])} "
+    f"{ci(X2['paired_minus_main']['top1']['ci'])} with the re-rank above",
+    need(all(m > 0 for m in X2_MOVES) and len(X2_MOVES) == X2["n_rank_changed"],
+         f"{len(X2_MOVES)} of the\n{C2['n_answer_in_shortlist']} answers in a shortlist move down"),
+    f"The {len(X3C)} patterns whose measured range begins with zero-intensity points\nare all pressure-series patterns; "
+    f"without those points, their fits find {min(X3_PK_NEW)}–{max(X3_PK_NEW)} peaks instead of "
+    f"{min(X3_PK_OLD)}–{max(X3_PK_OLD)}, and the\nown entry ranks first for {X3['control_rank1']} of them instead of "
+    f"{X3['control_rank1_old']}, and the injected answer for {X3['injected_rank1']} of {len(X3['injected'])} instead of "
+    f"{X3['injected_rank1_old']}",
+    need(len(X3_IN) == 1 and X3_IN[0]["rerank_rank"] > 1,
+         f"Top-1\nstill does not change (paired {sgn(X3['paired_minus_main']['top1']['diff'])} "
+         f"{ci(X3['paired_minus_main']['top1']['ci'])}), because only one of the ten shortlists holds the answer,\n"
+         f"which rises from rank {X3_IN[0]['old_rerank_rank']} to {X3_IN[0]['rerank_rank']}"),
+    need(not any((r["control"] or {}).get("rank_in_shortlist") == 1 for r in PS_OTHER),
+         f"The other {len(PS_OTHER)} pressure-series patterns begin without such points; their fits\n"
+         f"find {min(r['n_peaks'] for r in PS_OTHER)}–{max(r['n_peaks'] for r in PS_OTHER)} peaks and rank the own "
+         f"entry first for none"),
     f"declared primary before it was scored; it lowers the single-crystal top-1 from "
     f"{f2(EX['lnq_v1']['sc']['v1']['macro_top1']['value'])} to {f2(lq_sc['macro_top1'])}",
     f"| VC-GPWDF re-rank of the ln q top {C2['k']} | {f2(c2t1['value'])} {ci(c2t1['ci'])} | {f2(c2t10['value'])} | "
@@ -478,6 +511,10 @@ CLAIMS = [
     f"{C2['n_comparisons']:,} comparisons of {C2['n_patterns']} shortlists",
     f"the open replica's single-crystal set has only\n{cod_m('sc', 'lnq_bkg')['n_compounds']} compounds",
     need(c2p["top1"]["ci"][0] < 0, f"and {f2(c2t1['value'])} for a\nvariable-cell re-rank, which is not resolved from the ln q scan it re-ranks"),
+    need(X_NO_CHANGE and len(X3_IN) == 1,
+         f"better fits for {len(X3C)} of them change no first place, because {len(X3C) - len(X3_IN)} of their\n"
+         f"{len(X3C)} answers are not in the shortlist"),
+    need(X_NO_CHANGE, "uses no zero-offset correction (an\nanswer-blind one changes no first place)"),
 ]
 
 

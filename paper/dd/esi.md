@@ -428,6 +428,39 @@ Positive control: own entry ranked first for 29 of 36 ambient-pressure and 1 of 
 
 Patterns whose cells differ by more than 1 % (25): pressure series 16; recorded temperatures more than 50 K apart (not pressure series) 7; supercell description 1; none of these 1 (pattern_77).
 
+### Sensitivity of the re-rank to the zero offset and to the peak fits
+
+Zero offset: each single-crystal pattern gets an answer-blind zero offset δ, the native shift (±0.5°, steps of 0.02°, both scaled by λ/λ(Cu)) that maximises the cosine between the background-subtracted measured pattern on the Cu grid and the clean rendering of its ln q top-1 entry, which is never the answer. The fitted peak positions are shifted by −δ and the 36 shortlists that hold the answer are rerun (1,800 comparisons; a shortlist without the answer stays a miss). Median |δ| 0.07° for the 34 laboratory Cu patterns and 0.14° (Cu-equivalent) over all 59; 8 offsets lie at the edge of the scan.
+
+Peak fits: 10 patterns, all from pressure series, start their measured range with a run of zero-intensity points, which can drive the 20-knot background into large oscillations. Those points are dropped and the patterns refitted with critic2's default settings; their shortlists (500 comparisons), own-entry controls and answer injections are rerun. A grid search over the fit settings, judged by the own-entry DIFF, was set aside before it ran: that criterion rewards sparse peak lists and would have picked degenerate fits.
+
+Rerun comparisons past the 4-hour limit, counted as maximally dissimilar: pattern_511 against POSHIR (zero offsets, not an answer); pattern_730 against GOGZOU (refits, not an answer).
+
+**Table S18c** The re-rank with answer-blind zero offsets and with the refitted pressure-series patterns, against the main re-rank (paired differences over 30 compounds).
+
+| re-rank | comparisons rerun | macro top-1 | − main, top-1 | macro top-10 | − main, top-10 | first places | patterns whose rank changes |
+|---|---|---|---|---|---|---|---|
+| main |  | 0.53 [0.37, 0.70] |  | 0.62 [0.45, 0.79] |  | 27 |  |
+| zero offsets | 1,800 | 0.53 [0.37, 0.70] | 0.00 [0.00, 0.00] | 0.62 [0.45, 0.79] | 0.00 [0.00, 0.00] | 27 | 4 |
+| refitted pressure series | 500 | 0.53 [0.37, 0.70] | 0.00 [0.00, 0.00] | 0.62 [0.46, 0.79] | 0.00 [0.00, +0.01] | 27 | 1 |
+
+**Table S18d** The refitted patterns, before → after. Ranks as in Table S18 ('–': the answer is not in the shortlist; 'n/a': no injection, the answer is in the shortlist).
+
+| opXRD pattern | CSD family | own entry | peaks | own entry DIFF | own entry, rank among wrong entries | injected answer, rank | rank after the re-rank |
+|---|---|---|---|---|---|---|---|
+| pattern_730 | EPIVEF | EPIVEF02 | 24 → 43 | 0.427 → 0.022 | 50 → 1 | 50 → 1 | – → – |
+| pattern_921 | EPIVEF | EPIVEF01 | 29 → 46 | 0.177 → 0.019 | 1 → 1 | 1 → 1 | – → – |
+| pattern_760 | LILRIJ | LILRIJ01 | 11 → 40 | 0.256 → 0.053 | 32 → 10 | 40 → 6 | – → – |
+| pattern_213 | MEHNIY | MEHNIY07 | 11 → 54 | 0.227 → 0.044 | 49 → 1 | 37 → 15 | – → – |
+| pattern_594 | MEHNIY | MEHNIY01 | 18 → 59 | 0.368 → 0.013 | 21 → 2 | n/a | 22 → 2 |
+| pattern_623 | MEHNIY | MEHNIY04 | 12 → 51 | 0.509 → 0.015 | 11 → 2 | 12 → 3 | – → – |
+| pattern_875 | MEHNIY | MEHNIY05 | 11 → 50 | 0.354 → 0.016 | 14 → 1 | 25 → 1 | – → – |
+| pattern_891 | MEHNIY | MEHNIY06 | 13 → 60 | 0.488 → 0.022 | 10 → 1 | 10 → 1 | – → – |
+| pattern_978 | MEHNIY | MEHNIY03 | 15 → 52 | 0.495 → 0.011 | 17 → 1 | 29 → 4 | – → – |
+| pattern_1010 | MEHNIY | MEHNIY02 | 12 → 51 | 0.290 → 0.010 | 2 → 1 | 2 → 1 | – → – |
+
+Own entry ranked first: 1 → 7 of 10; median own-entry DIFF 0.361 → 0.018. Injected answer ranked first: 1 → 5 of 9.
+
 ## S11 Effect ladder
 
 Each pattern's own library entry, rendered with effects estimated from its measurement: its 2θ coverage (46 patterns do not cover 5–50°), its peak width (median FWHM 0.15°), Kα2 for the 120 Cu patterns, its own background followed by the background subtraction, noise at its level and its best-aligning zero offset (median |offset| 0.02°); B = 4.45 Å². Scored with the measured pattern's answer sets; 'p2p' matches the variant against the clean library patterns in the model's pattern space.

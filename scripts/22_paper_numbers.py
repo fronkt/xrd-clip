@@ -588,20 +588,27 @@ def main() -> int:
     # X2 answer-blind zero offsets (36 answer-holding shortlists), X3 zero-trimmed default refits of the 10
     # zero-padded pressure-series patterns (shortlists, own-entry control, answer injection)
     main_r = {pid: v["critic2"] for pid, v in c2["rank_by_pattern"].items()}
+    truth_c2 = {pid: set(p["truth"]) for pid, p in json.load(open("cache/critic2/plan.json")).items()}
     for tag, suf in (("x2_zero_offset", "_zs"), ("x3_dac_refit", "_x3")):
         if not os.path.exists(f"results/critic2_rerank{suf}.json"):
             continue
         v_ = json.load(open(f"results/critic2_rerank{suf}.json"))
         var_r = {pid: x["critic2"] for pid, x in v_["rank_by_pattern"].items()}
         changed = v_["meta"]["patterns_changed_rank"]
-        # unique pairs: the pattern_594 repair rerun (critic2_x23_fix594.sh) is appended, and later rows win
-        rerun = {(r_["pid"], r_["cand"]) for r_ in map(json.loads, open(f"cache/critic2/diffs{suf}.jsonl"))}
+        # unique pairs: the pattern_594 repair rerun (critic2_x23_fix594.sh) is appended, and later rows win; the
+        # eval's meta counts every comparison the variant's re-rank uses (main rows included), these only the rerun
+        rerun = {(r_["pid"], r_["cand"]): r_ for r_ in map(json.loads, open(f"cache/critic2/diffs{suf}.jsonl"))}
+        c2mod = import_module("29_critic2_rerank")
         ex[tag] = {"top1": rnd(v_["critic2_vcgpwdf"]["top1"]), "top10": rnd(v_["critic2_vcgpwdf"]["top10"]),
                    "paired_minus_main": rnd(v_["paired_variant_minus_main"]),
                    "hits": sum(r_ == 0 for r_ in var_r.values()), "hits_main": sum(r_ == 0 for r_ in main_r.values()),
                    "gains": sorted(p for p in changed if var_r[p] == 0), "losses": sorted(p for p in changed if main_r[p] == 0),
                    "n_rank_changed": len(changed), "n_comparisons_rerun": len(rerun),
-                   "n_failed": v_["meta"]["n_failed_comparisons"], "cpu_h_total": rd(v_["meta"]["cpu_h_total"])}
+                   "n_failed": v_["meta"]["n_failed_comparisons"],
+                   # [pattern, entry, is a correct answer] of each rerun comparison past the 4-h limit
+                   "failed_rerun": sorted([r_["pid"], r_["cand"], r_["cand"] in truth_c2[r_["pid"]]]
+                                          for r_ in rerun.values() if r_["diff"] is None),
+                   "cpu_h_rerun": rd(sum(c2mod.cpu_seconds(r_["cpu"]) for r_ in rerun.values() if r_["cpu"]) / 3600)}
     if "x2_zero_offset" in ex:
         zo = json.load(open("results/critic2_zero_offsets.json"))
         lab = [abs(z["delta_native_deg"]) for z in zo.values() if abs(z["wavelength"] - 1.5418) < 0.01]

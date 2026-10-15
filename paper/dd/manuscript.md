@@ -383,7 +383,10 @@ CPU-hours for the largest cells; one of the 2,950 comparisons reached the limit,
 not hold the answer, so it changes no result. Two checks were added after an internal review (ESI†): a
 positive control, in which each pattern is compared with its own powder-study entry, the structure refined
 against that very pattern; and an injection test, in which each answer missing from a shortlist is compared
-with its pattern to see where it would rank.
+with its pattern to see where it would rank. Two variants were then run as sensitivity checks (ESI†): the
+peaks of each pattern shifted by an answer-blind zero offset, the shift that best aligns the pattern with its
+ln q top-1 entry; and new fits, with the default settings, of the 10 patterns whose measured range begins with
+zero-intensity points, after dropping those points.
 
 ## 4. Results
 
@@ -459,6 +462,14 @@ only 1 of the 22 pressure-series patterns (median rank 26), so on those patterns
 information.
 Without the pressure-series patterns, the re-rank reaches 0.64 [0.46, 0.80] against 0.54 [0.34, 0.72] for
 the ln q scan (paired +0.10 [−0.04, 0.26]).
+Neither variant of Section 3.8 changes a first place. The answer-blind zero offset (median 0.07° on the 34
+laboratory Cu patterns) gives a paired difference of 0.00 [0.00, 0.00] with the re-rank above, and 4 of the
+36 answers in a shortlist move down. The 10 patterns whose measured range begins with zero-intensity points
+are all pressure-series patterns; without those points, their fits find 40–60 peaks instead of 11–29, and the
+own entry ranks first for 7 of them instead of 1, and the injected answer for 5 of 9 instead of 1. Top-1
+still does not change (paired 0.00 [0.00, 0.00]), because only one of the ten shortlists holds the answer,
+which rises from rank 22 to 2. The other 12 pressure-series patterns begin without such points; their fits
+find 37–49 peaks and rank the own entry first for none.
 
 **Table 1** Retrieval of 188 measured opXRD patterns from 309,080 simulated CSD entries
 (background-subtracted queries, no hubness correction). Compound-weighted top-1 and top-10, with 95 %
@@ -713,8 +724,9 @@ and measured patterns. For independent single-crystal references, retrieval fail
 determined at another pressure or temperature and the cells differ anisotropically by more than about 1 %.
 The published variable-cell method [@oterodelaroza2024vcgpwdf] gives no resolved gain here, is bounded
 by the shortlist it re-ranks, and in its automated form fits peaks poorly on the high-pressure patterns that
-make up most of the mismatched cells, so this case stays open for classical methods too, and it is where a
-learned method could show its value. For the learned model, the failure is the transfer from simulated to measured patterns,
+make up most of the mismatched cells; better fits for 10 of them change no first place, because 9 of their
+10 answers are not in the shortlist. This case stays open for classical methods too, and it is where a learned method
+could show its value. For the learned model, the failure is the transfer from simulated to measured patterns,
 not the size of the library, and it survives a retrain with the five modelled effects of Section 3.4.
 Full-profile generative models have shown the same sensitivity to how realistic the training patterns are
 [@segal2026xrdiff]. A learned method aimed at that transfer, for example one adapted with measured patterns
@@ -733,7 +745,8 @@ for every temperature, and disordered entries are simulated only approximately. 
 simple background removal and are interpolated onto the Cu grid, which can miss the tops of narrow
 synchrotron peaks, although averaging over each grid step instead changes little (Section 4.6). The zero scans use fixed offset grids (0.02°, and 0.04° for the ln q scan). The effect
 ladder adds Kα2 to every laboratory Cu pattern and does not estimate the intensity jitter. The variable-cell
-re-rank covers a shortlist of 50 with a 4-hour limit per comparison, uses no zero-offset correction, reaches
+re-rank covers a shortlist of 50 with a 4-hour limit per comparison, uses no zero-offset correction (an
+answer-blind one changes no first place), reaches
 only cell differences within ±10 % and ±5°, and fits peaks poorly on the high-pressure synchrotron patterns.
 The correct answers rely on packing similarity, which can count entries as one form across a phase
 transition that preserves the packing, set aside entries that cannot be

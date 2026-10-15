@@ -372,7 +372,12 @@ C. Paper: paper_numbers.json -> manuscript/ESI/figs -> verify_claims -> internal
            more than 0.05 (point estimate) in either answer set, propose to Frank that it become primary (GPU
            rescore of hubness/CSLS/library curves, ~$0.5); otherwise it is a sensitivity check (Section 4.6 +
            ESI). PREDICTION: every change within +-0.02; Cu lab patterns barely move.
-     - [ ] X2 critic2 zero offset (sensitivity). Per sc pattern an ANSWER-BLIND native zero offset: delta =
+     - [x] X2 critic2 zero offset (sensitivity). DONE 10-15 (results/critic2_rerank_zs.json; 1,800 comparisons,
+           198.5 CPU-h; pattern_511 x POSHIR hit the 4-h cap, not an answer): top-1 0.53 [0.37, 0.70], paired vs main
+           0.00 [0.00, 0.00], top-10 0.00; no first place changes; 4 answers move down (16: 28->29, 297: 3->4,
+           82: 23->24, 594: 22->30). PREDICTIONS: lab Cu median |delta| <= 0.03 deg FAILED (0.07; 8 at the scan
+           edge); top-1 within +-0.05, unresolved HELD (0.00). Section 3.8 + 4.2 + Limitations, ESI S18c.
+           Design: Per sc pattern an ANSWER-BLIND native zero offset: delta =
            argmax over native shifts (+-0.5 deg x lambda/lambda_Cu, step 0.02 deg x lambda/lambda_Cu) of the
            cosine between the background-subtracted measured pattern, shifted by -delta and put on the Cu grid,
            and the clean rendering of its ln q top-1 entry (never the answer). fit.peaks positions shifted by
@@ -381,7 +386,14 @@ C. Paper: paper_numbers.json -> manuscript/ESI/figs -> verify_claims -> internal
            pull armed at launch, self-stop + watchdog). Report re-rank top-1/top-10 with paired diffs against
            the unshifted re-rank, and the delta distribution. PREDICTION: lab Cu median |delta| <= 0.03 deg;
            re-rank top-1 moves within +-0.05, unresolved.
-     - [ ] X3 critic2 refits of the 22 pressure-series patterns. Tune XRPD BACKGROUND/FIT settings using ONLY
+     - [x] X3 critic2 refits (amended: the 10 zero-padded pressure-series patterns). DONE 10-15
+           (results/critic2_rerank_x3.json; 500 comparisons, 82.9 CPU-h; 730 x GOGZOU hit the cap again, not an
+           answer): peaks 11-29 -> 40-60; own entry first 1 -> 7 of 10 (median own DIFF 0.361 -> 0.018);
+           injected answer first 1 -> 5 of 9; top-1 paired 0.00 [0.00, 0.00] (only 594's shortlist holds the
+           answer: rank 22 -> 2), top-10 +0.005 [0.00, +0.01]. The other 12 pressure-series patterns (NAPHTA,
+           HOJQII) have no zero points, 37-49 peaks, own first 0 of 12. PREDICTIONS: control improves for a
+           majority HELD (7/10); sc top-1 rises by <= 0.03 HELD (0.00). Section 3.8 + 4.2 + Discussion, ESI S18d.
+           Original design: Tune XRPD BACKGROUND/FIT settings using ONLY
            the own-entry positive control as the criterion (never the sc answers); fix one setting for all 22;
            refit; rerun their answer-holding shortlists, the control and the injection (~300 comparisons,
            local). Report the re-rank with refitted pressure-series patterns as a sensitivity. PREDICTION: the
@@ -405,7 +417,7 @@ C. Paper: paper_numbers.json -> manuscript/ESI/figs -> verify_claims -> internal
            series (EPIVEF 2, LILRIJ 1, MEHNIY 7; NAPHTA, HOJQII and every ambient pattern have none). X3 is now:
            drop the zero-intensity points and refit with critic2's defaults, for every pattern that has them
            (these 10); no grid. Rerun their 10 x 50 shortlist comparisons, controls and injections.
-     - [~] X2 + X3 BOX RUN (10-14, Vast 55988256, EPYC 7B12 256 thr, $0.52/h; scripts/box/critic2_x23_box.sh): 2,297 of
+     - [x] X2 + X3 BOX RUN (10-14, Vast 55988256, EPYC 7B12 256 thr, $0.52/h; scripts/box/critic2_x23_box.sh): 2,297 of
            2,300 done by 19:41 (3 slow ones left: GOGZOU, POSHIR, RUWVUB; 4-h cap). BUG found in the partial pull:
            pattern_594 is in BOTH sets (X2's 36 answer-holding shortlists and X3's 10 refits), and compare() named its
            files cmp_<cand>.cri/.cro per pattern dir, so the two concurrent runs read and deleted each other's files
@@ -417,6 +429,17 @@ C. Paper: paper_numbers.json -> manuscript/ESI/figs -> verify_claims -> internal
            before touching PULLED (the box self-stops on it). The local pull loop was killed by Claude Code's
            low-memory reaper at ~19:45 (not a failure of the loop).
            Dry runs on the partial pull (eval, 22, 25 ESI S18c/S18d) all pass; no numbers taken from them.
+           10-15 02:40: the launcher's bash survived the reaper; it pulled out.tar at 21:22 (md5 ok; X2 1,800, X3 500,
+           control 10, inject 9 rows) and touched PULLED -> box STOPPED. out.tar was built by the box script at
+           RUN_DONE and does NOT hold diffs_zs594 / diffs_x3594: the repair rows sit on the stopped box's disk
+           (fix logs show 41/50 per variant within 2-4 min; main 594's slowest comparison was 24 min, so FIX_DONE
+           is likely). Pulled rows now in cache/critic2/ (unpacked copy in cache/box_rev/pullX/x/). New X2 failure:
+           pattern_511 POSHIR hit the 4-h cap. DO NOT destroy 55988256 until the 594 rows are recovered (relay +
+           vastai copy, lesson #20) or rerun locally.
+           10-15 RECOVERED (Frank: relay copy): relay 56056859 (GTX 1070 KR, $0.05/h, 3-h self-stop),
+           vastai copy of out_fix.tar (FIX_DONE 00:28Z, md5 ok, 50 + 50 rows all ok) -> appended to
+           diffs_zs / diffs_x3. Every collided 594 row that was not empty equals its repair (48/48 X2,
+           27/27 X3): the collision only deleted files. Relay + 55988256 destroyed; no instances; credit $4.33.
    - [ ] C9 Kaduk / ICDD raw data (Tier C; NOT part of draft v2 — a possible external set). Nicole (pdj@icdd.com)
          replied 10-14: journal supplemental raw data need Executive Director approval + one "PDJ Supplemental
          Data Request" form per reference; PDF-database deposits are a separate route (icdd.com/pdfdld, verified

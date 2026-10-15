@@ -108,3 +108,6 @@ paper/*.synctex.gz
 !/results/sc_conditions.json
 !/results/critic2_zero_offsets.json
 !/results/rescore_binavg.json
+# X2 / X3 re-rank variants (10-15): metrics + per-pattern ranks, like critic2_rerank.json; read by verify_claims
+!/results/critic2_rerank_zs.json
+!/results/critic2_rerank_x3.json

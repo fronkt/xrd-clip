@@ -687,3 +687,22 @@ reproduce", one seed / clean-val checkpoint caveats. (6) COD sc set = 20 ZZZUWK 
 + 8 NAPHTA pressure + 7 singletons: cannot test the CSD sc result; the replica now claims the any-same-form result
 only. Open for Frank: headline sc set (pre-declared 59 kept primary; ambient split secondary), further compute
 (DAC peak refits, zero-offset sensitivity, bin-averaged Cu-grid conversion for all scores).
+
+### 13g. Frank's extra checks X1-X3 (2026-10-14/15; designs + predictions in tasks/todo.md C8, fixed before any number)
+
+Frank 10-14: keep all 59 sc patterns as the headline; run all three checks. All three are sensitivity checks; none
+changes a headline number.
+- X1 bin-averaged Cu grid: classical macro top-1 moves 0.00 to +0.03 (one first place at most), model -0.004;
+  below the pre-declared 0.05 rule (Section 4.6, ESI S21b). Prediction (+-0.02) held except sc WCC 2 deg (+0.03).
+- X2 answer-blind zero offset for the critic2 re-rank (36 answer-holding shortlists, 1,800 comparisons): paired top-1
+  0.00 [0.00, 0.00], no first place changes, 4 answers move down. Predicted lab-Cu median |delta| <= 0.03 deg FAILED
+  (0.07 deg); predicted top-1 change within +-0.05 HELD.
+- X3 (amended before the grid run) default-setting refits of the 10 pressure-series patterns that begin with
+  zero-intensity points: peaks 11-29 -> 40-60, own entry first 1 -> 7 of 10, injected answer first 1 -> 5 of 9, but
+  paired top-1 0.00 [0.00, 0.00] because only one of the ten shortlists holds the answer (rank 22 -> 2). So the DAC
+  "fit failure" of 13c was mostly zero padding for these 10; the shortlist, not the fit, now bounds them. The other 12
+  pressure-series patterns (NAPHTA, HOJQII) have no padding and still fail the control (0 of 12). Both predictions
+  (control improves for a majority; top-1 rises <= 0.03) HELD.
+- Run note: X2 and X3 ran side by side and collided on pattern_594's work files (lessons.md 10-14); its 100 pairs
+  were rerun and recovered from the stopped box through a relay. Manuscript Sections 3.8, 4.2, Discussion and
+  Limitations, ESI S18c/S18d; verify 196/196.

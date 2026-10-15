@@ -159,6 +159,9 @@ def revision_sections() -> list:
               f"({x3['n_comparisons_rerun']:,} comparisons), own-entry controls and answer injections are rerun. A grid search "
               "over the fit settings, judged by the own-entry DIFF, was set aside before it ran: that criterion rewards sparse "
               "peak lists and would have picked degenerate fits.", "",
+              "Rerun comparisons past the 4-hour limit, counted as maximally dissimilar: " +
+              "; ".join(f"{p} against {c} ({nm_}{', a correct answer' if is_t else ', not an answer'})"
+                        for nm_, v in (("zero offsets", x2), ("refits", x3)) for p, c, is_t in v["failed_rerun"]) + ".", "",
               "**Table S18c** The re-rank with answer-blind zero offsets and with the refitted pressure-series patterns, against "
               f"the main re-rank (paired differences over {x2['top1']['n_compounds']} compounds).", ""]
         L += table(["re-rank", "comparisons rerun", "macro top-1", "− main, top-1", "macro top-10", "− main, top-10",
