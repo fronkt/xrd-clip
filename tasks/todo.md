@@ -461,6 +461,29 @@ C. Paper: paper_numbers.json -> manuscript/ESI/figs -> verify_claims -> internal
          the CIF), 3 lab Cu Ka1. Caveat: most refcodes are the powder entries refined against these same
          patterns, so an honest test must also score with that entry excluded. Thank-you reply = Gmail DRAFT
          (r1376547760379262224), unsent. NEXT: Frank decides whether to add the set (ESI-only vs not at all).
+   - [ ] C10 Kaduk external set (Frank 10-17: "go ahead", ESI-only). DESIGN FIXED HERE BEFORE ANY SCORE (commit first).
+         Correction to C9: saxagliptin's wavelength IS in its CIF (0.413676 A, in a _diffrn_radiation_wavelength loop),
+         so all 19 patterns are usable: 15 at 11-BM (~0.414 A), curcumin 0.6888 A, 3 lab Cu Ka1 (donepezil, 2 x
+         trandolapril), 18 compounds. Raw profiles stay in cache/ and the gitignored data dir (never committed).
+         Queries: observed intensity (_pd_meas_intensity_total / _pd_meas_counts_total) vs the measured 2theta
+           (_pd_meas_2theta_scan, else min/max/inc), unchanged otherwise; the rest of the pipeline exactly as the
+           main set: to_cu_grid "interp", bkg variant, scripts/28 config `main` (ln q v2, no R2 switches), the same
+           309,080-entry library and checkpoint, hybrids K = 100 / 1000. No tuning on these patterns.
+         Truth (scripts/37 truth, CCDC interpreter, script 18 rules): anchor = the paper's refcode (kaduk_pdj_refs.json);
+           reduced-cell search on the anchor's cell + element filter, plus the anchor's stem family; PackingSimilarity
+           15-molecule shell, strict tier (lenient only if the anchor fails against itself); 15/15 = same form,
+           < 15 = other form, no result = unknown (ignored). Entries outside the 309,080 library are dropped, never
+           simulated (library stays identical to the main set); the count is reported.
+           std = any same-form entry (includes the anchor, which was refined against this very pattern: an upper bound,
+           not a test); sc = powder-study entries ignored (the anchor removed) -> the honest test; n_sc = compounds
+           with an independent single-crystal same-form entry in the library.
+         Metrics: macro top-1 / top-10 by compound with compound bootstrap CIs, per-pattern top-1, median rank; no
+           paired test against the main set (different queries).
+         Predictions (before any number): std classical macro top-1 >= 0.8 (best method), model <= 0.1; sc classical
+           below its std value, model <= 0.1; n_sc small (< 10 compounds).
+         Decision rule: ESI section only; no headline number changes whatever happens. If the model's macro top-1 is
+           >= the best classical method on either truth, or the best classical std top-1 is < 0.5, that contradicts
+           the main result -> stop and show Frank before writing it in (then Discussion, not only ESI).
    - [~] C7 build.sh -> docx (builds 10-14, after the referee fixes); plan Section 13c-f readouts; check in with Frank
 After C (not R1-R5): R6 decisions, Zenodo deposit (code + open data; DD's data reviewer needs a DOI), cover
 letter, TOC graphic (at revision), Frank submits.
