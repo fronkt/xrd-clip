@@ -484,6 +484,16 @@ C. Paper: paper_numbers.json -> manuscript/ESI/figs -> verify_claims -> internal
          Decision rule: ESI section only; no headline number changes whatever happens. If the model's macro top-1 is
            >= the best classical method on either truth, or the best classical std top-1 is < 0.5, that contradicts
            the main result -> stop and show Frank before writing it in (then Discussion, not only ESI).
+         10-17 DONE (local CPU, 583 s, $0). Truth (scripts/37 truth): every anchor is a powder study; sc compounds in the
+           library = 3 (curcumin BINMEQ02, tramadol BUFPAV, paliperidone palmitate NOKFUR01); 8 sc same-form entries lie
+           outside the library (BINMEQ/01/03, ESIHOH, HAQQUN, HUCHEU, YAGRIJ/02), dropped as declared.
+           Macro top-1 (results/kaduk_main.json): std classical 0.94-1.00 (Pearson, cos, WCC-2 1.00; ln q, WCC-1 0.94),
+           model 0.11 [0.00, 0.28] (levalbuterol, hydrocortisone acetate; median rank 255); sc classical 0.33-0.67
+           (ln q / WCC 0.67), model 0.00 (n = 3).
+           Predictions: classical std >= 0.8 HELD; model std <= 0.1 FAILED narrowly (0.11 = 2 of 18 compounds); sc below
+           std HELD; model sc <= 0.1 HELD; n_sc < 10 HELD. Decision rule: no contradiction trigger -> ESI S14 (Tables
+           S23, S24 with article DOIs) + one paragraph in Section 4.7 (RSC needs every ESI section cited); verify 199/199,
+           docx built. Not done: the 18 Kaduk papers are not in refs_dd.bib (DOIs in Table S24 only).
    - [~] C7 build.sh -> docx (builds 10-14, after the referee fixes); plan Section 13c-f readouts; check in with Frank
 After C (not R1-R5): R6 decisions, Zenodo deposit (code + open data; DD's data reviewer needs a DOI), cover
 letter, TOC graphic (at revision), Frank submits.

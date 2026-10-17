@@ -684,6 +684,14 @@ the CSD library, and smaller libraries favour every score (Fig. 3b). The classic
 can be regenerated from open data alone; the model's need the CSD-trained checkpoint, which is not
 distributed, and can only be checked against the released ranks.
 
+An external set points the same way. The raw profiles that Kaduk and co-workers deposited with 18 structure
+reports in Powder Diffraction (19 patterns, 16 of them synchrotron) were scored after the analysis above was
+complete, with the design fixed in advance (ESI Section S14†). When any same-form entry counts, the classical
+scores reach a compound-weighted top-1 of 0.94–1.00 and the model 0.11 [0.00, 0.28]; this is generous, because
+each pattern's own Rietveld entry is in the library. With those entries ignored, only 3 compounds keep an
+independent single-crystal reference, and the classical scores place it first for 0.33–0.67 of them and the
+model for none.
+
 **Table 2** Compound-weighted top-1 on the main benchmark (CSD library, Table 1), with the library of
 Section 3.7 (CSD, realistic) and on the open replica (COD library, Section 2.6). The single-crystal set has
 30 compounds in the CSD and 9 in the COD; the any-same-form set has 123 and 125. Intervals are in the ESI.†

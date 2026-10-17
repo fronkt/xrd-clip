@@ -260,6 +260,43 @@ def revision_sections() -> list:
                          f2(pp["top1"]), f"{pp['median_rank']:,.0f}"])
     L += table(["score", "answer set", "patterns / compounds", "macro top-1", "macro top-10", "per-pattern top-1",
                 "median rank"], rows)
+
+    kd = rev.get("x4_kaduk")
+    if kd is not None:
+        ks = kd["summary"]
+        pp_ = ks["patterns"]
+        n_sync = sum(r["kind"] == "synchrotron" for r in pp_)
+        L += ["", "## S14 An external set: raw profiles deposited by Kaduk and co-workers", "",
+              f"Queries: the measured profiles in the supplementary CIFs of Kaduk and co-workers' Powder Diffraction structure "
+              f"reports (public Cambridge Core supplements; donepezil hydrochloride form III from the ICDD deposit): "
+              f"{ks['n_patterns']} patterns of {ks['n_compounds']} compounds, {n_sync} synchrotron "
+              f"({sum(r['kind'] == 'synchrotron' and r['wavelength'] < 0.5 for r in pp_)} at 11-BM, λ ≈ 0.414 Å; one at "
+              f"0.6888 Å) and {ks['n_patterns'] - n_sync} lab Cu Kα1. None was used in training, tuning or any earlier "
+              "analysis. The design, predictions and a decision rule were fixed before scoring; preprocessing, scores, "
+              "checkpoint and library are those of the main benchmark (corrected ln q, no hubness correction). Correct answers "
+              "follow Section S1, with the article's refcode as the anchor.", "",
+              "Every anchor is the powder-study entry refined against the query pattern itself, so the any-same-form answer "
+              "set is an upper bound, not a test. With powder-study entries ignored, only "
+              f"{ks['n_sc_compounds']} compounds keep an independent single-crystal entry in the library; "
+              f"{len(ks['sc_entries_outside_library'])} same-form single-crystal entries lie outside the corpus and were not "
+              "added, so that the library is identical to the main benchmark.", "",
+              "**Table S23** Retrieval on the external set (background-subtracted queries).", ""]
+        rows = []
+        for k in CLS + ["model_bkg"]:
+            for td, nm_ in SETS:
+                pp, mm = kd["per_pattern"][f"{td}|{k}"], kd["macro"][f"{td}|{k}"]
+                rows.append([NAMES[k], nm_, f"{pp['n']} / {mm['top1']['n_compounds']}", mci(mm["top1"]),
+                             f2(mm["top10"]["value"]), f2(pp["top1"]), f"{pp['median_rank']:,.0f}"])
+        L += table(["score", "answer set", "patterns / compounds", "macro top-1", "macro top-10", "per-pattern top-1",
+                    "median rank"], rows)
+        rk = lambda r, key: "–" if r["ranks"][key] < 0 else f"{r['ranks'][key] + 1:,}"
+        L += ["", "**Table S24** Rank of the best correct entry per pattern (1 = first place; '–': no correct entry in the "
+              "library).", ""]
+        L += table(["compound", "anchor", "article DOI", "source", "Cu-grid coverage", "ln q, any", "Pearson, any", "model, any",
+                    "ln q, single-crystal", "model, single-crystal"],
+                   [[r["compound"], r["refcode"], r["doi"], f"{r['kind']}, {r['wavelength']:.4f} Å", f2(r["cu_grid_coverage"]),
+                     rk(r, "std|lnq_bkg"), rk(r, "std|pearson_bkg"), rk(r, "std|model_bkg"), rk(r, "sc|lnq_bkg"),
+                     rk(r, "sc|model_bkg")] for r in pp_])
     return L
 
 

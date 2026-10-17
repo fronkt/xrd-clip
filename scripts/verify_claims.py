@@ -111,6 +111,9 @@ c2t1, c2t10, c2p = c2r["critic2_vcgpwdf"]["top1"], c2r["critic2_vcgpwdf"]["top10
 lq_sc = b("lnq_bkg", "sc")
 GA, GR = REV["r4_gap"]["results"], REV["r4c_realism"]["results"]
 R2p, R2a, COD, CODX = REV["r2"]["paired_vs_main"], REV["r2_ablations"], REV["r5_cod"], EX["cod"]
+KD = REV["x4_kaduk"]                       # C10 external set (Kaduk et al. raw profiles)
+KS = KD["summary"]
+kd_m = lambda td, key: KD["macro"][f"{td}|{key}"]["top1"]
 
 
 def gm(res, rung, meth="model", td="std"):
@@ -515,6 +518,14 @@ CLAIMS = [
          f"better fits for {len(X3C)} of them change no first place, because {len(X3C) - len(X3_IN)} of their\n"
          f"{len(X3C)} answers are not in the shortlist"),
     need(X_NO_CHANGE, "uses no zero-offset correction (an\nanswer-blind one changes no first place)"),
+    # C10 external set (Section 4.7, ESI S14)
+    f"deposited with {KS['n_compounds']} structure reports in Powder Diffraction ({KS['n_patterns']} patterns, "
+    f"{sum(r['kind'] == 'synchrotron' for r in KS['patterns'])} of them synchrotron)",
+    f"scores reach a compound-weighted top-1 of {rng([kd_m('std', k)['value'] for k in CLS])} and the model "
+    f"{f2(kd_m('std', 'model_bkg')['value'])} {ci(kd_m('std', 'model_bkg')['ci'])}",
+    f"only {KS['n_sc_compounds']} compounds keep an independent single-crystal reference, and the classical scores place it "
+    f"first for {rng([kd_m('sc', k)['value'] for k in CLS])} of them and the model for "
+    + ("none" if kd_m('sc', 'model_bkg')['value'] == 0 else "<model found some>"),
 ]
 
 

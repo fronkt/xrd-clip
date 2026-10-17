@@ -150,6 +150,10 @@ def revision(stems: np.ndarray, R) -> dict:
         rev["x1_binavg"]["paired_vs_main"] = {k: {"top1": paired_macro(f[k], R[f"none|{k}"], stems),
                                                   "n_top1_changed": int(((f[k] == 0) != (R[f"none|{k}"] == 0)).sum())}
                                               for k in f.files if "@" not in k}
+    # C10 (10-17, Frank): Kaduk et al. raw profiles as an external set; design + predictions in tasks/todo.md C10
+    rev["x4_kaduk"] = slim(load("results/kaduk_main.json"))
+    if rev["x4_kaduk"] is not None:
+        rev["x4_kaduk"]["summary"] = rnd(load("results/kaduk_summary.json"))
     full = "cache/real_bench/rescore_r2/ranks.npz"
     if rev["r2"] is not None and os.path.exists(full):
         f = np.load(full)

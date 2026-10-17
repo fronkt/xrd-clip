@@ -572,3 +572,50 @@ Library: 108,716 COD entries pass the corpus filter and 854 candidate entries of
 | WCC, l = 2° + zero scan | single-crystal | 35 / 9 | 0.44 [0.11, 0.78] | 0.67 | 0.11 | 6,954 |
 | Learned embedding | any same-form | 190 / 125 | 0.02 [0.00, 0.04] | 0.04 | 0.01 | 2,946 |
 | Learned embedding | single-crystal | 35 / 9 | 0.00 [0.00, 0.00] | 0.00 | 0.00 | 11,624 |
+
+## S14 An external set: raw profiles deposited by Kaduk and co-workers
+
+Queries: the measured profiles in the supplementary CIFs of Kaduk and co-workers' Powder Diffraction structure reports (public Cambridge Core supplements; donepezil hydrochloride form III from the ICDD deposit): 19 patterns of 18 compounds, 16 synchrotron (15 at 11-BM, λ ≈ 0.414 Å; one at 0.6888 Å) and 3 lab Cu Kα1. None was used in training, tuning or any earlier analysis. The design, predictions and a decision rule were fixed before scoring; preprocessing, scores, checkpoint and library are those of the main benchmark (corrected ln q, no hubness correction). Correct answers follow Section S1, with the article's refcode as the anchor.
+
+Every anchor is the powder-study entry refined against the query pattern itself, so the any-same-form answer set is an upper bound, not a test. With powder-study entries ignored, only 3 compounds keep an independent single-crystal entry in the library; 8 same-form single-crystal entries lie outside the corpus and were not added, so that the library is identical to the main benchmark.
+
+**Table S23** Retrieval on the external set (background-subtracted queries).
+
+| score | answer set | patterns / compounds | macro top-1 | macro top-10 | per-pattern top-1 | median rank |
+|---|---|---|---|---|---|---|
+| ln q lag + zero scan | any same-form | 19 / 18 | 0.94 [0.83, 1.00] | 1.00 | 0.95 | 1 |
+| ln q lag + zero scan | single-crystal | 3 / 3 | 0.67 [0.00, 1.00] | 1.00 | 0.67 | 1 |
+| Cosine + zero scan | any same-form | 19 / 18 | 1.00 [1.00, 1.00] | 1.00 | 1.00 | 1 |
+| Cosine + zero scan | single-crystal | 3 / 3 | 0.33 [0.00, 1.00] | 0.67 | 0.33 | 3 |
+| Pearson, fixed grid | any same-form | 19 / 18 | 1.00 [1.00, 1.00] | 1.00 | 1.00 | 1 |
+| Pearson, fixed grid | single-crystal | 3 / 3 | 0.33 [0.00, 1.00] | 0.67 | 0.33 | 3 |
+| WCC, l = 1° + zero scan | any same-form | 19 / 18 | 0.94 [0.83, 1.00] | 1.00 | 0.95 | 1 |
+| WCC, l = 1° + zero scan | single-crystal | 3 / 3 | 0.67 [0.00, 1.00] | 1.00 | 0.67 | 1 |
+| WCC, l = 2° + zero scan | any same-form | 19 / 18 | 1.00 [1.00, 1.00] | 1.00 | 1.00 | 1 |
+| WCC, l = 2° + zero scan | single-crystal | 3 / 3 | 0.67 [0.00, 1.00] | 1.00 | 0.67 | 1 |
+| Learned embedding | any same-form | 19 / 18 | 0.11 [0.00, 0.28] | 0.28 | 0.11 | 255 |
+| Learned embedding | single-crystal | 3 / 3 | 0.00 [0.00, 0.00] | 0.00 | 0.00 | 95 |
+
+**Table S24** Rank of the best correct entry per pattern (1 = first place; '–': no correct entry in the library).
+
+| compound | anchor | article DOI | source | Cu-grid coverage | ln q, any | Pearson, any | model, any | ln q, single-crystal | model, single-crystal |
+|---|---|---|---|---|---|---|---|---|---|
+| tramadol hydrochloride | BUFPAV01 | 10.1017/s088571561500041x | synchrotron, 0.4137 Å | 1.00 | 1 | 1 | 523 | 1 | 523 |
+| folic acid dihydrate | FOLCAH03 | 10.1017/s0885715614000815 | synchrotron, 0.4137 Å | 1.00 | 1 | 1 | 9 | – | – |
+| fingolimod hydrochloride | HUCHEU02 | 10.1017/s0885715615000317 | synchrotron, 0.4139 Å | 1.00 | 1 | 1 | 10,374 | – | – |
+| levalbuterol hydrochloride | OMAJIX | 10.1017/s0885715615000172 | synchrotron, 0.4139 Å | 1.00 | 1 | 1 | 1 | – | – |
+| ziprasidone hydrochloride monohydrate | OMAKAQ01 | 10.1017/s0885715615000305 | synchrotron, 0.4139 Å | 1.00 | 1 | 1 | 3,538 | – | – |
+| rilpivirine | OMAKOE01 | 10.1017/s0885715615000196 | synchrotron, 0.4137 Å | 1.00 | 1 | 1 | 2 | – | – |
+| solifenacin hydrogen succinate | URATAK | 10.1017/s0885715615000329 | synchrotron, 0.4137 Å | 1.00 | 1 | 1 | 255 | – | – |
+| lacosamide form I | URATIS | 10.1017/s0885715615000378 | synchrotron, 0.4137 Å | 1.00 | 1 | 1 | 867 | – | – |
+| nilotinib | URAVUG | 10.1017/s0885715615000512 | synchrotron, 0.4137 Å | 1.00 | 1 | 1 | 4,348 | – | – |
+| sitagliptin dihydrogen phosphate monohydrate | URAWUH | 10.1017/s0885715615000755 | synchrotron, 0.4139 Å | 1.00 | 1 | 1 | 10 | – | – |
+| paliperidone | YAGRIJ01 | 10.1017/s0885715616000087 | synchrotron, 0.4139 Å | 1.00 | 1 | 1 | 107 | – | – |
+| paliperidone palmitate | NOKFUR | 10.1017/s0885715617000896 | synchrotron, 0.4133 Å | 1.00 | 1 | 1 | 95 | 1 | 95 |
+| hydrocortisone acetate | ZZZGCU01 | 10.1017/s0885715616000713 | synchrotron, 0.4133 Å | 1.00 | 1 | 1 | 1 | – | – |
+| estradiol valerate | DOVGEC02 | 10.1017/s0885715618000039 | synchrotron, 0.4142 Å | 1.00 | 2 | 1 | 88 | – | – |
+| curcumin | BINMEQ09 | 10.1017/s0885715614001018 | synchrotron, 0.6888 Å | 1.00 | 1 | 1 | 36 | 3 | 48 |
+| saxagliptin | HAQQUN02 | 10.1017/s0885715615000548 | synchrotron, 0.4137 Å | 1.00 | 1 | 1 | 450 | – | – |
+| trandolapril | IQISAE | 10.1017/s0885715616000294 | lab Cu, 1.5406 Å | 0.78 | 1 | 1 | 263,727 | – | – |
+| trandolapril | IQISAE | 10.1017/s0885715616000294 | lab Cu, 1.5406 Å | 1.00 | 1 | 1 | 369 | – | – |
+| donepezil hydrochloride form III | EDUPUS | 10.1017/s0885715621000415 | lab Cu, 1.5406 Å | 0.67 | 1 | 1 | 166,760 | – | – |

@@ -179,5 +179,43 @@ def cmd_truth() -> int:
     return 0
 
 
+def cmd_summary() -> int:
+    """results/kaduk_summary.json: per-pattern metadata and ranks (refcodes and numbers only, no profile data)."""
+    import numpy as np
+    sys.path.insert(0, "src")
+    from xrdclip.eval.real_patterns import to_cu_grid
+    pats = json.load(open(f"{OUT}/kaduk_patterns.json"))["organic"]
+    truth = {t["id"]: t for t in json.load(open(f"{OUT}/kaduk_truth.json"))}
+    in_lib = set(ln.strip() for f in (f"{DATA}/stick_refcodes.txt", f"{OUT}/library_extra.txt")
+                 for ln in open(f) if ln.strip())
+    z = np.load("cache/real_bench_kaduk/rescore_main/ranks.npz")
+    doi = {r["refcode"]: r["doi"] for r in json.load(open(REFS))["refs"]}
+    rows = []
+    for i, o in enumerate(pats):
+        t = truth[o["id"]]
+        _, m = to_cu_grid(o["two_theta"], o["intensity"], o["wavelength"])
+        same = t["same_form"]
+        rows.append({"id": o["id"], "refcode": o["refcode"], "compound": o["short"], "source": o["source"],
+                     "doi": doi[o["refcode"]],
+                     "wavelength": o["wavelength"], "kind": "lab Cu" if abs(o["wavelength"] - 1.54059) < 0.003 else "synchrotron",
+                     "tt_range": o["tt_range"], "cu_grid_coverage": round(float(m.mean()), 3),
+                     "n_same_form": len(same), "n_same_form_in_library": sum(x["refcode"] in in_lib for x in same),
+                     "sc_in_library": [x["refcode"] for x in same if not x["is_powder_study"] and x["refcode"] in in_lib],
+                     "sc_outside_library": [x["refcode"] for x in same if not x["is_powder_study"] and x["refcode"] not in in_lib],
+                     "ranks": {k: int(z[k][i]) for k in z.files if "@" not in k}})
+    out = {"description": "Kaduk external set (tasks/todo.md C10): 19 measured profiles from the papers' supplementary "
+                          "CIFs, scored by scripts/28 config main against the 309,080-entry library. Rank = wrong "
+                          "entries above the best correct one (0 = first place, -1 = no correct entry in the library).",
+           "n_patterns": len(rows), "n_compounds": len({r["refcode"] for r in rows}),
+           "n_sc_compounds": len({r["refcode"] for r in rows if r["sc_in_library"]}),
+           "sc_entries_outside_library": sorted({x for r in rows for x in r["sc_outside_library"]}),
+           "patterns": rows}
+    with open("results/kaduk_summary.json", "w") as fh:
+        json.dump(out, fh, indent=1)
+    print(f"[summary] {out['n_patterns']} patterns, {out['n_compounds']} compounds, sc compounds {out['n_sc_compounds']}; "
+          f"sc entries outside the library {out['sc_entries_outside_library']}")
+    return 0
+
+
 if __name__ == "__main__":
-    sys.exit({"extract": cmd_extract, "truth": cmd_truth}[sys.argv[1]]())
+    sys.exit({"extract": cmd_extract, "truth": cmd_truth, "summary": cmd_summary}[sys.argv[1]]())
