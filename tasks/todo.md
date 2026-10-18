@@ -257,7 +257,7 @@ B. Box session (manual mode, one CSD-derived upload): R4c training; ln q CSLS re
      launch, pull loop -> cache/box_rev/pullC/). Needs MANUAL mode (CSD CIFs). Offer seen: 51326865, 128-core
      EPYC 7B12, $0.31/h; onstart guard: stop if not launched in 2 h, hard stop at 24 h.
      LAUNCHED 10-13 21:42 local (01:42Z), manual mode: 51326865 was gone -> offer 49717811 = instance 55845149
-     (EPYC 7W83, 256-core cgroup, 251 GB, Taiwan, $0.681/h), root@211.21.106.81 -p 46075. Hard stop lowered to
+     (EPYC 7W83, 256-core cgroup, 251 GB, Taiwan, $0.681/h), root@<box IP redacted>. Hard stop lowered to
      14 h (credit $11.22 lasts ~16 h). Box: critic2 1.4.155, 0 missing fits, 254 critic2 processes. Pull loop =
      background launch_c2k10.sh (log cache/box_rev/launch_c2k10.log, polls every 10 min) -> cache/box_rev/pullC/
      out.tar; the box self-stops on PULLED. AFTER: back up cache/critic2/diffs.jsonl, take the box's (a
@@ -440,7 +440,7 @@ C. Paper: paper_numbers.json -> manuscript/ESI/figs -> verify_claims -> internal
            vastai copy of out_fix.tar (FIX_DONE 00:28Z, md5 ok, 50 + 50 rows all ok) -> appended to
            diffs_zs / diffs_x3. Every collided 594 row that was not empty equals its repair (48/48 X2,
            27/27 X3): the collision only deleted files. Relay + 55988256 destroyed; no instances; credit $4.33.
-   - [ ] C9 Kaduk / ICDD raw data (Tier C; NOT part of draft v2 — a possible external set). Nicole (pdj@icdd.com)
+   - [ ] C9 Kaduk / ICDD raw data (Tier C; NOT part of draft v2 — a possible external set). ICDD (pdj@icdd.com)
          replied 10-14: journal supplemental raw data need Executive Director approval + one "PDJ Supplemental
          Data Request" form per reference; PDF-database deposits are a separate route (icdd.com/pdfdld, verified
          students get 5 PDF entries free). CSD API check (10-14): only 23 of the 113 requested DOIs have a CSD
@@ -450,7 +450,7 @@ C. Paper: paper_numbers.json -> manuscript/ESI/figs -> verify_claims -> internal
          20 have PUBLIC supplementary CIFs (static.cambridge.org ...supNNN.cif, HTTP 200, mostly ~2.7 MB = raw
          profile size; repotrectinib's emailed CIF is 1.9 MB with _pd_meas_intensity_total). Only donepezil HCl
          form III (2021) needs the form; albuterol sulfate (2014 data report) has no supplement (PDF route).
-         Waiting on Frank: OK to download the form template + the 18 public CIFs; then reply draft to Nicole
+         Waiting on Frank: OK to download the form template + the 18 public CIFs; then reply draft to ICDD
          narrowing the request to donepezil (filler: scratchpad fill_pdj_form.py).
          10-15 OUTCOME: ICDD declined raw instrument data (Executive Director), but sent the deposited donepezil
          CIFs; DONEPEZIL-Rietveld-Final.cif HAS the measured profile (_pd_meas_counts_total, 1500 pts, 5-34.98 deg,
@@ -560,3 +560,15 @@ Format facts (verified urtc.mit.edu): ≤5 pages hard, IEEE conference template,
 
 ## Review
 (to fill as work completes)
+
+# C11 Retarget to RSC Advances (Frank 10-18) — package paper/dd/submissions/RSCA/
+- [x] Guidelines read in Chrome (rsc.org blocks fetch); spec = submissions/RSCA/requirements.md (Frank approved defaults 10-18)
+- [x] End sections in RSC order (contributions, conflicts, DAS, acknowledgements); CRediT; ICDD thanked; AI statement = Frank's
+      mlip-dynstab wording verbatim ([FRANK] check scope: Claude also wrote code here)
+- [x] 18 Kaduk reports cited (Crossref-checked, ledger section added); refs 42-59; verify 199/199
+- [x] Figures 600-dpi LZW TIFF from the vector PDFs (Fig3/4/6 tagged 601-610 dpi to fit 17.1 cm)
+- [x] Cover letter drafted from the manuscript's own claims (CoverLetter.md, [DRAFTED — REVIEW])
+- [x] apply_format + audit 23/23 PASS; Word render 31 pages checked
+- [x] History audit for the public flip: SAFE (no CSD/checkpoint/profile/secret ever tracked); box IP + ICDD staff name redacted
+- [ ] Zenodo deposit assembled at D:\xrd-clip\zenodo_deposit (licence-checked), draft with reserved DOI -> DAS
+- [ ] Frank: final OK -> publish Zenodo + flip fronkt/xrd-clip public; read cover letter + AI statement; submit in ScholarOne

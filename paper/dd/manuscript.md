@@ -685,7 +685,7 @@ can be regenerated from open data alone; the model's need the CSD-trained checkp
 distributed, and can only be checked against the released ranks.
 
 An external set points the same way. The raw profiles that Kaduk and co-workers deposited with 18 structure
-reports in Powder Diffraction (19 patterns, 16 of them synchrotron) were scored after the analysis above was
+reports in Powder Diffraction (19 patterns, 16 of them synchrotron)[@kaduk2015tramadol;@kaduk2015folic;@kaduk2015fingolimod;@kaduk2015levalbuterol;@kaduk2015ziprasidone;@kaduk2015rilpivirine;@kaduk2015solifenacin;@kaduk2015lacosamide;@kaduk2015nilotinib;@kaduk2015sitagliptin;@kaduk2016paliperidone;@kaduk2017palmitate;@kaduk2017hydrocortisone;@wheatley2018estradiol;@reid2015curcumin;@kaduk2015saxagliptin;@reid2016trandolapril;@reid2021donepezil] were scored after the analysis above was
 complete, with the design fixed in advance (ESI Section S14†). When any same-form entry counts, the classical
 scores reach a compound-weighted top-1 of 0.94–1.00 and the model 0.11 [0.00, 0.28]; this is generous, because
 each pattern's own Rietveld entry is in the library. With those entries ignored, only 3 compounds keep an
@@ -777,13 +777,21 @@ pressure, so that the cells differ anisotropically by more than about 1 %; in th
 patterns come from compression series. We release the benchmark so that learned methods can be compared
 with these numbers on measured data.
 
+## Author contributions
+
+Frank Cai: conceptualization, methodology, software, formal analysis, investigation, data curation,
+visualization, writing – original draft, writing – review & editing.
+
+## Conflicts of interest
+
+There are no conflicts to declare.
+
 ## Data availability
 
-<!-- [FRANK] GitHub URL and Zenodo DOI after the deposit (tasks/todo.md, after Step C). Digital Discovery
-asks, for restricted data, for "a representative dataset that enables similar conclusions": the COD replica. -->
+<!-- [FRANK] Zenodo DOI after the deposit (reserved DOI goes here before submission). -->
 
-The code, the benchmark definition and all results are available at [GitHub URL] and archived at Zenodo
-([DOI]). The deposit contains: the opXRD pattern identifiers with their CSD refcodes, same-form sets and
+The code, the benchmark definition and all results are available at https://github.com/fronkt/xrd-clip and archived at Zenodo
+(https://doi.org/[ZENODO DOI]). The deposit contains: the opXRD pattern identifiers with their CSD refcodes, same-form sets and
 packing-similarity results; the corpus refcode list and the training splits; the per-pattern ranks of
 every score and correction, including the learned model's and the variable-cell re-rank's; the
 critic2 inputs derived from the opXRD patterns (cut patterns, background and peak fits, command files) and
@@ -799,20 +807,25 @@ from the Zenodo record 10.5281/zenodo.15298026. The measured patterns are from o
 4.0, and the COD structures are CC0. CSD structures and the simulated patterns derived from them cannot be
 redistributed; users with a CSD licence regenerate them from the refcode lists. The model checkpoints, the
 original and the retrained one, were trained on CSD data and are not distributed.
-
-## Author contributions
-
-F. C. conceived the study, wrote the code, ran the computations and analysis, and wrote the manuscript.
-
-## Conflicts of interest
-
-There are no conflicts to declare.
+The external set of Section 4.7 uses the measured profiles in the supplementary CIFs of the cited Powder
+Diffraction reports, which can be downloaded from Cambridge Core, and, for donepezil hydrochloride form III,
+the CIF deposited with the ICDD; these profiles are not redistributed, and the deposit contains their
+refcodes, the extraction script and the per-pattern ranks. The reports listed in ESI Table S24 are
+cited in the article's reference list.
 
 ## Acknowledgements
 
 The author thanks the opXRD and COD contributors whose deposited powder data made the benchmark possible,
-and the CCDC for the CSD and its Python API. GPU time was rented from commercial cloud providers. This
-research received no specific grant from any funding agency in the public, commercial, or not-for-profit
-sectors. [AI-use statement: FRANK, in his own words; RSC asks for it here.]
+the CCDC for the CSD and its Python API, and the ICDD for providing the deposited donepezil hydrochloride
+CIF. GPU time was rented from commercial cloud providers. This research received no specific grant from
+any funding agency in the public, commercial, or not-for-profit sectors.
+
+<!-- [FRANK] AI-use statement: your wording from the submitted mlip-dynstab RSC Advances manuscript (10-10),
+reused verbatim. Check it still describes this project (here Claude also wrote and ran pipeline code). -->
+*Use of AI tools.* The author used a large language model (Claude, Anthropic), through the Claude Fable 5.1
+and Opus 5.5, under the author's direction, to cross-check the statistical analyses and internal audits
+described in the ESI, and to edit and review text. All code, data and results are deposited (see Data
+availability) so that every number can be regenerated independently. The author designed the study,
+reviewed all code, results and text, and takes full responsibility for the content.
 
 ## Notes and references

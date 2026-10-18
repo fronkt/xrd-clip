@@ -571,3 +571,28 @@ All titles were screened. Abstracts were read for 2610.05844, 2609.29751, 2609.2
 - **refute_1 #13a and refute_2 #5:** RealBind is **not** inorganic-only. Its measured set includes opXRD-CNRS MOFs and molecular crystals (release DATASHEET.md).
 - **refute_2 #6:** the Zenodo `relations.version` index for 15298026 is 10, with `is_last: true`. The RealBind datasheet calls this "version 11", consistent with lit_C's "v11". Both notes describe the same record.
 - **lit_B row 9 and the item-5 brief:** the J. Appl. Cryst. 2024 method is VC-GPWDF; VC-PWDF and VC-xPWDF are the Mayo et al. papers.
+
+## Kaduk external set (added 2026-10-18, RSC Advances retarget)
+
+Each entry checked against its Crossref record (api.crossref.org/works/<DOI>): authors, title, volume, issue, pages, print year.
+
+| key | anchor refcode | DOI | record | checked |
+|---|---|---|---|---|
+| kaduk2015tramadol | BUFPAV01 | 10.1017/s088571561500041x | Powder Diffraction 2015, 30(3), 242-249; 4 authors | Crossref API 2026-10-18 |
+| kaduk2015folic | FOLCAH03 | 10.1017/s0885715614000815 | Powder Diffraction 2015, 30(1), 52-56; 3 authors | Crossref API 2026-10-18 |
+| kaduk2015fingolimod | HUCHEU02 | 10.1017/s0885715615000317 | Powder Diffraction 2015, 30(3), 205-210; 4 authors | Crossref API 2026-10-18 |
+| kaduk2015levalbuterol | OMAJIX | 10.1017/s0885715615000172 | Powder Diffraction 2015, 30(2), 158-162; 4 authors | Crossref API 2026-10-18 |
+| kaduk2015ziprasidone | OMAKAQ01 | 10.1017/s0885715615000305 | Powder Diffraction 2015, 30(3), 192-198; 4 authors | Crossref API 2026-10-18 |
+| kaduk2015rilpivirine | OMAKOE01 | 10.1017/s0885715615000196 | Powder Diffraction 2015, 30(2), 170-174; 3 authors | Crossref API 2026-10-18 |
+| kaduk2015solifenacin | URATAK | 10.1017/s0885715615000329 | Powder Diffraction 2015, 30(3), 211-217; 5 authors | Crossref API 2026-10-18 |
+| kaduk2015lacosamide | URATIS | 10.1017/s0885715615000378 | Powder Diffraction 2015, 30(3), 224-230; 4 authors | Crossref API 2026-10-18 |
+| kaduk2015nilotinib | URAVUG | 10.1017/s0885715615000512 | Powder Diffraction 2015, 30(3), 270-277; 4 authors | Crossref API 2026-10-18 |
+| kaduk2015sitagliptin | URAWUH | 10.1017/s0885715615000755 | Powder Diffraction 2015, 30(4), 349-356; 4 authors | Crossref API 2026-10-18 |
+| kaduk2016paliperidone | YAGRIJ01 | 10.1017/s0885715616000087 | Powder Diffraction 2016, 31(2), 135-141; 4 authors | Crossref API 2026-10-18 |
+| kaduk2017palmitate | NOKFUR | 10.1017/s0885715617000896 | Powder Diffraction 2017, 32(4), 222-227; 4 authors | Crossref API 2026-10-18 |
+| kaduk2017hydrocortisone | ZZZGCU01 | 10.1017/s0885715616000713 | Powder Diffraction 2017, 32(1), 31-34; 3 authors | Crossref API 2026-10-18 |
+| wheatley2018estradiol | DOVGEC02 | 10.1017/s0885715618000039 | Powder Diffraction 2018, 33(1), 70-71; 4 authors | Crossref API 2026-10-18 |
+| reid2015curcumin | BINMEQ09 | 10.1017/s0885715614001018 | Powder Diffraction 2015, 30(1), 67-75; 4 authors | Crossref API 2026-10-18 |
+| kaduk2015saxagliptin | HAQQUN02 | 10.1017/s0885715615000548 | Powder Diffraction 2015, 30(3), 296-297; 5 authors | Crossref API 2026-10-18 |
+| reid2016trandolapril | IQISAE | 10.1017/s0885715616000294 | Powder Diffraction 2016, 31(3), 205-210; 3 authors | Crossref API 2026-10-18 |
+| reid2021donepezil | EDUPUS | 10.1017/s0885715621000415 | Powder Diffraction 2021, 36(4), 233-240; 2 authors | Crossref API 2026-10-18 |
