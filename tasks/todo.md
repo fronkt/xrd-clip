@@ -571,4 +571,7 @@ Format facts (verified urtc.mit.edu): ≤5 pages hard, IEEE conference template,
 - [x] apply_format + audit 23/23 PASS; Word render 31 pages checked
 - [x] History audit for the public flip: SAFE (no CSD/checkpoint/profile/secret ever tracked); box IP + ICDD staff name redacted
 - [x] Zenodo deposit assembled at D:xrd-clipzenodo_deposit (506 MB, licence-checked); DRAFT 23446290, DOI 10.5281/zenodo.23446290 reserved, in the DAS (unpublished); DAS rank wording fixed (sweep + ladder = summaries)
-- [ ] Frank: final OK -> publish Zenodo + flip fronkt/xrd-clip public; read cover letter + AI statement; submit in ScholarOne
+- [x] Code licence MIT (LICENSE, 68fe192), data CC BY 4.0; DAS file + cover letter final (f58def4)
+- [x] fronkt/xrd-clip PUBLIC (GitHub detects MIT); Zenodo 23446290 PUBLISHED 10-18 (14 files, md5 verified; cod_replica sticks split into 6 shard zips), DOI resolves
+- [x] ScholarOne rscadv Steps 1-7 complete (Purdue covers the APC; AI statement unchanged per Frank)
+- [ ] Frank: final go -> click Submit in ScholarOne (Step 7)
