@@ -1,6 +1,3 @@
-<!-- [DRAFTED — REVIEW] Frank: every claim below is taken from the manuscript; no significance is added that the
-paper does not state. Remove this comment once you have read it. Do not name reviewers here (RSC: ScholarOne only). -->
-
 Frank Cai\
 Purdue University, West Lafayette, Indiana, USA\
 cai485@purdue.edu · ORCID 0009-0003-0041-1459
@@ -36,8 +33,7 @@ measured-data reference point for learned methods, and because the benchmark (co
 ranks and the open replica) is released so that other methods can be compared on the same patterns. All numbers
 in the manuscript are checked automatically against the deposited results.
 
-The manuscript has not been published and is not under consideration elsewhere. I am the sole author, there
-are no conflicts to declare, and the use of AI tools is stated in the Acknowledgements.
+The manuscript has not been published and is not under consideration elsewhere. I am the sole author, and the use of AI tools is stated in the Acknowledgements.
 
 Sincerely,
 
