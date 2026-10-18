@@ -39,3 +39,8 @@ structures. Cite the CSD and list all refcodes in the paper SI.
 | `src/eval/` | Top-k retrieval, robustness curves, search-match baseline |
 | `configs/` | Training + simulation configs |
 | `refcodes/` | CSD refcode lists per split (no CIFs) |
+
+## Licence
+
+Code: MIT (see `LICENSE`). Results, refcode lists and other data files written by this project: CC BY 4.0.
+The archived data deposit for the article is https://doi.org/10.5281/zenodo.23446290.
