@@ -788,12 +788,14 @@ There are no conflicts to declare.
 
 ## Data availability
 
-<!-- [FRANK] Zenodo DOI after the deposit (reserved DOI goes here before submission). -->
+<!-- Zenodo DOI reserved 2026-10-18 (draft 23446290, unpublished until Frank OKs). -->
 
 The code, the benchmark definition and all results are available at https://github.com/fronkt/xrd-clip and archived at Zenodo
-(https://doi.org/[ZENODO DOI]). The deposit contains: the opXRD pattern identifiers with their CSD refcodes, same-form sets and
+(https://doi.org/10.5281/zenodo.23446290). The deposit contains: the opXRD pattern identifiers with their CSD refcodes, same-form sets and
 packing-similarity results; the corpus refcode list and the training splits; the per-pattern ranks of
-every score and correction, including the learned model's and the variable-cell re-rank's; the
+every score and correction on the measured patterns, including the learned model's and the variable-cell
+re-rank's (the simulated sweep of Section 4.1 and the effect ladder of Section 4.5 are deposited as summary
+results); the
 critic2 inputs derived from the opXRD patterns (cut patterns, background and peak fits, command files) and
 the measurement conditions of the single-crystal patterns; the scripts that build the library from a CSD
 installation, compute the scores (CPU and GPU) and regenerate every table and figure; and

@@ -570,5 +570,5 @@ Format facts (verified urtc.mit.edu): ≤5 pages hard, IEEE conference template,
 - [x] Cover letter drafted from the manuscript's own claims (CoverLetter.md, [DRAFTED — REVIEW])
 - [x] apply_format + audit 23/23 PASS; Word render 31 pages checked
 - [x] History audit for the public flip: SAFE (no CSD/checkpoint/profile/secret ever tracked); box IP + ICDD staff name redacted
-- [ ] Zenodo deposit assembled at D:\xrd-clip\zenodo_deposit (licence-checked), draft with reserved DOI -> DAS
+- [x] Zenodo deposit assembled at D:xrd-clipzenodo_deposit (506 MB, licence-checked); DRAFT 23446290, DOI 10.5281/zenodo.23446290 reserved, in the DAS (unpublished); DAS rank wording fixed (sweep + ladder = summaries)
 - [ ] Frank: final OK -> publish Zenodo + flip fronkt/xrd-clip public; read cover letter + AI statement; submit in ScholarOne
