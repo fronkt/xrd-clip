@@ -574,4 +574,4 @@ Format facts (verified urtc.mit.edu): ≤5 pages hard, IEEE conference template,
 - [x] Code licence MIT (LICENSE, 68fe192), data CC BY 4.0; DAS file + cover letter final (f58def4)
 - [x] fronkt/xrd-clip PUBLIC (GitHub detects MIT); Zenodo 23446290 PUBLISHED 10-18 (14 files, md5 verified; cod_replica sticks split into 6 shard zips), DOI resolves
 - [x] ScholarOne rscadv Steps 1-7 complete (Purdue covers the APC; AI statement unchanged per Frank)
-- [ ] Frank: final go -> click Submit in ScholarOne (Step 7)
+- [x] SUBMITTED 2026-10-18 to RSC Advances: manuscript ID RA-ART-10-2026-010272 (Frank's go)
