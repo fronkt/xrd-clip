@@ -617,3 +617,9 @@ D4 Paper
 D5 Gates: verify_claims, aris paper-claim-audit, citation-audit, kill-argument (gpt-6.1-sol); Frank reads; package.
 FRANK 2026-11-10: venue = RSOS transfer; model = fix + retrain ON ANVIL (not Vast); baselines = ΔT-rescaled cells only;
 prose = full ARIS rewrite, Frank reviews. -> D1 started.
+- 11-10: D1 DONE (cc4f605, 43f94d9; 45 tests; overfit 1.0 with/without symops). D2 partial (55770a0, c0bffc4): audit on
+  final matrices = only GOFWUV, corrected via refcodes/truth_corrections.json; λ fit: 3 unknowns = Cu (validation
+  median 0.05 %); ZZZUWK texture fit 49 axes: Pearson 0.72 -> 0.79 only, (101) 0.32 vs (202) 2.49 -> not texture.
+  Rescores conv + dT RUNNING locally (logs/rescore_conv.log, rescore_dT.log). ANVIL D3 SUBMITTED (nice 100, bundle
+  43f94d9 at $PROJECT/xrd-clip, d3.tar md5 00a118f6): d3_fix 22141344(+45), d3_sym_s0 22141346(+47),
+  d3_sym_s1 22141348(+49); logs /anvil/scratch/x-fcai3/xrdclip_ops/. Login-node smoke dies (memory), untestable there.
