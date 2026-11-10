@@ -615,3 +615,5 @@ D4 Paper
       pipeline code) and grammatical.
 - [ ] Response to the previous reviews (RSOS asks that the RSC Advances history be stated).
 D5 Gates: verify_claims, aris paper-claim-audit, citation-audit, kill-argument (gpt-6.1-sol); Frank reads; package.
+FRANK 2026-11-10: venue = RSOS transfer; model = fix + retrain ON ANVIL (not Vast); baselines = ΔT-rescaled cells only;
+prose = full ARIS rewrite, Frank reviews. -> D1 started.
