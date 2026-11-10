@@ -86,12 +86,19 @@ class StructureEncoder(nn.Module):
     """
 
     def __init__(self, embed_dim: int = 256, lattice_dim: int = 8, width: int = 256,
-                 depth: int = 4, heads: int = 8):
+                 depth: int = 4, heads: int = 8, symops: bool = False):
         super().__init__()
         self.z_embed = nn.Embedding(MAX_Z, width, padding_idx=0)
         # Fractional coords are periodic; feed sin/cos so 0.0 and 1.0 map to the same place.
         self.pos_proj = nn.Linear(6, width)
         self.lattice_proj = nn.Sequential(nn.Linear(lattice_dim, width), nn.GELU(), nn.Linear(width, width))
+        # Resubmission D1: the asymmetric unit + cell do not determine the pattern (systematic absences,
+        # multiplicities and Z need the space group). With `symops`, every CIF operator x' = R x + t becomes one
+        # token (9 rotation entries + sin/cos of 2 pi t), so the atoms can attend to the symmetry. Off = the original
+        # architecture, so earlier checkpoints load unchanged.
+        self.symops = symops
+        if symops:
+            self.op_proj = nn.Sequential(nn.Linear(15, width), nn.GELU(), nn.Linear(width, width))
 
         layer = nn.TransformerEncoderLayer(
             width, heads, dim_feedforward=width * 4, batch_first=True, activation="gelu", norm_first=True
@@ -101,21 +108,30 @@ class StructureEncoder(nn.Module):
             nn.Linear(width * 2, embed_dim * 2), nn.GELU(), nn.Linear(embed_dim * 2, embed_dim)
         )
 
-    def forward(self, atom_z, atom_frac, lattice, mask):
+    def forward(self, atom_z, atom_frac, lattice, mask, ops=None, ops_mask=None):
         two_pi = 2.0 * torch.pi
         pos = torch.cat([torch.sin(two_pi * atom_frac), torch.cos(two_pi * atom_frac)], dim=-1)
         h = self.z_embed(atom_z) + self.pos_proj(pos)                 # (B, A, W)
+        n_atoms = h.shape[1]
 
         # A lattice token, prepended so every atom can attend to the cell.
         lat = self.lattice_proj(lattice).unsqueeze(1)                # (B, 1, W)
         h = torch.cat([lat, h], dim=1)
         m = torch.cat([torch.ones(mask.shape[0], 1, dtype=torch.bool, device=mask.device), mask], dim=1)
 
+        if self.symops:
+            if ops is None:
+                raise ValueError("this encoder was built with symops=True; pass ops and ops_mask")
+            t = ops[..., 3]                                          # (B, O, 3) translations
+            feat = torch.cat([ops[..., :3].flatten(-2), torch.sin(two_pi * t), torch.cos(two_pi * t)], dim=-1)
+            h = torch.cat([h, self.op_proj(feat)], dim=1)            # operator tokens after the atoms
+            m = torch.cat([m, ops_mask], dim=1)
+
         h = self.transformer(h, src_key_padding_mask=~m)
 
         # Pool atoms (masked mean) and read the lattice token; concatenate both.
         lat_out = h[:, 0]
-        atoms = h[:, 1:]
+        atoms = h[:, 1:1 + n_atoms]
         am = mask.unsqueeze(-1).float()
         atom_mean = (atoms * am).sum(1) / am.sum(1).clamp(min=1.0)
         return F.normalize(self.proj(torch.cat([lat_out, atom_mean], dim=-1)), dim=-1)

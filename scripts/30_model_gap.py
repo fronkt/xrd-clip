@@ -81,10 +81,9 @@ def cmd_render(args) -> int:
 
 def load_model(args):
     import torch
-    from xrdclip.models.clip import XRDClip
+    from xrdclip.models.clip import load_checkpoint
     torch.set_num_threads(args.threads)
-    model = XRDClip(embed_dim=256)
-    model.load_state_dict(torch.load(args.ckpt, map_location="cpu")["model"])
+    model = load_checkpoint(args.ckpt)
     model.eval()
     return model
 

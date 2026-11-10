@@ -101,16 +101,20 @@ def sample_params(rng: np.random.Generator, r: Ranges = Ranges()) -> Params:
 # physics
 # --------------------------------------------------------------------------------------------
 
-def _shift_two_theta(two_theta: np.ndarray, d_hkl: np.ndarray, p: Params) -> np.ndarray:
+def _shift_two_theta(two_theta: np.ndarray, d_hkl: np.ndarray, p: Params,
+                     lam: "np.ndarray | float" = 1.0) -> np.ndarray:
     """Isotropic strain (theta-dependent) + zero offset (constant).
 
     Strain acts on d-spacing, so we go back through Bragg's law rather than shifting 2theta
     directly. That distinction matters: strain compresses the low-angle peaks less than the
     high-angle ones, which is exactly the signature a correlation-based search-match cannot
     absorb — and therefore exactly the invariance we want the encoder to learn.
+
+    `lam` is each stick's wavelength in units of Cu K-alpha1 (1 for K-alpha1, lambda2/lambda1 for a K-alpha2 copy).
+    Without it a strained K-alpha2 copy, which shares its reflection's d, lands back on K-alpha1 (resubmission D1).
     """
     if p.strain != 0.0:
-        sin_theta = WAVELENGTH / (2.0 * d_hkl * (1.0 + p.strain))
+        sin_theta = WAVELENGTH * lam / (2.0 * d_hkl * (1.0 + p.strain))
         sin_theta = np.clip(sin_theta, -1.0, 1.0)
         two_theta = np.degrees(2.0 * np.arcsin(sin_theta))
     return two_theta + p.zero_offset
@@ -142,29 +146,38 @@ def _fwhm(two_theta: np.ndarray, p: Params) -> np.ndarray:
     return np.sqrt(inst_sq + size**2)
 
 
-def _march_dollase(hkl: np.ndarray, recip: np.ndarray, p: Params) -> np.ndarray:
+def _march_dollase(hkl: np.ndarray, recip: np.ndarray, p: Params,
+                   rot: "np.ndarray | None" = None) -> np.ndarray:
     """Preferred-orientation intensity correction.
 
     P(alpha) = (r^2 cos^2(alpha) + sin^2(alpha)/r)^(-3/2)
 
-    alpha is the angle between each reflection's plane normal (g = hkl . B, in reciprocal space)
+    alpha is the angle between a reflection's plane normal (g = hkl . B, in reciprocal space)
     and the texture axis. r = 1 returns unity everywhere.
+
+    A powder peak sums every symmetry-equivalent reflection of its family, and the members make different angles with
+    the texture axis, so the factor is the mean of P over the members (h R for each operator rotation R; Friedel
+    partners share |cos alpha|). Mapping over all operators counts every member equally, so a plain mean is exact.
+    `rot` (n_ops, 3, 3) holds the rotation parts of the CIF operators; without it only the stored representative is
+    used (the behaviour before resubmission D1). Peaks that merge distinct families keep the first family's members
+    (0.1 % of peaks and of intensity in a 400-structure sample).
     """
     if p.march == 1.0:
         return np.ones(len(hkl), dtype=np.float32)
 
-    g = hkl.astype(np.float32) @ recip                       # plane normals
-    axis = np.asarray(p.po_axis, dtype=np.float32) @ recip   # texture axis in the same space
-    gn = np.linalg.norm(g, axis=1)
+    axis = np.asarray(p.po_axis, dtype=np.float32) @ recip   # texture axis in reciprocal space
     an = np.linalg.norm(axis)
     if an < 1e-8:
         return np.ones(len(hkl), dtype=np.float32)
 
-    cos_a = np.abs(g @ axis) / (np.maximum(gn, 1e-8) * an)
-    cos_a = np.clip(cos_a, 0.0, 1.0)
+    h = hkl.astype(np.float32)
+    members = h[None] if rot is None else np.einsum("nj,kji->kni", h, np.asarray(rot, np.float32))
+    g = members @ recip                                      # (k, n, 3) plane normals
+    gn = np.linalg.norm(g, axis=-1)
+    cos_a = np.clip(np.abs(g @ axis) / (np.maximum(gn, 1e-8) * an), 0.0, 1.0)
     sin2, cos2 = 1.0 - cos_a**2, cos_a**2
     r = p.march
-    return (r**2 * cos2 + sin2 / r) ** (-1.5)
+    return ((r**2 * cos2 + sin2 / r) ** (-1.5)).mean(axis=0).astype(np.float32)
 
 
 def _profile(grid: np.ndarray, centers: np.ndarray, inten: np.ndarray,
@@ -229,12 +242,13 @@ def render_sticks(sticks: dict, p: Params = CLEAN,
     hkl = np.asarray(sticks["hkl"])
     d_hkl = np.asarray(sticks["d_hkl"], dtype=np.float32)
     recip = np.asarray(sticks["recip"], dtype=np.float32)
+    lam = np.asarray(sticks["lam"], dtype=np.float32) if "lam" in sticks else np.float32(1.0)
 
     if any(e != 0.0 for e in p.axis_strain):
         d_hkl = _axis_strained_d(hkl, recip, p.axis_strain)
-        two_theta = np.degrees(2.0 * np.arcsin(np.clip(WAVELENGTH / (2.0 * d_hkl), -1.0, 1.0)))
-    tt = _shift_two_theta(two_theta, d_hkl, p)
-    inten = inten * _march_dollase(hkl, recip, p)
+        two_theta = np.degrees(2.0 * np.arcsin(np.clip(WAVELENGTH * lam / (2.0 * d_hkl), -1.0, 1.0)))
+    tt = _shift_two_theta(two_theta, d_hkl, p, lam)
+    inten = inten * _march_dollase(hkl, recip, p, sticks.get("rot"))
     fwhm = _fwhm(tt, p)
 
     y = _profile(grid, tt, inten, fwhm, p.eta)
@@ -301,14 +315,16 @@ def realism_sticks(sticks: dict, rng: np.random.Generator, R: Realism) -> dict:
     sig = rng.uniform(*R.jitter)
     if sig > 0:
         inten = inten * rng.lognormal(0.0, sig, inten.shape)
+    lam = np.ones(tt.size, np.float64)
     if rng.random() < R.p_ka2:
         s2 = np.sin(np.radians(tt / 2)) * R.ka2_rho
         ok = s2 < 1
         tt = np.r_[tt, np.degrees(2 * np.arcsin(s2[ok]))]
         inten = np.r_[inten, R.ka2_ratio * inten[ok]]
-        d = np.r_[d, d[ok]]
+        d = np.r_[d, d[ok]]                                       # same planes, so the same d ...
         hkl = np.r_[hkl, hkl[ok]]
-    return {**sticks, "two_theta": tt, "intensity": inten, "d_hkl": d, "hkl": hkl}
+        lam = np.r_[lam, np.full(int(ok.sum()), R.ka2_rho)]       # ... at the K-alpha2 wavelength
+    return {**sticks, "two_theta": tt, "intensity": inten, "d_hkl": d, "hkl": hkl, "lam": lam}
 
 
 def realism_mask(rng: np.random.Generator, R: Realism, grid: np.ndarray = GRID) -> np.ndarray:

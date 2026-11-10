@@ -14,7 +14,7 @@ import numpy as np
 import torch
 
 from xrdclip.data import augment as A
-from xrdclip.data.dataset import structure_features
+from xrdclip.data.dataset import structure_features, structure_tensors  # noqa: F401
 from xrdclip.eval import baselines as B
 
 
@@ -25,19 +25,8 @@ def embed_library(model, store, refcodes, device, batch=256) -> np.ndarray:
     embs = []
     for i in range(0, len(refcodes), batch):
         chunk = refcodes[i:i + batch]
-        recs = [store[rc] for rc in chunk]
-        A_max = max(len(r["atom_z"]) for r in recs)
-        az = torch.zeros(len(recs), A_max, dtype=torch.long)
-        af = torch.zeros(len(recs), A_max, 3, dtype=torch.float32)
-        mask = torch.zeros(len(recs), A_max, dtype=torch.bool)
-        lat = torch.zeros(len(recs), 8, dtype=torch.float32)
-        for j, r in enumerate(recs):
-            n = len(r["atom_z"])
-            az[j, :n] = torch.from_numpy(np.asarray(r["atom_z"], dtype=np.int64))
-            af[j, :n] = torch.from_numpy(np.asarray(r["atom_frac"], dtype=np.float32))
-            mask[j, :n] = True
-            lat[j] = torch.from_numpy(structure_features(r))
-        z = model.encode_structure(az.to(device), af.to(device), lat.to(device), mask.to(device))
+        t = {k: v.to(device) for k, v in structure_tensors([store[rc] for rc in chunk]).items()}
+        z = model.encode_structure(t["atom_z"], t["atom_frac"], t["lattice"], t["mask"], t["ops"], t["ops_mask"])
         embs.append(z.cpu().numpy())
     return np.concatenate(embs, axis=0)
 

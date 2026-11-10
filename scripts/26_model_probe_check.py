@@ -24,7 +24,7 @@ bench = import_module("19_real_bench")
 hubm = import_module("21_hubness")
 
 from xrdclip.data import augment as A          # noqa: E402
-from xrdclip.models.clip import XRDClip        # noqa: E402
+from xrdclip.models.clip import load_checkpoint  # noqa: E402
 
 
 def main() -> int:
@@ -39,8 +39,7 @@ def main() -> int:
     hub = np.load(os.path.join(work, "hub_ctx.npz"))
     probes, pg = hub["P__raw"], hub["probe_g"]
     P = len(probes) // 2
-    model = XRDClip(embed_dim=256)
-    model.load_state_dict(torch.load(ckpt, map_location="cpu")["model"])
+    model = load_checkpoint(ckpt)
     model.eval()
     with torch.no_grad():
         x = np.stack([A.standardize(y) for y in probes])

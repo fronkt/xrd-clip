@@ -38,7 +38,7 @@ DATA = "C:/Users/frank/xrd-clip-data"
 # XRD_STICK_DIRS (comma-separated) swaps the library, e.g. cod/sticks for the open COD stand-in (R5)
 STICK_DIRS = tuple(os.environ.get("XRD_STICK_DIRS", "cache/sticks,cache/sticks_extra").split(","))
 RENDER_FIELDS = ("two_theta", "intensity", "hkl", "d_hkl", "recip")
-EMBED_FIELDS = ("atom_z", "atom_frac", "cell", "n_atoms")
+EMBED_FIELDS = ("atom_z", "atom_frac", "cell", "n_atoms", "ops")
 SPECS = {"cos_zs": dict(l_deg=0.0), "wcc_1": dict(l_deg=1.0), "wcc_2": dict(l_deg=2.0), "lnq": dict(lnq=True)}
 # lnq costs ~10x the others (a 16-step zero-offset scan per query), so it runs on the bkg variant only.
 VARIANTS = {"pearson": ("raw", "bkg"), "cos_zs": ("raw", "bkg"), "wcc_1": ("raw", "bkg"),
@@ -99,8 +99,15 @@ def shard_table(limit: "int | None") -> "list[tuple[str, int, int]]":
 
 
 def load_records(path: str, lo: int, hi: int, fields) -> "list[dict]":
+    """`fields` may include "ops": the shard's symmetry operators from cache/symops (scripts/40_symops.py)."""
+    want = [f for f in fields if f != "ops"]
     with np.load(path, allow_pickle=True) as z:
-        cols = {f: z[f][lo:hi] for f in fields}
+        cols = {f: z[f][lo:hi] for f in want}
+        refs = z["refcode"] if "ops" in fields else None
+    if "ops" in fields:
+        from xrdclip.data.dataset import load_symops
+        ops = load_symops(path, refs)
+        cols["ops"] = ops[lo:hi] if ops is not None else [None] * (hi - lo)
     return [{f: cols[f][i] for f in fields} for i in range(hi - lo)]
 
 
@@ -209,12 +216,11 @@ def _embed_shard(job) -> "tuple[str, float]":
         return out_npy, 0.0
     import torch
     from xrdclip.eval.retrieve import embed_library
-    from xrdclip.models.clip import XRDClip
+    from xrdclip.models.clip import load_checkpoint
     unthrottle()
     torch.set_num_threads(4)
     t0 = time.time()
-    model = XRDClip(embed_dim=embed_dim)
-    model.load_state_dict(torch.load(ckpt, map_location="cpu")["model"])
+    model = load_checkpoint(ckpt)
     model.eval()
     store = {str(i): r for i, r in enumerate(load_records(path, 0, n, EMBED_FIELDS))}
     with torch.no_grad():
@@ -328,7 +334,7 @@ def main() -> int:
         return box_main(args)
 
     import torch
-    from xrdclip.models.clip import XRDClip
+    from xrdclip.models.clip import load_checkpoint
 
     unthrottle()
     torch.set_num_threads(4)
@@ -352,8 +358,7 @@ def main() -> int:
           f"{sum(bool(q['sets']['sc'][0]) for q in qinfo)}", flush=True)
 
     # ---- model: library embeddings + query embeddings -------------------------------------------
-    model = XRDClip(embed_dim=args.embed_dim)
-    model.load_state_dict(torch.load(args.ckpt, map_location="cpu")["model"])
+    model = load_checkpoint(args.ckpt)
     model.eval()
     from multiprocessing import Pool
     emb_jobs = [(p, n, args.ckpt, args.embed_dim,

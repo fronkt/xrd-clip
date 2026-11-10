@@ -295,10 +295,9 @@ def model_side(args, shards, Q, probes, stem, ks):
     """Model scores of the queries + probe statistics of every library entry, on the CPU."""
     import torch
     from xrdclip.data import augment as A
-    from xrdclip.models.clip import XRDClip
+    from xrdclip.models.clip import load_checkpoint
     torch.set_num_threads(args.threads)
-    model = XRDClip(embed_dim=args.embed_dim)
-    model.load_state_dict(torch.load(args.ckpt, map_location="cpu")["model"])
+    model = load_checkpoint(args.ckpt)
     model.eval()
     emb_dir = args.emb_dir or args.work
     lib_emb = np.concatenate([np.load(os.path.join(emb_dir, f"emb_{os.path.basename(os.path.dirname(p))}_"

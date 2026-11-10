@@ -385,10 +385,9 @@ def ranks_from_scores(Sk, sets, nq: int) -> dict:
 def model_scores(args, shards, raw: np.ndarray) -> np.ndarray:
     import torch
     from xrdclip.data import augment as A
-    from xrdclip.models.clip import XRDClip
+    from xrdclip.models.clip import load_checkpoint
     torch.set_num_threads(args.threads)
-    model = XRDClip(embed_dim=args.embed_dim)
-    model.load_state_dict(torch.load(args.ckpt, map_location="cpu")["model"])
+    model = load_checkpoint(args.ckpt)
     model.eval()
     emb = np.concatenate([np.load(os.path.join(args.work, f"emb_{os.path.basename(os.path.dirname(p))}_"
                                                           f"{os.path.basename(p)[:-4]}_{n}.npy")) for p, n, _ in shards])

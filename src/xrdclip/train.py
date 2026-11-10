@@ -27,8 +27,9 @@ def load_refcodes(path: str) -> "list[str]":
 
 
 def build_loader(store, refcodes, batch_size, augment, workers, shuffle=True, ranges=A.Ranges(),
-                 batch_sampler=None, realism=None):
-    ds = ContrastiveXRDDataset(store, refcodes, augment=augment, ranges=ranges, realism=realism)
+                 batch_sampler=None, realism=None, fixed=False, seed=0):
+    ds = ContrastiveXRDDataset(store, refcodes, augment=augment, ranges=ranges, realism=realism, fixed=fixed,
+                               seed=seed)
     if batch_sampler is not None:
         # batch_sampler already fixes batch composition + size; batch_size/shuffle/drop_last are
         # mutually exclusive with it.
@@ -67,11 +68,19 @@ def main() -> int:
     ap.add_argument("--realism", action="store_true",
                     help="R4c (revision): add measured-pattern effects (K-alpha2, Debye-Waller, per-reflection "
                          "intensity jitter, range crops) and train on the queries' background-removed input")
+    ap.add_argument("--symops", action="store_true",
+                    help="resubmission D1: feed the CIF symmetry operators to the structure encoder (needs "
+                         "cache/symops from scripts/40_symops.py)")
+    ap.add_argument("--val_mode", choices=("clean", "degraded"), default="clean",
+                    help="checkpoint selection on clean validation patterns (original runs) or on a fixed degraded "
+                         "draw of the training distribution (resubmission D3)")
+    ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     os.makedirs(args.out, exist_ok=True)
-    torch.manual_seed(0)
+    torch.manual_seed(args.seed)
+    np.random.seed(args.seed)
 
     if args.smoke:
         args.epochs, args.batch_size, args.workers = 2, 16, 0
@@ -110,21 +119,28 @@ def main() -> int:
         if args.poly_families:
             from xrdclip.data.polymorph import load_families, PolymorphBatchSampler
             fams = load_families(args.poly_families)
-            train_sampler = PolymorphBatchSampler(train_refs, fams, args.batch_size, seed=0)
+            train_sampler = PolymorphBatchSampler(train_refs, fams, args.batch_size, seed=args.seed)
             print(f"[train] polymorph hard-negative batches: {train_sampler.n_families:,} families / "
                   f"{train_sampler.n_family_structs:,} structs, {len(train_sampler):,} batches/epoch")
             train_loader, _ = build_loader(store, train_refs, args.batch_size, train_augment,
                                            args.workers, ranges=train_ranges,
-                                           batch_sampler=train_sampler, realism=realism)
+                                           batch_sampler=train_sampler, realism=realism, seed=args.seed)
         else:
             train_loader, _ = build_loader(store, train_refs, args.batch_size, train_augment,
-                                           args.workers, ranges=train_ranges, realism=realism)
-        val_loader, _ = build_loader(store, val_refs, min(args.batch_size, len(val_refs)),
-                                     False, args.workers, shuffle=False)
+                                           args.workers, ranges=train_ranges, realism=realism, seed=args.seed)
+        if args.val_mode == "degraded":
+            val_loader, _ = build_loader(store, val_refs, min(args.batch_size, len(val_refs)), True,
+                                         args.workers, shuffle=False, ranges=train_ranges, realism=realism,
+                                         fixed=True, seed=12345)
+        else:
+            val_loader, _ = build_loader(store, val_refs, min(args.batch_size, len(val_refs)),
+                                         False, args.workers, shuffle=False)
+        if args.symops and "ops" not in store[train_refs[0]]:
+            raise SystemExit("--symops but the stick store has no operators; run scripts/40_symops.py")
         print(f"[train] {len(train_refs):,} train / {len(val_refs):,} val on {device}")
 
     # --- model ---
-    model = XRDClip(embed_dim=args.embed_dim).to(device)
+    model = XRDClip(embed_dim=args.embed_dim, symops=args.symops).to(device)
     n_params = sum(p.numel() for p in model.parameters())
     print(f"[train] model has {n_params/1e6:.1f}M params")
 
@@ -147,7 +163,7 @@ def main() -> int:
             az, af = batch["atom_z"].to(device), batch["atom_frac"].to(device)
             lat, mask = batch["lattice"].to(device), batch["mask"].to(device)
 
-            logits, _, _ = model(pattern, az, af, lat, mask)
+            logits, _, _ = model(pattern, az, af, lat, mask, batch["ops"].to(device), batch["ops_mask"].to(device))
             loss = clip_loss(logits)
 
             opt.zero_grad()
@@ -193,6 +209,7 @@ def evaluate_inbatch(model, loader, device) -> float:
         logits, _, _ = model(
             batch["pattern"].to(device), batch["atom_z"].to(device),
             batch["atom_frac"].to(device), batch["lattice"].to(device), batch["mask"].to(device),
+            batch["ops"].to(device), batch["ops_mask"].to(device),
         )
         accs.append(batch_topk_accuracy(logits)["top1"])
     return float(np.mean(accs)) if accs else float("nan")

@@ -24,6 +24,25 @@ from xrdclip.data import augment as A
 # Z', failed symmetry analysis) can never OOM a training run. The asymmetric unit is almost always
 # well under this.
 MAX_ENC_ATOMS = 256
+IDENTITY_OP = np.concatenate([np.eye(3, dtype=np.float32), np.zeros((3, 1), np.float32)], axis=1)[None]
+
+
+def symops_twin(sticks_npz: str) -> str:
+    """cache/sticks/shard_000.npz -> cache/sticks_symops/shard_000.npz (scripts/40_symops.py). Kept beside its own
+    stick directory so libraries whose shards share file names (CSD cache/sticks, COD cod/sticks) never mix."""
+    d = os.path.dirname(os.path.abspath(sticks_npz))
+    return os.path.join(d + "_symops", os.path.basename(sticks_npz))
+
+
+def load_symops(sticks_npz: str, refcodes) -> "np.ndarray | None":
+    """Operator arrays aligned with `refcodes` of one stick shard, or None if the twin file does not exist."""
+    twin = symops_twin(sticks_npz)
+    if not os.path.exists(twin):
+        return None
+    with np.load(twin, allow_pickle=True) as z:
+        if not np.array_equal(z["refcode"], np.asarray(refcodes)):
+            raise RuntimeError(f"{twin} is not aligned with {sticks_npz}; rerun scripts/40_symops.py")
+        return z["ops"]
 
 
 class StickStore:
@@ -44,6 +63,7 @@ class StickStore:
                 cell, recip = z["cell"], z["recip"]
                 cols = {f: z[f] for f in self.FIELDS}
                 sg, na = z["spacegroup"], z["n_atoms"]
+                ops = load_symops(path, rcs)
                 for i in keep:
                     self.records[str(rcs[i])] = {
                         "two_theta": cols["two_theta"][i],
@@ -57,6 +77,9 @@ class StickStore:
                         "spacegroup": str(sg[i]),
                         "n_atoms": int(na[i]),
                     }
+                    if ops is not None:
+                        self.records[str(rcs[i])]["ops"] = ops[i]
+                        self.records[str(rcs[i])]["rot"] = ops[i][:, :, :3]
 
         self.refcodes = sorted(self.records)
         if not self.refcodes:
@@ -92,13 +115,17 @@ class ContrastiveXRDDataset(Dataset):
     """Yields (pattern, structure_feats, index) triples. Index is the contrastive label."""
 
     def __init__(self, store: StickStore, refcodes: "list[str]", augment: bool = True,
-                 ranges: A.Ranges = A.Ranges(), seed: int = 0, realism: "A.Realism | None" = None):
+                 ranges: A.Ranges = A.Ranges(), seed: int = 0, realism: "A.Realism | None" = None,
+                 fixed: bool = False):
         self.store = store
         self.refcodes = [rc for rc in refcodes if rc in store.records]
         self.augment = augment
         self.ranges = ranges
         self.seed = seed
         self.realism = realism          # R4c: measured effects + the queries' background removal
+        # fixed=True draws the same degradation for an index every epoch (a degraded validation set that can rank
+        # checkpoints; resubmission D3 selects on it instead of on clean patterns).
+        self.fixed = fixed
         self._feat_cache: dict[str, np.ndarray] = {}
 
     def __len__(self) -> int:
@@ -110,9 +137,9 @@ class ContrastiveXRDDataset(Dataset):
 
         # Per-worker, per-epoch-varying RNG: torch reseeds workers each epoch, so this gives a
         # genuinely fresh degradation every time rather than a fixed per-index one.
-        rng = np.random.default_rng(
+        rng = (np.random.default_rng((self.seed, i)) if self.fixed else np.random.default_rng(
             (self.seed, i, torch.initial_seed() % (2**32), np.random.randint(2**31))
-        )
+        ))
 
         p = A.sample_params(rng, self.ranges) if self.augment else A.CLEAN
         if self.augment and self.realism is not None:
@@ -135,6 +162,7 @@ class ContrastiveXRDDataset(Dataset):
             "lattice": torch.from_numpy(self._feat_cache[rc]),     # (8,)
             "atom_z": torch.from_numpy(az),
             "atom_frac": torch.from_numpy(af),
+            "ops": torch.from_numpy(np.asarray(rec.get("ops", IDENTITY_OP), dtype=np.float32)),
             "index": i,
         }
 
@@ -153,11 +181,44 @@ def collate(batch: "list[dict]") -> dict:
         atom_frac[j, :n] = b["atom_frac"]
         mask[j, :n] = True
 
+    ops, ops_mask = pad_ops([b["ops"] for b in batch])
     return {
         "pattern": torch.stack([b["pattern"] for b in batch]),
         "lattice": torch.stack([b["lattice"] for b in batch]),
         "atom_z": atom_z,
         "atom_frac": atom_frac,
         "mask": mask,
+        "ops": ops,
+        "ops_mask": ops_mask,
         "index": torch.tensor([b["index"] for b in batch], dtype=torch.long),
     }
+
+
+def pad_ops(op_list) -> "tuple[torch.Tensor, torch.Tensor]":
+    """Ragged (n_ops, 3, 4) operator arrays -> (B, O, 3, 4) + mask; a record without operators gets the identity."""
+    op_list = [torch.as_tensor(np.asarray(o if o is not None else IDENTITY_OP, dtype=np.float32)) for o in op_list]
+    O = max(int(o.shape[0]) for o in op_list)
+    ops = torch.zeros(len(op_list), O, 3, 4, dtype=torch.float32)
+    mask = torch.zeros(len(op_list), O, dtype=torch.bool)
+    for j, o in enumerate(op_list):
+        ops[j, :o.shape[0]] = o
+        mask[j, :o.shape[0]] = True
+    return ops, mask
+
+
+def structure_tensors(recs: "list[dict]", cap: "int | None" = None) -> dict:
+    """Structure-encoder inputs for a list of records (library embedding outside the DataLoader). No atom cap by
+    default, which is what library embedding has always done, so earlier embeddings reproduce exactly."""
+    n = [len(r["atom_z"]) if cap is None else min(len(r["atom_z"]), cap) for r in recs]
+    A_max = max(n)
+    az = torch.zeros(len(recs), A_max, dtype=torch.long)
+    af = torch.zeros(len(recs), A_max, 3, dtype=torch.float32)
+    mask = torch.zeros(len(recs), A_max, dtype=torch.bool)
+    lat = torch.zeros(len(recs), 8, dtype=torch.float32)
+    for j, (r, k) in enumerate(zip(recs, n)):
+        az[j, :k] = torch.from_numpy(np.asarray(r["atom_z"], dtype=np.int64)[:k])
+        af[j, :k] = torch.from_numpy(np.asarray(r["atom_frac"], dtype=np.float32)[:k])
+        mask[j, :k] = True
+        lat[j] = torch.from_numpy(structure_features(r))
+    ops, ops_mask = pad_ops([r.get("ops") for r in recs])
+    return {"atom_z": az, "atom_frac": af, "lattice": lat, "mask": mask, "ops": ops, "ops_mask": ops_mask}
