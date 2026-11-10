@@ -82,7 +82,10 @@ def records_at(shards, gs, fields) -> "list[dict]":
                 want.setdefault(si, []).append((j, int(g) - off))
     for si, items in want.items():
         with np.load(shards[si][0], allow_pickle=True) as z:
-            cols = {f: z[f] for f in fields}
+            cols = {f: z[f] for f in fields if f != "ops"}
+            if "ops" in fields:                              # symmetry operators (scripts/40_symops.py)
+                from xrdclip.data.dataset import load_symops
+                cols["ops"] = load_symops(shards[si][0], z["refcode"])
         for j, i in items:
             out[j] = {f: cols[f][i] for f in fields}
     return out

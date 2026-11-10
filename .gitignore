@@ -112,3 +112,4 @@ paper/*.synctex.gz
 !/results/critic2_rerank_zs.json
 !/results/critic2_rerank_x3.json
 !results/wavelength_fit.json
+!results/zzzuwk_texture.json
