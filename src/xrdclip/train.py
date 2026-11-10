@@ -75,6 +75,8 @@ def main() -> int:
                     help="checkpoint selection on clean validation patterns (original runs) or on a fixed degraded "
                          "draw of the training distribution (resubmission D3)")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--resume", action="store_true",
+                    help="continue from <out>/state.pt (written every epoch) so a job chain can outlast a time limit")
     args = ap.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -153,7 +155,17 @@ def main() -> int:
 
     history = []
     best_val = -1.0
-    for epoch in range(args.epochs):
+    start = 0
+    state_path = os.path.join(args.out, "state.pt")
+    if args.resume and os.path.exists(state_path):
+        st = torch.load(state_path, map_location=device)
+        model.load_state_dict(st["model"])
+        opt.load_state_dict(st["opt"])
+        sched.load_state_dict(st["sched"])
+        start, best_val, history = st["epoch"] + 1, st["best_val"], st["history"]
+        torch.set_rng_state(st["torch_rng"].cpu())
+        print(f"[train] resumed from {state_path} at epoch {start} (best val_top1 {best_val:.3f})")
+    for epoch in range(start, args.epochs):
         model.train()
         if train_sampler is not None:
             train_sampler.set_epoch(epoch)      # fresh polymorph-aware shuffle each epoch
@@ -189,6 +201,10 @@ def main() -> int:
         print(f"[e{epoch:03d}] loss={tr_loss:.4f} train_top1={tr_acc:.3f} "
               f"val_top1={val_acc:.3f} tau={1/model.log_temp.exp().item():.3f} ({dt:.1f}s)")
         history.append({"epoch": epoch, "loss": tr_loss, "train_top1": tr_acc, "val_top1": val_acc})
+        torch.save({"model": model.state_dict(), "opt": opt.state_dict(), "sched": sched.state_dict(),
+                    "epoch": epoch, "best_val": best_val, "history": history, "args": vars(args),
+                    "torch_rng": torch.get_rng_state()}, state_path + ".tmp")
+        os.replace(state_path + ".tmp", state_path)
 
         if args.overfit and tr_acc > 0.99:
             print(f"[train] overfit reached top1={tr_acc:.3f} at epoch {epoch} — plumbing OK")
