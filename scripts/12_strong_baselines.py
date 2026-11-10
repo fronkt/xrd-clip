@@ -60,6 +60,12 @@ def thermal_axis_strain(cell, dT: float, rng) -> tuple:
     return tuple(float(x) for x in alpha * dT)
 
 
+def bfdh_axis(rec) -> tuple:
+    """Bravais-Friedel-Donnay-Harker: the dominant face is the allowed plane of largest d, i.e. the first stick."""
+    h = np.asarray(rec["hkl"])[int(np.argmin(np.asarray(rec["two_theta"])))]
+    return tuple(int(x) for x in h)
+
+
 def conditions():
     """name -> fn(rec, rng) -> Params. One Params per query, so per-crystal draws are possible."""
     out = {"clean": lambda rec, rng: A.CLEAN}
@@ -85,6 +91,11 @@ def conditions():
         out[f"field_thermal_{name}"] = (lambda base, zb, dT: lambda rec, rng: replace(
             base, zero_offset=float(rng.uniform(-zb, zb)),
             axis_strain=thermal_axis_strain(rec["cell"], dT, rng)))(base, zb, dT)
+    # resubmission D3 (referee 1, RSC Advances): texture along each crystal's own BFDH axis, the normal of its
+    # largest-d allowed reflection (the first stick; absent reflections carry no intensity), plates (r < 1) and
+    # needles (r > 1). The (001) conditions above apply one axis to every crystal.
+    for r in (0.5, 0.7, 0.8, 0.9, 1.1, 1.25, 1.5, 2.0):
+        out[f"march_bfdh={r:g}"] = (lambda r: lambda rec, rng: A.sweep_params(march=r, po_axis=bfdh_axis(rec)))(r)
     base_kw, zb, sb = FIELD["moderate"]
     base = A.sweep_params(**base_kw)
     out["sign_cancel"] = (lambda p: lambda rec, rng: p)(replace(base, zero_offset=zb, strain=sb))
@@ -129,7 +140,7 @@ def main() -> int:
 
     from xrdclip.data.dataset import StickStore
     from xrdclip.data.polymorph import load_families, family_groups
-    from xrdclip.models.clip import XRDClip
+    from xrdclip.models.clip import load_checkpoint
     from xrdclip.eval.retrieve import embed_library
 
     torch.set_num_threads(int(os.environ.get("NTHREADS", os.cpu_count() or 4)))   # nproc lies on capped boxes
@@ -146,8 +157,7 @@ def main() -> int:
     sizes = np.array([len(groups[s]) for s in stems for _ in groups[s]])
     print(f"[strong] {len(stems)} families / {len(fam_idx)} queries; chance {np.mean(1 / sizes):.3f}")
 
-    model = XRDClip(embed_dim=args.embed_dim).to(device)
-    model.load_state_dict(torch.load(args.ckpt, map_location=device)["model"])
+    model = load_checkpoint(args.ckpt, map_location=device).to(device)
     model.eval()
 
     # Clean references: rendered once, shared by every condition.
