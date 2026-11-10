@@ -1,0 +1,11 @@
+{
+ "_doc": "Ground-truth corrections applied by scripts/19_real_bench.build_queries (resubmission D2). Each entry adds same-form refcodes found by the wrong-top-1 audit (scripts/27, final score matrices): an entry of another refcode family that matches the pattern's anchor 15/15 under the strict packing settings of scripts/18. Metadata copied from the opXRD truth file where the same entries appear for another pattern.",
+ "pattern_100.json": {
+  "reason": "QQQAUJ04 (anchor) vs GOFWUV 15/15 rmsd 0.103, vs GOFWUV01 15/15 rmsd 0.140, vs GOFWUV02 15/15 rmsd 0.133 (CCDC packing similarity, 15-molecule shell, H positions ignored, 2026-11-10)",
+  "add_same_form": [
+   {"refcode": "GOFWUV", "n_matched": 15, "rmsd": 0.1032, "is_anchor": false, "temperature": "294 K", "is_powder_study": true, "has_disorder": false, "formula": "C9 H11 N1 O2"},
+   {"refcode": "GOFWUV01", "n_matched": 15, "rmsd": 0.1395, "is_anchor": false, "temperature": "120 K", "is_powder_study": false, "has_disorder": false, "formula": "C9 H11 N1 O2"},
+   {"refcode": "GOFWUV02", "n_matched": 15, "rmsd": 0.1333, "is_anchor": false, "temperature": "120.0 K", "is_powder_study": false, "has_disorder": false, "formula": "C9 H11 N1 O2"}
+  ]
+ }
+}

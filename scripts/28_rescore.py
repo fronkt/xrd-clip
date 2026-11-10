@@ -50,7 +50,17 @@ CONFIGS = {
     "r2_nomask": dict(lnq=2, B=True,  lp=True,  ka2=True,  mask=False, keys=KEYS),
     # 10-14 referee check (Frank's X1): measured patterns put on the Cu grid by bin averaging, not interpolation
     "binavg":    dict(lnq=2, B=False, lp=False, ka2=False, mask=False, grid="binavg", keys=KEYS),
+    # resubmission D2 (referee 1, RSC Advances): intensity convention of the wavelength conversion. "conv" = the
+    # main benchmark with non-Cu queries converted to Cu LP AND area-conserving on the axis change (divide by the
+    # Jacobian d2theta_Cu/d2theta_native), everything else as "main".
+    "conv":      dict(lnq=2, B=False, lp=True, jac=True, ka2=False, mask=False, keys=KEYS),
+    # resubmission D3 practitioner baseline: every library entry re-rendered at 295 K, isotropic strain
+    # alpha_lin (295 - T_entry), alpha_lin = 1.65e-4 / 3 K^-1 (mean volumetric, Bond 2021); entries without a
+    # temperature in K stay as they are. Queries as "conv".
+    "dT":        dict(lnq=2, B=False, lp=True, jac=True, ka2=False, mask=False, dT=True, keys=KEYS),
 }
+ALPHA_LIN = 1.65e-4 / 3
+T_QUERY = 295.0
 BVALUE_JSON = "results/r2_bvalue.json"
 
 
@@ -71,6 +81,29 @@ def lp_factor(tt_cu: np.ndarray, wl: float, kind: str) -> np.ndarray:
     lp_cu = (1 + np.cos(2 * th) ** 2) / (np.sin(th) ** 2 * np.cos(th))
     pol0 = (1 + np.cos(2 * th0) ** 2) if kind in ("cu", "co", "mo") else 2.0
     return lp_cu / (pol0 / (np.sin(th0) ** 2 * np.cos(th0)))
+
+
+def jacobian(tt_cu: np.ndarray, wl: float) -> np.ndarray:
+    """d(2theta_Cu)/d(2theta_native) at the Cu-scale angles tt_cu. A trace moved onto the Cu axis keeps its heights,
+    so its peak areas grow by this factor; dividing by it conserves areas (resubmission D2)."""
+    from xrdclip.data import augment as A
+    th = np.radians(np.asarray(tt_cu, float) / 2)
+    th0 = np.arcsin(np.clip(np.sin(th) * wl / A.WAVELENGTH, 1e-6, 1 - 1e-9))
+    return (A.WAVELENGTH / wl) * np.cos(th0) / np.cos(th)
+
+
+def lib_temperatures(lib_rc: "list[str]") -> np.ndarray:
+    """CSD temperature (K) of every library entry in global order; NaN where the CSD gives none."""
+    from xrdclip.eval.real_patterns import temp_k
+    t = {}
+    for d in ("cache/csd", "cache/real_extra"):
+        for sh in sorted(p for p in os.listdir(d) if p.endswith(".jsonl.gz")):
+            with gzip.open(os.path.join(d, sh), "rt", encoding="utf-8") as fh:
+                for line in fh:
+                    r = json.loads(line)
+                    v = temp_k(r.get("temperature"))
+                    t[r["refcode"]] = np.nan if v is None else v
+    return np.array([t.get(rc, np.nan) for rc in lib_rc], np.float64)
 
 
 def b_value(cfg: dict) -> float:
@@ -156,6 +189,8 @@ def build_queries(cfg: dict, gidx: dict, args):
         y, m = to_cu_grid(o["two_theta"], o["intensity"], wl, method=cfg.get("grid", "interp"))
         if cfg["lp"] and kind != "cu":
             y = np.where(m, y * lp_factor(A.GRID, wl, kind), 0).astype(np.float32)
+        if cfg.get("jac") and kind != "cu":
+            y = np.where(m, y / jacobian(A.GRID, wl), 0).astype(np.float32)
         raw.append(preprocess(y, m, bkg=True))
         kinds.append(kind)
         masks.append(m)
@@ -175,9 +210,14 @@ def lnq_mask(m: np.ndarray) -> np.ndarray:
 # ------------------------------------------------------------------------------------------------
 # library rendering (worker processes)
 # ------------------------------------------------------------------------------------------------
-def render(recs: "list[dict]", B: float, rho: "float | None") -> np.ndarray:
-    """Clean library patterns, optionally with an overall B and a K-alpha2 copy at sin(theta) x rho."""
+def render(recs: "list[dict]", B: float, rho: "float | None", strain: "np.ndarray | None" = None) -> np.ndarray:
+    """Clean library patterns, optionally with an overall B, a K-alpha2 copy at sin(theta) x rho and a per-entry
+    isotropic strain (the 295 K re-rendering)."""
     from xrdclip.data import augment as A
+    if strain is not None:
+        assert not B and rho is None
+        return np.stack([A.render_sticks(r, A.sweep_params(strain=float(e)) if np.isfinite(e) else A.CLEAN)
+                         for r, e in zip(recs, strain)]).astype(np.float32)
     if not B and rho is None:
         return bench.render(recs)
     ys = []
@@ -202,9 +242,9 @@ def render(recs: "list[dict]", B: float, rho: "float | None") -> np.ndarray:
 
 def _render_job(job):
     from xrdclip.eval import strong_baselines as SB
-    cid, path, lo, hi, g0, B, rhos, lnq_v, need_lnq = job
+    cid, path, lo, hi, g0, B, rhos, lnq_v, need_lnq, strain = job
     recs = bench.load_records(path, lo, hi, bench.RENDER_FIELDS)
-    libs = {"k1": render(recs, B, None)}
+    libs = {"k1": render(recs, B, None, strain)}
     for name, rho in rhos.items():
         libs[name] = render(recs, B, rho)
     lnq = ({k: np.stack([SB._to_lnq(y, 0.0, lnq_v) for y in v]).astype(np.float32) for k, v in libs.items()}
@@ -318,7 +358,14 @@ def cmd_score(args) -> int:
         S[k] = np.lib.format.open_memmap(p, mode="r+" if os.path.exists(p) else "w+", dtype=np.float32, shape=(nq, N))
     done_path = os.path.join(out, "done_chunks.txt")
     done = set(int(x) for x in open(done_path).read().split()) if os.path.exists(done_path) else set()
-    jobs = [j + (B, rhos, cfg["lnq"], need_lnq) for j in bench.chunk_jobs(shards, args.chunk) if j[0] not in done]
+    strain = None
+    if cfg.get("dT"):
+        temps = lib_temperatures(lib_rc)
+        strain = ALPHA_LIN * (T_QUERY - temps)
+        print(f"[score] 295 K library: {np.isfinite(temps).sum():,} of {N:,} entries have a temperature; median "
+              f"{np.nanmedian(temps):.0f} K; median strain {np.nanmedian(strain) * 100:.2f} %", flush=True)
+    jobs = [j + (B, rhos, cfg["lnq"], need_lnq, None if strain is None else strain[j[4]:j[4] + j[3] - j[2]])
+            for j in bench.chunk_jobs(shards, args.chunk) if j[0] not in done]
     print(f"[score] {len(jobs)} chunks to run ({len(done)} done), {args.workers} render workers, "
           f"{args.threads} torch threads", flush=True)
 

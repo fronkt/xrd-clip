@@ -33,7 +33,9 @@ def pairs() -> int:
     truth = {t["id"]: t for t in json.load(open(f"{DATA}/opxrd/opxrd_truth.json"))}
     out = []
     for key in KEYS:
-        S = np.load(f"cache/real_bench/full/S_{key}.npy", mmap_mode="r")
+        # the final matrices: ln q v2 from the 10-13 rescore (cache/real_bench_lnq2), the rest identical in both dirs.
+        # The first audit (10-12) read cache/real_bench/full, i.e. ln q v1, and missed 6 final cases (resubmission D2).
+        S = np.load(f"cache/real_bench_lnq2/full/S_{key}.npy", mmap_mode="r")
         for qi, q in enumerate(qinfo):
             row = np.asarray(S[qi], dtype=np.float32)
             for td in ("std", "sc"):
@@ -62,8 +64,10 @@ def compare() -> int:
     ps.settings.ignore_hydrogen_positions = True
     ps.settings.allow_molecular_differences = False
     ps.settings.timeout_ms = 30000
-    todo = sorted({(a, p["wrong"]) for p in json.load(open(PAIRS)) for a in p["anchors"]})
-    res = {}
+    import os
+    res = json.load(open(PACK)) if os.path.exists(PACK) else {}       # incremental: reuse finished pairs
+    todo = sorted({(a, p["wrong"]) for p in json.load(open(PAIRS)) for a in p["anchors"]} -
+                  {tuple(k.split("|")) for k in res})
     for i, (a, w) in enumerate(todo):
         try:
             r = ps.compare(reader.crystal(a), reader.crystal(w))

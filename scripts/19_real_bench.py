@@ -130,6 +130,16 @@ def build_queries(truth_path: str, patterns_path: str, gidx: dict) -> "tuple[lis
             if m.sum() * A.STEP < 10.0:       # pattern_706: 2theta axis runs 0.01-0.83 (radians?)
                 excluded[t["id"]] = f"covers {m.sum() * A.STEP:.1f} deg of the 5-50 deg grid (axis {o['tt_range']})"
     truth = [t for t in all_truth if t["id"] not in excluded]
+    # audited label corrections (resubmission D2); XRD_NO_TRUTH_CORRECTIONS=1 reproduces the submitted labels
+    corr_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "refcodes", "truth_corrections.json")
+    if os.path.exists(corr_path) and not os.environ.get("XRD_NO_TRUTH_CORRECTIONS"):
+        corr = json.load(open(corr_path))
+        for t in truth:
+            for x in corr.get(t["id"], {}).get("add_same_form", []):
+                if x["refcode"] not in {y["refcode"] for y in t["same_form"]}:
+                    t["same_form"].append(x)
+                t["unknown"] = [y for y in t["unknown"] if y["refcode"] != x["refcode"]]
+                t["other_form"] = [y for y in t["other_form"] if y["refcode"] != x["refcode"]]
     qinfo = []
     for t in truth:
         same = [x for x in t["same_form"] if x["refcode"] in gidx]
