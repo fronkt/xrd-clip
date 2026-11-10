@@ -623,3 +623,12 @@ prose = full ARIS rewrite, Frank reviews. -> D1 started.
   Rescores conv + dT RUNNING locally (logs/rescore_conv.log, rescore_dT.log). ANVIL D3 SUBMITTED (nice 100, bundle
   43f94d9 at $PROJECT/xrd-clip, d3.tar md5 00a118f6): d3_fix 22141344(+45), d3_sym_s0 22141346(+47),
   d3_sym_s1 22141348(+49); logs /anvil/scratch/x-fcai3/xrdclip_ops/. Login-node smoke dies (memory), untestable there.
+- RSOS requirements (royalsociety.org author guidelines, read 11-10; royalsocietypublishing.org 403s -> read article
+  types/limits/subject areas/soundness policy in Chrome before formatting): abstract <= 200 words, no refs, no
+  unexplained acronyms; 3-10 keywords; British English; Vancouver numbered refs (Open Biology style); figures >= 300 dpi
+  separate at final, labels TNR 9 pt, '(a)' italic; initial submission format-free; end statements (Ethics, AI use,
+  Data/code/materials, Competing interests, CRediT) go in the ScholarOne form, Funding + Acknowledgements stay in the
+  manuscript; data/code in DOI repos with CC0/CC-BY (Zenodo OK), "available on request" NOT permitted (CSD structures:
+  state licence + refcode lists + COD replica); AI: must disclose, and "use of AI in language editing must be declared";
+  APC GBP 1400 / USD 1960 on acceptance; peer review reports published (anonymous unless signed). RSC Advances is not a
+  formal RS transfer route: new submission, state the previous submission.
