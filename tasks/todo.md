@@ -575,3 +575,43 @@ Format facts (verified urtc.mit.edu): ≤5 pages hard, IEEE conference template,
 - [x] fronkt/xrd-clip PUBLIC (GitHub detects MIT); Zenodo 23446290 PUBLISHED 10-18 (14 files, md5 verified; cod_replica sticks split into 6 shard zips), DOI resolves
 - [x] ScholarOne rscadv Steps 1-7 complete (Purdue covers the APC; AI statement unchanged per Frank)
 - [x] SUBMITTED 2026-10-18 to RSC Advances: manuscript ID RA-ART-10-2026-010272 (Frank's go)
+
+## D. Resubmission after RSC Advances rejection (2026-11-10) - PLAN, NOT STARTED (waiting on Frank)
+
+Defect list + referee/board matching: D:\blindreads\run-2026-11-10-m\REVIEW_BOARD_vs_REFEREES.md (outside the public repo:
+referee text is confidential). aris:resubmit-pipeline returned BLOCKED / out_of_scope_microedit: it is text-only, and the
+fixes below need code changes and reruns. ARIS chain instead: experiment-plan -> experiment-bridge -> auto-review-loop
+(Codex gpt-6.1-sol) -> text rewrite -> paper-claim-audit + citation-audit + kill-argument -> package.
+
+D1 Code fixes + tests (local, $0)
+- [ ] Kα2 under strain: realism_sticks must give Kα2 copies their own d (or strain acting on 2θ through each line's λ);
+      add an interaction test that renders through the full training path and checks the doublet survives.
+- [ ] March-Dollase per contributing hkl: keep pymatgen's per-family hkls + multiplicities, apply P(α) before summing;
+      test against a cubic {100} hand case (r 0.5, axis 001 -> 2.902).
+- [ ] Structure encoder sees the space group (symmetry ops, or the full cell): decide which form (Frank / design note).
+- [ ] Fix the simulate.py:106 comment.
+D2 Benchmark repairs (local CPU + CCDC interpreter)
+- [ ] Rerun the script-27 audit on the FINAL score matrices (6 unchecked cases); correct GOFWUV; regenerate the numbers.
+- [ ] Doc + check: the two-anchor procedure (script 18:172) vs the text's "every anchor".
+- [ ] 3 no-wavelength patterns (144 DOCNEP, 758 DISLID, 917 MIGQOJ): λ from the COD CIF, else fit from the deposited
+      cell; report the exclusion sensitivity (Codex: classical 0.72-0.88 / 0.32-0.52, model 0.017 / 0).
+- [ ] Intensity convention: LP ratio + Jacobian applied in the MAIN benchmark (not only the 3.7 package); rescore (GPU port).
+- [ ] Lenient anchors: list all 35 with what was ignored; strict-only sensitivity.
+- [ ] ZZZUWK: full per-reflection table; fit March-Dollase r over the low-index axes; check vs the deposited COD Rietveld
+      model / calc profile if present.
+D3 Experiments (GPU, needs credit: Vast left $4.33)
+- [ ] Texture sweep rerun with corrected PO, per-structure BFDH axis (CSD API) and r 0.5-2.0.
+- [ ] Retrain(s): (a) fixed Kα2 realism; (b) + space-group-aware encoder; checkpoint selected on DEGRADED validation;
+      >= 2 seeds if budget allows. Rough cost $5-15 per 60-epoch run (earlier estimate $2-25).
+- [ ] Practitioner baselines on the 37 ambient single-crystal patterns: ΔT-rescaled reference cells (cheap), and
+      Pawley/Le Bail or index+cell search on the ln q shortlist (bigger; scope with Frank).
+D4 Paper
+- [ ] Headline = ambient single-crystal set; pressure series reported separately.
+- [ ] Retitle around the benchmark + one model; abstract without gapping; one meaning of "five".
+- [ ] Section 4.5 rewritten from the corrected retrain; "costs" -> resulting top-1; the sign flip (366 vs 376);
+      Table 1/2 widths; the polymorph "one in three" claim checked against ref. 4; B/Si filter; radian pattern.
+- [ ] Clarify why the training-overlap test is a control (Referee 2 misread it); define the structure encoder with a schematic.
+- [ ] Prose: Frank's voice; AI-tell rules in the review doc Section 4; AI-use statement accurate (Claude wrote + ran
+      pipeline code) and grammatical.
+- [ ] Response to the previous reviews (RSOS asks that the RSC Advances history be stated).
+D5 Gates: verify_claims, aris paper-claim-audit, citation-audit, kill-argument (gpt-6.1-sol); Frank reads; package.
