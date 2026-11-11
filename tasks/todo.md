@@ -632,3 +632,7 @@ prose = full ARIS rewrite, Frank reviews. -> D1 started.
   state licence + refcode lists + COD replica); AI: must disclose, and "use of AI in language editing must be declared";
   APC GBP 1400 / USD 1960 on acceptance; peer review reports published (anonymous unless signed). RSC Advances is not a
   formal RS transfer route: new submission, state the previous submission.
+- 11-10 rescores (corrected labels; results/rescore_{main,conv,dT}.json): main std classical 0.71-0.88, sc (now 31
+  compounds) 0.30-0.52, model 0.016 / 0. conv (LP + Jacobian) moves every score <= 0.012, none resolved; model 0.016 ->
+  0. dT (295 K library, 274,224 entries with T, median strain 0.67 %): std Pearson -0.043 [-0.082, -0.006], sc +0.03
+  (Pearson, cos, WCC-2) n.s., ln q unchanged (isotropic, as expected). Cheap ΔT baseline does not rescue the hard case.
