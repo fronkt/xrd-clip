@@ -436,7 +436,7 @@ def model_scores(args, shards, raw: np.ndarray) -> np.ndarray:
     torch.set_num_threads(args.threads)
     model = load_checkpoint(args.ckpt)
     model.eval()
-    emb = np.concatenate([np.load(os.path.join(args.work, f"emb_{os.path.basename(os.path.dirname(p))}_"
+    emb = np.concatenate([np.load(os.path.join(args.emb_dir or args.work, f"emb_{os.path.basename(os.path.dirname(p))}_"
                                                           f"{os.path.basename(p)[:-4]}_{n}.npy")) for p, n, _ in shards])
     with torch.no_grad():
         q = model.encode_pattern(torch.from_numpy(np.stack([A.standardize(y) for y in raw])).unsqueeze(1))
@@ -491,7 +491,7 @@ def cmd_eval(args) -> int:
                 ranks[f"{td}|model@{K}->{key}"] = np.array(
                     [hybrid_rank(s_model[qi], np.asarray(S_cls[key][qi]), *sets[td][qi], K, N) if len(sets[td][qi][0])
                      else -1 for qi in range(nq)], dtype=np.int64)
-    np.savez_compressed(os.path.join(out, "ranks.npz"), **ranks)
+    np.savez_compressed(args.ranks_out or os.path.join(out, "ranks.npz"), **ranks)
 
     base = base_ranks(args, args.base) if args.base else {}
     boot = bench.compound_bootstrap(stems)
@@ -547,6 +547,9 @@ def main() -> int:
     ap.add_argument("--chunk", type=int, default=4096)
     ap.add_argument("--ckpt", default="runs/xrdclip_poly/best.pt")
     ap.add_argument("--embed_dim", type=int, default=256)
+    ap.add_argument("--emb_dir", default=None, help="eval: library structure embeddings of --ckpt (default: --work)")
+    ap.add_argument("--ranks_out", default=None, help="eval: ranks file (default: <work>/rescore_<tag>/ranks.npz, which "
+                                                      "scripts/43 reads; give a retrained model its own file)")
     ap.add_argument("--n", type=int, default=5000, help="bvalue: entries to sample")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default=None)

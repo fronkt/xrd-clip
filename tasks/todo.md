@@ -636,3 +636,14 @@ prose = full ARIS rewrite, Frank reviews. -> D1 started.
   compounds) 0.30-0.52, model 0.016 / 0. conv (LP + Jacobian) moves every score <= 0.012, none resolved; model 0.016 ->
   0. dT (295 K library, 274,224 entries with T, median strain 0.67 %): std Pearson -0.043 [-0.082, -0.006], sc +0.03
   (Pearson, cos, WCC-2) n.s., ln q unchanged (isotropic, as expected). Cheap ΔT baseline does not rescue the hard case.
+- 11-17: D3 retrains DONE on Anvil (60 epochs, rc 0; best degraded-val top-1): d3_fix 0.842, d3_sym_s0 0.864,
+  d3_sym_s1 0.862 (runs at $PROJECT/xrd-clip/runs/d3_*). Frank 11-17: go on the evaluation. Plan:
+  - [ ] E1 code: scripts/44_d3_embed.py (library structure + pattern embeddings on cuda, TF32 off, symops-twin guard,
+        GPU/CPU parity check); 28 eval gains --emb_dir/--ranks_out (rescore_main/ranks.npz stays the original model's,
+        43 reads it). Local smoke: the realism checkpoint reproduces cache/real_bench_realism rows.
+  - [ ] E2 Anvil (GPU partition only; CPU SUs are nearly gone): bundle -> HEAD; upload sticks_extra(+symops) and the
+        exact lib_clean_f16.npy (render unchanged by D1: 800 sampled rows identical); one job = 44 for the 3 runs, then
+        12 sweep (--no_vc --lnq_version 2, 43 conditions incl. 8 march_bfdh) per run -> results/sbv3_<run>_<group>.
+  - [ ] E3 pull embeddings to cache/real_bench_<run>; local 30 eval (ladder, measured, p2p) -> results/model_gap_<run>.json,
+        28 eval --tag main --base main -> results/rescore_main_<run>.json (paired vs the original model).
+  - [ ] E4 summary table for Frank (which checkpoint is the paper's model), then D4 rewrite.
