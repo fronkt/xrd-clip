@@ -1,6 +1,7 @@
 """Is the learned model's failure discrimination or the measured-to-simulated gap? (referee 10-12)
 
   PYTHONPATH=src python scripts/26_model_probe_check.py      -> results/model_probe_check.json
+  PYTHONPATH=src python scripts/26_model_probe_check.py --ckpt runs/d3_sym_s0/best.pt --emb_dir cache/real_bench_d3_sym_s0 \n      --out results/d3/model_probe_check_d3_sym_s0.json         (a retrained model)
 
 The 8,000 hubness probes (21 prep) are library entries rendered either cleanly, exactly like the library
 patterns, or with the training-time degradations and then background-subtracted like the measured queries.
@@ -11,6 +12,7 @@ simulated probes, its problem is discrimination at library scale, not the gap to
 """
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import sys
@@ -28,13 +30,18 @@ from xrdclip.models.clip import load_checkpoint  # noqa: E402
 
 
 def main() -> int:
-    work, ckpt = "cache/real_bench", "runs/xrdclip_poly/best.pt"
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--ckpt", default="runs/xrdclip_poly/best.pt")
+    ap.add_argument("--emb_dir", default="cache/real_bench", help="library structure embeddings of --ckpt")
+    ap.add_argument("--out", default="results/model_probe_check.json")
+    args = ap.parse_args()
+    work, ckpt = "cache/real_bench", args.ckpt            # work: the probes (hub_ctx.npz)
     torch.set_num_threads(4)
     shards = bench.shard_table(None)
     lib_rc = hubm.library_refcodes(shards)
     stem = hubm.stems_of(lib_rc)
     lib_emb = torch.from_numpy(np.concatenate([np.load(os.path.join(
-        work, f"emb_{os.path.basename(os.path.dirname(p))}_{os.path.basename(p)[:-4]}_{n}.npy")) for p, n, _ in shards]
+        args.emb_dir, f"emb_{os.path.basename(os.path.dirname(p))}_{os.path.basename(p)[:-4]}_{n}.npy")) for p, n, _ in shards]
     ).astype(np.float32))
     hub = np.load(os.path.join(work, "hub_ctx.npz"))
     probes, pg = hub["P__raw"], hub["probe_g"]
@@ -85,7 +92,8 @@ def main() -> int:
             out[f"{name}|{td}"] = {"n": int(len(r)), "top1": float((r == 0).mean()), "top10": float((r < 10).mean()),
                                    "median_rank": float(np.median(r) + 1)}
             print(name, td, out[f"{name}|{td}"], flush=True)
-    with open("results/model_probe_check.json", "w") as fh:
+    out["ckpt"] = ckpt
+    with open(args.out, "w") as fh:
         json.dump(out, fh, indent=1)
     return 0
 
