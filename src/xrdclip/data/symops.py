@@ -46,7 +46,8 @@ def parse_op(op: str) -> np.ndarray:
 
 
 def parse_symops(cif: str) -> np.ndarray:
-    """All operators of the first symop loop in `cif`; identity only if the CIF has none."""
+    """All operators of the first symop loop in `cif`; without a loop, the operators of its space-group symbol
+    (ops_from_symbol); identity only if the CIF has neither."""
     lines = cif.splitlines()
     for i, line in enumerate(lines):
         if line.strip() != "loop_":
@@ -71,7 +72,46 @@ def parse_symops(cif: str) -> np.ndarray:
             j += 1
         if ops:
             return np.stack(ops)
+    sym = ops_from_symbol(cif)
+    if sym is not None:
+        return sym
     return np.concatenate([np.eye(3, dtype=np.float32), np.zeros((3, 1), np.float32)], axis=1)[None]
+
+
+_HALL_TAGS = ("_symmetry_space_group_name_hall", "_space_group_name_hall")
+_HM_TAGS = ("_symmetry_space_group_name_h-m", "_space_group_name_h-m_alt")
+
+
+def _tag_value(lines: "list[str]", tags: tuple) -> "str | None":
+    for ln in lines:
+        parts = ln.strip().split(None, 1)
+        if len(parts) == 2 and parts[0].lower() in tags:
+            v = parts[1].strip().strip("'\"").strip()
+            if v and v not in ("?", "."):
+                return v
+    return None
+
+
+def ops_from_symbol(cif: str) -> "np.ndarray | None":
+    """Operators generated from the space-group symbol, for a CIF without an operator loop (some older COD entries
+    give only the Hall and H-M symbols; every CSD CIF written by the CSD API has the loop). The Hall symbol is
+    preferred because it fixes setting and origin; an H-M symbol takes gemmi's default setting. pymatgen built those
+    entries' cells from the same symbols, and scripts/40 --check compares the expanded sites with pymatgen's."""
+    lines = cif.splitlines()
+    try:
+        import gemmi
+        hall = _tag_value(lines, _HALL_TAGS)
+        if hall:
+            g = gemmi.symops_from_hall(hall)
+        else:
+            hm = _tag_value(lines, _HM_TAGS)
+            sg = gemmi.find_spacegroup_by_name(hm) if hm else None
+            if sg is None:
+                return None
+            g = sg.operations()
+        return np.stack([parse_op(op.triplet()) for op in g])
+    except (ImportError, RuntimeError, ValueError):
+        return None
 
 
 def expand(frac: np.ndarray, ops: np.ndarray, tol: float = 1e-3) -> np.ndarray:

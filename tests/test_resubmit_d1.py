@@ -113,6 +113,18 @@ _cell_length_a 5
     assert parse_symops("data_y\n_cell_length_a 5\n").shape == (1, 3, 4)       # no loop -> identity
 
 
+def test_parse_symops_from_symbol_without_loop():
+    """Older COD CIFs give only the symbols (e.g. COD 2001164): the operators come from the Hall symbol."""
+    hall_only = "data_z\n_symmetry_space_group_name_Hall  'C -2yc'\n_symmetry_space_group_name_H-M   'C 1 c 1'\n"
+    ops = parse_symops(hall_only)
+    want = {"x,y,z", "x,-y,z+1/2", "x+1/2,y+1/2,z", "x+1/2,-y+1/2,z+1/2"}
+    assert ops.shape == (4, 3, 4)
+    assert {tuple(np.round(o, 4).ravel()) for o in ops} == {tuple(np.round(parse_op(w), 4).ravel()) for w in want}
+    assert len(expand(np.array([[0.1, 0.2, 0.3]], np.float32), ops)) == 4
+    hm_only = "data_w\n_space_group_name_H-M_alt 'P 1 21/c 1'\n"
+    assert parse_symops(hm_only).shape == (4, 3, 4)
+
+
 def test_symops_encoder_forward_and_operator_order_invariance():
     from xrdclip.data.dataset import structure_tensors
     from xrdclip.models.clip import XRDClip

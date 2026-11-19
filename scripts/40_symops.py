@@ -91,23 +91,32 @@ def main() -> int:
                 from pymatgen.core import Structure
                 idx = rng.choice(len(refs), size=min(a.check, len(refs)), replace=False)
                 bad = []
+                bad_pos = []
                 for i in idx:
                     cif = cifs[str(refs[i])]
                     try:
-                        n_full = len(Structure.from_str(cif, fmt="cif"))
+                        full = Structure.from_str(cif, fmt="cif")
                     except Exception:   # Z' < 1 entries: the same lenient parse simulate.py falls back to
                         from pymatgen.io.cif import CifParser
-                        n_full = len(CifParser.from_str(cif, occupancy_tolerance=8.01).parse_structures(
-                            primitive=False)[0])
-                    if len(expand(frac[i], ops[i])) != n_full:
+                        full = CifParser.from_str(cif, occupancy_tolerance=8.01).parse_structures(primitive=False)[0]
+                    ex = expand(frac[i], ops[i])
+                    if len(ex) != len(full):
                         bad.append(str(refs[i]))
-                print(f"{path}: check {len(idx)}, mismatches {len(bad)} {bad[:10]}", flush=True)
+                        continue
+                    # every regenerated site must be one of pymatgen's sites (same frame, periodic distance)
+                    d = np.abs(ex[:, None, :] - (np.asarray(full.frac_coords) % 1.0)[None])
+                    if (np.minimum(d, 1 - d).max(axis=2).min(axis=1) > 2e-3).any():
+                        bad_pos.append(str(refs[i]))
+                print(f"{path}: check {len(idx)}, count mismatches {len(bad)} {bad[:10]}, "
+                      f"position mismatches {len(bad_pos)} {bad_pos[:10]}", flush=True)
                 continue
             out = os.path.join(out_dir, os.path.basename(path))
             np.savez_compressed(out, refcode=refs, ops=np.array(ops, dtype=object), allow_pickle=True)
             n = np.array([len(o) for o in ops])
-            print(f"{out}: {len(refs)} entries, n_ops min {n.min()} median {int(np.median(n))} max {n.max()}",
-                  flush=True)
+            no_loop = sum(not any(t in cifs[str(r)].lower() for t in ("_symmetry_equiv_pos_as_xyz",
+                                                                       "_space_group_symop_operation_xyz")) for r in refs)
+            print(f"{out}: {len(refs)} entries, n_ops min {n.min()} median {int(np.median(n))} max {n.max()}; "
+                  f"{no_loop} without an operator loop (operators from the space-group symbol)", flush=True)
     return 0
 
 
