@@ -679,3 +679,34 @@ prose = full ARIS rewrite, Frank reviews. -> D1 started.
   - [ ] Frank: which checkpoint is the paper's model. The plan's rule selects epochs on degraded validation; no rule
         between runs. By degraded val: d3_sym_s0 (0.864). d3_fix is best on the real benchmark, which is the test set.
   - [ ] optional: poly sweep rerun on Anvil at HEAD (same platform as sbv3; adds poly's 8 BFDH conditions).
+
+## D-rest. Frank 2026-11-19: "Pick the space group aware then. Carry out everything then rewrite for RSOS"
+Decisions (11-19):
+- Paper model = d3_sym (space-group-aware encoder + Kα2/March-Dollase fixes, epochs selected on degraded validation).
+  Checkpoint d3_sym_s0 (best degraded val 0.864, the pre-set criterion); seed s1 reported beside it; d3_fix = ablation
+  without the symmetry encoder; poly = the RSC Advances model (ESI comparison + deviations table only).
+- Intensity convention: main stays as submitted; conv (LP + area Jacobian) is a reported sensitivity in the main text
+  (classical change <= 0.012, ln q 0.883 / sc 0.472 unchanged). Switching the primary would rerun every downstream
+  analysis (critic2 re-rank, hubness, Kaduk, label sensitivity) for changes inside the CIs. DEVIATES from the D2 line
+  "applied in the MAIN benchmark" -> flag to Frank.
+F1 Model numbers for d3_sym (local unless noted)
+- [ ] poly sweep at HEAD on Anvil (job 22319852, gpu-debug) -> results/d3/sbv3_poly_*; 45 prefers it over sbv2.
+- [ ] 28 eval --tag conv for d3_sym_s0/s1, d3_fix (sensitivity rows).
+- [ ] every other model-dependent analysis on d3_sym_s0 (+ s1 where cheap): hubness (21), COD replica (R5, needs COD
+      library embeddings), Kaduk external set (37), subgroups / label sensitivity (43); 22_paper_numbers model rows.
+F2 D2 leftovers
+- [ ] same-form sets against EVERY anchor (CCDC; 18 used the 2 lowest-RMSD anchors): diff the sets, rescore if any change.
+- [ ] lenient anchors: table of the 35 (what differs: components, H counts, bonds) + strict-only sensitivity (154).
+- [ ] exclusion sensitivity for the 3 patterns without a recorded wavelength (185).
+- [ ] ZZZUWK per-reflection table (ESI S4) incl. (111) 1.13x, (200) 0.77x vs (110) 0.21x and the 49-axis fit.
+- [ ] B/Si: queries with B or Si vs the library filter; pattern 706 (radian axis): convert, report as sensitivity.
+- [ ] "one in three CSD compounds is polymorphic": check against ref 4.
+F3 Figures/tables: regenerate the sweep (+ BFDH), real benchmark, rank distributions, effect ladder for d3_sym;
+  structure-encoder schematic (vector-schematics); Table 1/2 widths in the docx.
+F4 Rewrite manuscript.md + esi.md for RSOS (D4 list + the review file's Section 4 rules; British English; abstract
+  <= 200 words; headline = ambient single-crystal set; audit trail -> one ESI deviations table; Vancouver refs).
+F5 Claims: 22_paper_numbers + verify_claims templates rewritten for the new text; verify N/N.
+F6 Gates: aris auto-review-loop (Codex gpt-6.1-sol), paper-claim-audit, citation-audit, kill-argument; headless blind
+  board on the new PDF; fixes.
+F7 Package paper/dd/submissions/RSOS/ (manuscript, ESI, cover letter stating the RSC Advances history, response to the
+  previous reviews, DAS). Frank OK needed before: Zenodo new version, git push, submission.
