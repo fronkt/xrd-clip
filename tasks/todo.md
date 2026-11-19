@@ -710,3 +710,17 @@ F6 Gates: aris auto-review-loop (Codex gpt-6.1-sol), paper-claim-audit, citation
   board on the new PDF; fixes.
 F7 Package paper/dd/submissions/RSOS/ (manuscript, ESI, cover letter stating the RSC Advances history, response to the
   previous reviews, DAS). Frank OK needed before: Zenodo new version, git push, submission.
+- 11-19 evening progress (D-rest):
+  - F1: conv (d3 model unchanged vs main), label sensitivity 43 (--ranks), hub ln q v2 + Kaduk for s0/s1, r1 for s0/s1,
+    every-anchor variant DONE. Running: rescore variants r2/ablations/binavg/dT + hub v1 for s0 (bdrpqw7jn), probe check
+    26 (queued), COD embeddings for s0 on CPU (b9z5lyz77), poly sweep on Anvil (22319852, gpu-debug, pending).
+  - COD symops: COD CIFs rsynced to Anvil scratch (109,570, 16.9 GB); 308 COD CIFs give no operator loop (Hall/H-M only)
+    -> symops.ops_from_symbol (gemmi; f648cea); twins rebuilt, 40 --check (counts + positions) 0 mismatches; CSD twins
+    cannot change (0 of 309,080 non-P1 entries identity-only).
+  - F2: every-anchor (47): 1 of 59 patterns gains EPIVEF (rmsd 0.50; 11/15 vs the two anchors used) -> labels kept, variant
+    refcodes/truth_corrections_every_anchor.json scored as a sensitivity. Lenient: 35 patterns, 0 component mismatches.
+    critic2 for pattern_100 (joined the sc set via GOFWUV): 29 prep/fit/run (be44sqet1, slow: 6/50 by 17:42), then
+    c2_chain (b28mmxmil): X2 offsets for 60 (old 59 must be unchanged), X2 run for pattern_100, 29 eval main/_zs/_x3.
+  - F3: Fig. 2 model schematic DONE (paper/rsos/figs/gen_fig_model.py, verify PASS). 50_rsos_figs.py written.
+  - F4: paper/rsos/manuscript.md drafted (efb5590), {{placeholders}} remain; 49_rsos_esi.py written; 48 numbers script
+    written (needs every input; run when the jobs finish).
