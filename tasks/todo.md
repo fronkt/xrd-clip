@@ -638,15 +638,15 @@ prose = full ARIS rewrite, Frank reviews. -> D1 started.
   (Pearson, cos, WCC-2) n.s., ln q unchanged (isotropic, as expected). Cheap ΔT baseline does not rescue the hard case.
 - 11-17: D3 retrains DONE on Anvil (60 epochs, rc 0; best degraded-val top-1): d3_fix 0.842, d3_sym_s0 0.864,
   d3_sym_s1 0.862 (runs at $PROJECT/xrd-clip/runs/d3_*). Frank 11-17: go on the evaluation. Plan:
-  - [ ] E1 code: scripts/44_d3_embed.py (library structure + pattern embeddings on cuda, TF32 off, symops-twin guard,
+  - [x] E1 code: scripts/44_d3_embed.py (library structure + pattern embeddings on cuda, TF32 off, symops-twin guard,
         GPU/CPU parity check); 28 eval gains --emb_dir/--ranks_out (rescore_main/ranks.npz stays the original model's,
         43 reads it). Local smoke: the realism checkpoint reproduces cache/real_bench_realism rows.
-  - [ ] E2 Anvil (GPU partition only; CPU SUs are nearly gone): bundle -> HEAD; upload sticks_extra(+symops) and the
+  - [x] E2 Anvil (GPU partition only; CPU SUs are nearly gone): bundle -> HEAD; upload sticks_extra(+symops) and the
         exact lib_clean_f16.npy (render unchanged by D1: 800 sampled rows identical); one job = 44 for the 3 runs, then
         12 sweep (--no_vc --lnq_version 2, 43 conditions incl. 8 march_bfdh) per run -> results/sbv3_<run>_<group>.
-  - [ ] E3 pull embeddings to cache/real_bench_<run>; local 30 eval (ladder, measured, p2p) -> results/model_gap_<run>.json,
+  - [x] E3 pull embeddings to cache/real_bench_<run>; local 30 eval (ladder, measured, p2p) -> results/model_gap_<run>.json,
         28 eval --tag main --base main -> results/rescore_main_<run>.json (paired vs the original model).
-  - [ ] E4 summary table for Frank (which checkpoint is the paper's model), then D4 rewrite.
+  - [x] E4 summary table for Frank (which checkpoint is the paper's model), then D4 rewrite.
 - 11-18: E2 job 22284873 FAILED in 3 min, nothing wrong written (both guards fired):
   - 44 GPU/CPU parity 6.7e-4 > 1e-4 on all three runs. Diagnosis on gpu-debug (22302566, the first 256 entries of
     shard_000, d3_fix + d3_sym_s0): nn.TransformerEncoderLayer's CUDA fused inference fast path gives 6.7e-4 /
@@ -661,3 +661,21 @@ prose = full ARIS rewrite, Frank reviews. -> D1 started.
   - Resubmitted (bundle 605e965, every output on user scratch /anvil/scratch/x-fcai3/xrdclip_ops/d3eval because the
     project fileset refused new files): GPU smoke 22306241 of the fixed 44 (--smoke 512) PASSED 11-19: d3_fix
     structure 1.76e-6, patterns 6.6e-7; d3_sym_s0 1.43e-6 / 7.1e-7. Full job 22306242 pending (est. start 11-21).
+- 11-19: E2-E4 DONE. Job 22306242 ran 14:30-15:07 (36 min): embed rc 0 x3, parity <= 1.8e-6 on every shard and
+  <= 7.1e-7 on the library patterns; sweep 43 / 43 conditions x3; tar md5 OK (pulled to D:\xrd-clip\d3eval_pull_2026-11-19,
+  copies md5-identical). The sweep read cache/sticks with its sticks_symops twins, so the sym models got their real
+  operators and the queries the operator-averaged March-Dollase. Local 30 eval + 28 eval rc 0 x3; classical rows
+  identical to the submitted file (paired +0.000). results/d3/summary.md (45), corrected labels, macro std top-1:
+  poly 0.016 [0, 0.041], realism 0.024, d3_fix 0.033 [0.008, 0.065], d3_sym_s0 0.016, d3_sym_s1 0.027; every paired
+  diff vs poly has a CI touching or crossing 0; sc: only d3_sym_s1 nonzero (0.032, 1 of 31 compounds); model@1000 -> ln q
+  0.265 / 0.325 / 0.395 / 0.300 / 0.344 vs ln q alone 0.883. Ladder: own_all_dw median rank 744 (poly) -> 8-18 (D3), so
+  the modelled effects no longer cost the model much, yet measured stays 3,344-5,574: the remaining gap is unmodelled.
+  Sweep (within-family top-1): d3_sym 0.55-0.59, d3_fix ~ poly; every model still below every classical method.
+  Seed spread s0 vs s1 (real 0.016 vs 0.027, own_clean 0.249 vs 0.324) ~ the between-model differences.
+  - Sweep determinism: the 3 D3 runs agree exactly (classical, 0 of 1,290 comparisons differ). vs sbv2 (poly, the 4090
+    box) 34 of 35 shared conditions agree exactly; field_thermal_mild differs (Pearson-zs 5, wcc_1 2, ln q 1 of 2,835
+    queries). Locally (CPU) c661394 code == HEAD code on that condition (0.7192 / 0.7333 / 0.7291, model 0.552) but
+    both differ from Anvil and from sbv2: a platform-dependent draw in that one condition, not D1. Cause not isolated.
+  - [ ] Frank: which checkpoint is the paper's model. The plan's rule selects epochs on degraded validation; no rule
+        between runs. By degraded val: d3_sym_s0 (0.864). d3_fix is best on the real benchmark, which is the test set.
+  - [ ] optional: poly sweep rerun on Anvil at HEAD (same platform as sbv3; adds poly's 8 BFDH conditions).
