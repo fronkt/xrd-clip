@@ -672,7 +672,7 @@ prose = full ARIS rewrite, Frank reviews. -> D1 started.
   the modelled effects no longer cost the model much, yet measured stays 3,344-5,574: the remaining gap is unmodelled.
   Sweep (within-family top-1): d3_sym 0.55-0.59, d3_fix ~ poly; every model still below every classical method.
   Seed spread s0 vs s1 (real 0.016 vs 0.027, own_clean 0.249 vs 0.324) ~ the between-model differences.
-  - Sweep determinism: the 3 D3 runs agree exactly (classical, 0 of 1,290 comparisons differ). vs sbv2 (poly, the 4090
+  - Sweep determinism: the 3 D3 runs agree exactly (classical, 0 of 387 run-pair x condition x method comparisons differ). vs sbv2 (poly, the 4090
     box) 34 of 35 shared conditions agree exactly; field_thermal_mild differs (Pearson-zs 5, wcc_1 2, ln q 1 of 2,835
     queries). Locally (CPU) c661394 code == HEAD code on that condition (0.7192 / 0.7333 / 0.7291, model 0.552) but
     both differ from Anvil and from sbv2: a platform-dependent draw in that one condition, not D1. Cause not isolated.
