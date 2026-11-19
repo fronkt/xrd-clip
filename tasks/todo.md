@@ -658,3 +658,6 @@ prose = full ARIS rewrite, Frank reviews. -> D1 started.
     is ignored and $GROUPS = the gid (7026335), so --only matched nothing, 12 exited 0 and the N-markers check
     passed (3 = 3 x 1). Fixes: CONDS; 12 exits 1 when --only matches no condition; the job now checks that every run
     has all 43 conditions of 12's conditions() (tested on fake results: 43/43 ok, 42/43 and 0/43 fail).
+  - Resubmitted (bundle 605e965, every output on user scratch /anvil/scratch/x-fcai3/xrdclip_ops/d3eval because the
+    project fileset refused new files): GPU smoke 22306241 of the fixed 44 (--smoke 512) PASSED 11-19: d3_fix
+    structure 1.76e-6, patterns 6.6e-7; d3_sym_s0 1.43e-6 / 7.1e-7. Full job 22306242 pending (est. start 11-21).
