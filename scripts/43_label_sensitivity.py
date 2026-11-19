@@ -8,9 +8,11 @@ From the corrected-label ranks of the main rescore (cache/real_bench/rescore_mai
 and the list of lenient-anchor patterns with their anchors, for the ESI.
 
     PYTHONPATH=src python scripts/43_label_sensitivity.py     -> results/label_sensitivity.json
+    PYTHONPATH=src python scripts/43_label_sensitivity.py --ranks cache/real_bench/rescore_main/ranks_d3_sym_s0.npz \n        --out results/d3/label_sensitivity_d3_sym_s0.json           (a retrained model's ranks, from 28 eval --ranks_out)
 """
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import sys
@@ -28,13 +30,17 @@ UNKNOWN_WL = {"pattern_144.json", "pattern_758.json", "pattern_917.json"}
 
 
 def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--ranks", default="cache/real_bench/rescore_main/ranks.npz")
+    ap.add_argument("--out", default="results/label_sensitivity.json")
+    args = ap.parse_args()
     shards = bench.shard_table(None)
     gidx = {rc: i for i, rc in enumerate(hubm.library_refcodes(shards))}
     qinfo, _, _ = bench.build_queries(f"{bench.DATA}/opxrd/opxrd_truth.json",
                                       f"{bench.DATA}/opxrd/opxrd_cnrs_organic.json", gidx)
     truth = {t["id"]: t for t in json.load(open(f"{bench.DATA}/opxrd/opxrd_truth.json"))}
     sc_cond = json.load(open("results/sc_conditions.json"))
-    z = np.load("cache/real_bench/rescore_main/ranks.npz")
+    z = np.load(args.ranks)
     ids = np.array([q["id"] for q in qinfo])
     stems = np.array([q["stem"] for q in qinfo])
     lenient = np.array([truth[i].get("anchor_tier") == "lenient" for i in ids])
@@ -57,7 +63,8 @@ def main() -> int:
         print(name, {k: (v["top1"], v["n_compounds"]) for k, v in res.items()}, flush=True)
     out["lenient_patterns"] = [{"id": i, "stem": s, "anchors": sorted(truth[i]["anchors"])}
                                for i, s, l in zip(ids, stems, lenient) if l]
-    json.dump(out, open("results/label_sensitivity.json", "w"), indent=1)
+    out["ranks"] = args.ranks
+    json.dump(out, open(args.out, "w"), indent=1)
     return 0
 
 
