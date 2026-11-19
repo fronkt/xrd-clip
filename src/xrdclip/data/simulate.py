@@ -104,8 +104,10 @@ def simulate_one(rec: dict) -> "dict | None":
     # needs the atoms, not just the cell.
     #
     # We feed the ASYMMETRIC UNIT, not the full unit cell. The full cell is all Z symmetry copies of
-    # the asymmetric unit -- redundant given that the space group + lattice (both provided) generate
-    # the copies -- and feeding it makes the structure encoder's O(atoms^2) attention explode
+    # the asymmetric unit -- redundant given the space group's operators + the lattice, which generate
+    # the copies. The encoder always gets the lattice (8 cell numbers, dataset.structure_features); it gets
+    # the operators only in the symops model (scripts/40_symops.py twins, resubmission D1). The original
+    # encoder never saw the space group. Feeding the full cell makes the encoder's O(atoms^2) attention explode
     # (a Z=8, 50-atom-molecule crystal is 400 atoms; outliers exceed 1000, blowing past 15 GB and
     # thrashing swap). The asymmetric unit is the compact, non-redundant, correct representation:
     # for a molecular crystal it is just the Z' molecules, typically tens of atoms.

@@ -584,14 +584,14 @@ fixes below need code changes and reruns. ARIS chain instead: experiment-plan ->
 (Codex gpt-6.1-sol) -> text rewrite -> paper-claim-audit + citation-audit + kill-argument -> package.
 
 D1 Code fixes + tests (local, $0)
-- [ ] Kα2 under strain: realism_sticks must give Kα2 copies their own d (or strain acting on 2θ through each line's λ);
+- [x] Kα2 under strain: realism_sticks must give Kα2 copies their own d (or strain acting on 2θ through each line's λ);
       add an interaction test that renders through the full training path and checks the doublet survives.
-- [ ] March-Dollase per contributing hkl: keep pymatgen's per-family hkls + multiplicities, apply P(α) before summing;
+- [x] March-Dollase per contributing hkl: keep pymatgen's per-family hkls + multiplicities, apply P(α) before summing;
       test against a cubic {100} hand case (r 0.5, axis 001 -> 2.902).
-- [ ] Structure encoder sees the space group (symmetry ops, or the full cell): decide which form (Frank / design note).
-- [ ] Fix the simulate.py:106 comment.
+- [x] Structure encoder sees the space group (symmetry ops, or the full cell): decide which form (Frank / design note).
+- [x] Fix the simulate.py:106 comment.
 D2 Benchmark repairs (local CPU + CCDC interpreter)
-- [ ] Rerun the script-27 audit on the FINAL score matrices (6 unchecked cases); correct GOFWUV; regenerate the numbers.
+- [x] Rerun the script-27 audit on the FINAL score matrices (6 unchecked cases); correct GOFWUV; regenerate the numbers.
 - [ ] Doc + check: the two-anchor procedure (script 18:172) vs the text's "every anchor".
 - [ ] 3 no-wavelength patterns (144 DOCNEP, 758 DISLID, 917 MIGQOJ): λ from the COD CIF, else fit from the deposited
       cell; report the exclusion sensitivity (Codex: classical 0.72-0.88 / 0.32-0.52, model 0.017 / 0).
@@ -600,8 +600,8 @@ D2 Benchmark repairs (local CPU + CCDC interpreter)
 - [ ] ZZZUWK: full per-reflection table; fit March-Dollase r over the low-index axes; check vs the deposited COD Rietveld
       model / calc profile if present.
 D3 Experiments (GPU, needs credit: Vast left $4.33)
-- [ ] Texture sweep rerun with corrected PO, per-structure BFDH axis (CSD API) and r 0.5-2.0.
-- [ ] Retrain(s): (a) fixed Kα2 realism; (b) + space-group-aware encoder; checkpoint selected on DEGRADED validation;
+- [x] Texture sweep rerun with corrected PO, per-structure BFDH axis (CSD API) and r 0.5-2.0.
+- [x] Retrain(s): (a) fixed Kα2 realism; (b) + space-group-aware encoder; checkpoint selected on DEGRADED validation;
       >= 2 seeds if budget allows. Rough cost $5-15 per 60-epoch run (earlier estimate $2-25).
 - [ ] Practitioner baselines on the 37 ambient single-crystal patterns: ΔT-rescaled reference cells (cheap), and
       Pawley/Le Bail or index+cell search on the ln q shortlist (bigger; scope with Frank).
