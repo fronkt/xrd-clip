@@ -42,8 +42,8 @@ reference patterns, measured or simulated, from a database such as the Powder Di
 matters as much as the compound, because polymorphs can differ in solubility and stability, and the late appearance
 of a less soluble form once interrupted the supply of a marketed drug [@bauer2001ritonavir; @cruzcabeza2015polymorph].
 
-Machine learning offers another route. Contrastive models train a pattern encoder and a structure encoder so that a
-pattern lands near the structure that produced it, and retrieval then becomes a nearest-neighbour search
+Machine learning offers another route, in which contrastive models train a pattern encoder and a structure encoder so
+that a pattern lands near the structure that produced it, and retrieval becomes a nearest-neighbour search
 [@lai2025xtalnet; @xu2026xccp; @yang2026pxtal]. Generative models instead build the structure from the pattern
 [@johansen2026decifer; @segal2026xrdiff]. Both kinds are trained on simulated patterns, mostly of inorganic or
 framework materials, and are evaluated mostly on simulated patterns. Tests on measured data are recent and limited:
@@ -55,9 +55,9 @@ mostly minerals and inorganic or hybrid materials, a model-free correlation reac
 patterns of pharmaceutical solid forms, de Gelder's weighted cross-correlation gave a better accuracy than a Siamese
 network, although the network ranked better [@lange2024smolnet]. A hand-crafted peak-feature index outperformed
 element-constrained commercial search–match on measured mineral patterns [@wang2026matdiffract], and a classifier
-trained on synthetic crystals lost much of its accuracy on measured diffractograms [@schopmans2023synthetic]. Other
-fields report the same pattern. Simple heuristics often outperformed neural recommender systems that could be
-reproduced [@ferraridacrema2019progress], a fair comparison left little of the reported progress in deep metric
+trained on synthetic crystals lost much of its accuracy on measured diffractograms [@schopmans2023synthetic]. In other
+fields too, simple heuristics often outperformed the neural recommender systems that could be reproduced
+[@ferraridacrema2019progress], a fair comparison left little of the reported progress in deep metric
 learning [@musgrave2020reality], and in a mass-spectrometry benchmark ranking candidates by their simulated spectra
 beat the best spectrum-to-fingerprint retrieval model [@bushuiev2024massspecgym].
 
@@ -94,7 +94,7 @@ whose phase contains C and H and no element outside {C, H, N, O, S, P, F, Cl, Br
 (0.34–1.30 Å) and 7 at Mo, Co or other wavelengths. opXRD records no wavelength for 3 of the 120, and a fit of the
 peak positions to each pattern's deposited cell places all three at Cu Kα (Supplementary Section S1). Every pattern
 was converted to a Cu Kα1 2θ axis through its d-spacings and interpolated onto the grid used throughout this work,
-5–50° 2θ in 0.02° steps (2,251 points). The Kα2 component was not removed. In 31 of the 188 refined structures the
+5–50° 2θ in 0.02° steps (2,251 points), without removing the Kα2 component. In 31 of the 188 refined structures the
 H atoms are omitted.
 
 ### 2.2 Correct answers by packing similarity
@@ -102,15 +102,15 @@ H atoms are omitted.
 A cell match alone does not identify a compound, because unrelated compounds with the same elements can have similar
 reduced cells. We therefore identified every pattern from its deposited structure (figure 1) in three steps.
 
-The first step collects candidates. A CSD reduced-cell search on the deposited structure's primitive Niggli cell
-(1.5 % in lengths and 2° in angles, the CCDC defaults) keeps every hit with the same non-H element set. The second
-step finds anchors. CCDC packing similarity [@chisholm2005compack; @macrae2008mercury] compares the deposited structure
-with each candidate over a 15-molecule shell (distance tolerance 20 %, angle tolerance 20°, H positions ignored), and
-a candidate that matches 15 of 15 molecules is an anchor. Structures rebuilt from bare coordinates sometimes perceive
+First, a CSD reduced-cell search on the deposited structure's primitive Niggli cell (1.5 % in lengths and 2° in
+angles, the CCDC defaults) collects every hit with the same non-H element set as a candidate. Second, CCDC packing
+similarity [@chisholm2005compack; @macrae2008mercury] compares the deposited structure with each candidate over a
+15-molecule shell (distance tolerance 20 %, angle tolerance 20°, H positions ignored), and a candidate that matches 15
+of 15 molecules is an anchor. Structures rebuilt from bare coordinates sometimes perceive
 bonds differently from curated CSD molecules, so when no candidate passes, a lenient pass ignores bond types, bond
 counts, H counts and the smallest components; 154 patterns were anchored in the strict pass and 35 in the lenient
-pass. The third step builds the same-form set. The two anchors closest to the deposited structure are compared with
-every entry of their CSD refcode family, CSD against CSD with the strict settings, and an entry that matches 15 of 15
+pass. Third, the two anchors closest to the deposited structure are compared with every entry of their CSD refcode
+family, CSD against CSD with the strict settings, and an entry that matches 15 of 15
 molecules is the same solid form whatever its temperature or pressure. Entries that cannot be compared are excluded
 from ranking and are never scored as errors (134 entries, affecting 57 patterns).
 
@@ -122,7 +122,7 @@ matching anchor entries are compared with their refcode family to collect every 
 Bottom: the measured pattern, on a Cu Kα1 2θ axis with Kα2 retained, is scored against all 309,080 simulated library
 patterns, and the rank of the first correct entry is recorded under each answer set.
 
-Of the 196 patterns, 189 were identified. The other seven are three Si frameworks or silsesquioxanes that passed the
+Of the 196 patterns, 189 were identified; the other seven are three Si frameworks or silsesquioxanes that passed the
 element filter and four patterns with no packing match. One identified pattern records its 2θ axis in radians (0.01
 to 0.83) and was excluded, which leaves 188 patterns of 123 compounds. Most compounds have one pattern (110 of 123),
 but a few have many: ZZZUWK has 20, a variable-temperature series, ZZZIZM 12 and NAPHTA 10.
@@ -142,7 +142,7 @@ all from the H-omitted ZZZUWK series, ignoring bond counts alone is enough.
 ### 2.3 Answer sets
 
 For 184 of the 188 patterns the CSD contains a powder-study entry that reproduces the deposited structure to within
-0.05 Å RMSD, so the pattern is the data that entry was refined against [@rietveld1969]. We call this entry the
+0.05 Å RMSD, so the pattern is the data that entry was refined against [@rietveld1969], and we call this entry the
 pattern's self-entry. Finding the self-entry tests whether a method can read a measured pattern, but it is close to
 self-retrieval, so we score three answer sets.
 
@@ -191,8 +191,8 @@ distinguishable.
 
 The CSD licence does not allow the library or the answer sets to be redistributed. So that the results can be
 checked without a licence, we rebuilt the benchmark from the COD (CC0) [@grazulis2009cod; @vaitkus2021cod], the source
-of the opXRD patterns themselves. The queries are unchanged. The library applies the corpus filter of Section 2.4 to
-the COD metadata (C-containing entries with coordinates, no disorder flag, R ≤ 7.5 %, Z′ of 1–2, no element outside
+of the opXRD patterns themselves. The queries are unchanged, and the library applies the corpus filter of Section
+2.4 to the COD metadata (C-containing entries with coordinates, no disorder flag, R ≤ 7.5 %, Z′ of 1–2, no element outside
 H, C, N, O, F, S, Cl, Br, I and P), which keeps 108,716 entries, and adds 854 candidate entries of the queries that the
 filter removes. Of these 109,570 entries, 108,902 gave stick patterns, computed and rendered as for the CSD library.
 
@@ -215,8 +215,8 @@ model, without the corrections of Sections 3.6 and 3.8.
 ### 3.1 Preprocessing
 
 The measured patterns were scored in two forms: raw, shifted to a zero minimum and scaled to a unit maximum, and
-background-subtracted, in which a rolling minimum over 2° smoothed by a 2° moving average is removed before scaling.
-Library patterns are scored as simulated. The conversion to the Cu axis moves peak positions but not intensities, so
+background-subtracted, in which a rolling minimum over 2° smoothed by a 2° moving average is removed before scaling;
+library patterns are scored as simulated. The conversion to the Cu axis moves peak positions but not intensities, so
 for the 68 patterns not measured with Cu Kα it leaves the Lorentz–polarisation factor of the original wavelength and
 the intensity scale of the original axis. We tested this convention by rescoring every pattern with the
 Lorentz–polarisation factor converted to Cu Kα1 and the intensities divided by the Jacobian of the axis change, which
@@ -259,16 +259,16 @@ patterns and probes) against all 309,080 entries took 761 s, and the GPU scores 
 
 ### 3.4 Learned model
 
-The model is a dual encoder (figure 2). A one-dimensional residual convolutional network encodes the standardised
-pattern on the grid above. A Transformer encodes the structure from three kinds of token: one lattice token (the
-logarithms of the cell lengths and volume, the cosines of the cell angles and the atom count), one token per atom of
-the asymmetric unit (an element embedding and the sine and cosine of 2π times each fractional coordinate) and one
-token per symmetry operator x′ = Rx + t of the entry's CIF (the nine entries of R and the sine and cosine of 2πt).
-The operator tokens are new in this work. The asymmetric unit and the cell alone do not determine a pattern, because
-systematic absences, multiplicities and the number of molecules in the cell all follow from the space group, and an
-encoder without the operators cannot know them. Both encoders map to a 256-dimensional unit vector, and a pattern is
-scored against the library by the cosine between its pattern embedding and each entry's structure embedding. The
-model has 6.2 million parameters.
+The model is a dual encoder with 6.2 million parameters (figure 2). A one-dimensional residual convolutional network
+encodes the standardised pattern on the grid above. A Transformer encodes the structure from three kinds of token.
+One lattice token carries the logarithms of the cell lengths and volume, the cosines of the cell angles and the atom
+count. Each atom of the asymmetric unit gives one token, an element embedding plus the sine and cosine of 2π times
+each fractional coordinate. Each symmetry operator x′ = Rx + t of the entry's CIF gives one token, the nine entries of
+R plus the sine and cosine of 2πt. The operator tokens are new in this work. The asymmetric unit and the cell alone do
+not determine a pattern, because systematic absences, multiplicities and the number of molecules in the cell all follow
+from the space group, and an encoder without the operators cannot know them. Both encoders map to a 256-dimensional
+unit vector, and a pattern is scored against the library by the cosine between its pattern embedding and each entry's
+structure embedding.
 
 ![](figs/fig_model.pdf)
 
@@ -281,12 +281,12 @@ The model was trained for 60 epochs with a symmetric InfoNCE loss [@oord2018cpc;
 AdamW, learning rate 3 × 10⁻⁴, weight decay 0.05, 3 warm-up epochs), with the sibling polymorphs of each family placed
 in the same batch as hard negatives, on 247,089 CSD structures of a scaffold- and polymorph-family split
 [@cai2026urtc]. Patterns were simulated on the fly with a random zero offset, isotropic strain, Caglioti and
-crystallite-size broadening, March–Dollase texture [@dollase1986], background and Poisson noise, and with the
-measurement effects of the benchmark patterns that we could model: a Kα2 copy of every reflection (probability 0.6,
-I₂/I₁ = 0.5) that keeps its own wavelength under strain, an overall Debye–Waller factor (B drawn uniformly from
-0–8 Å²), log-normal intensity jitter per reflection (σ drawn uniformly from 0–0.5), a cut of the 2θ range
-(probability 0.25; start 5–12°, end 30–50°) and the background subtraction applied to the measured patterns. Texture
-is averaged over the symmetry-equivalent reflections of each peak. The checkpoint was chosen by in-batch top-1 on a
+crystallite-size broadening, March–Dollase texture [@dollase1986] averaged over the symmetry-equivalent reflections of
+each peak, background and Poisson noise. The simulation also included the measurement effects of the benchmark
+patterns that we could model. A Kα2 copy of every reflection (probability 0.6, I₂/I₁ = 0.5) keeps its own wavelength
+under strain; an overall Debye–Waller factor has B drawn uniformly from 0–8 Å²; log-normal intensity jitter per
+reflection has σ drawn uniformly from 0–0.5; the 2θ range is cut with probability 0.25 (start 5–12°, end 30–50°); and
+the background subtraction of the measured patterns is applied to every training pattern. The checkpoint was chosen by in-batch top-1 on a
 fixed draw of these degraded patterns for the validation structures, not on clean ones, because a clean criterion
 selects against robustness; the best epochs reach 0.864 (seed 0) and 0.862 (seed 1). We report seed 0 as the model
 and seed 1 beside it. As an ablation, the same training without the operator tokens reaches 0.842. The earlier model
@@ -295,13 +295,14 @@ in Supplementary Section S7, which also lists how this version differs from the 
 
 ### 3.5 Diagnostics of the learned model
 
-Four diagnostics probe the model's failure (Section 4.6). The first is an effect ladder. Each pattern's self-entry is
-rendered cleanly and then with one effect of the measurement at a time: its 2θ coverage, its peak width and its noise
-level, each estimated from the measured pattern; Kα2, added to every laboratory Cu pattern because opXRD does not
-record monochromatisation; its own background followed by the background subtraction of Section 3.1; the zero offset
-that best aligns it with its self-entry; and an overall Debye–Waller factor (B = 4.45 Å², from the library, Section
-3.8). It is then rendered with the first six effects together, and with those six plus the Debye–Waller factor,
-log-normal intensity jitter per reflection (σ = 0.3 or 0.5, not estimated from the data), or both (σ = 0.3). Every
+Four diagnostics probe the model's failure (Section 4.6). The first, an effect ladder, renders each pattern's
+self-entry cleanly and then with one effect of the measurement at a time. Three effects are estimated from the measured
+pattern: its 2θ coverage, its peak width and its noise level. Kα2 is added to every laboratory Cu pattern, because
+opXRD does not record monochromatisation, and the pattern's own background is added and then removed by the background
+subtraction of Section 3.1. The zero offset is the one that best aligns the pattern with its self-entry, and the
+Debye–Waller factor is an overall one (B = 4.45 Å², from the library, Section 3.8). The self-entry is then rendered with
+the first six effects together, and with those six plus the Debye–Waller factor, log-normal intensity jitter per
+reflection (σ = 0.3 or 0.5, not estimated from the data), or both (σ = 0.3). Every
 variant is scored with the answer sets of the measured pattern. One effect, the zero offset, uses the self-entry, so
 the ladder diagnoses the model and is not a retrieval method. The second diagnostic matches patterns to patterns:
 the clean library patterns are passed through the model's pattern encoder, so measured patterns are compared with
@@ -333,16 +334,20 @@ The sweep reuses the within-family test of ref. [@cai2026urtc]: 1,077 held-out p
 structures, in which the query is one form's simulated and degraded pattern and the candidates are the clean patterns
 of the family's forms (composition-only chance 0.38). In the clean condition the query is the candidate's own
 rendering, so every profile score that can align it exactly scores 1.00, and the sweep measures how far each method
-falls from that starting point rather than how well it retrieves. Each condition varies one degradation: zero offset
-up to 0.3°, isotropic strain up to 1.2 %, crystallite size down to 10 nm and counting noise; March–Dollase texture
-with r from 0.5 to 0.9 along (001) for every structure; March–Dollase texture along each structure's own
-Bravais–Friedel–Donnay–Harker axis, the normal of its largest-d allowed reflection [@donnay1937bfdh], for plates
-(r = 0.5–0.9) and needles (r = 1.1–2.0); an anisotropic thermal strain for a temperature change of 50–200 K, with
-per-axis expansion coefficients drawn so that the mean volumetric coefficient (about 1.65 × 10⁻⁴ K⁻¹) matches the
-CSD survey of ref. [@bond2021thermal]; or combinations with random offsets and strains. Texture is averaged over the
-symmetry-equivalent reflections of each peak. Every method scores the same rendered queries, intervals come from a
-bootstrap over families, and each condition's random draws are seeded from a checksum of its name, so the sweep can
-be regenerated exactly. The sweep has 42 distinct conditions (a zero offset of 0° is the clean condition).
+falls from that starting point rather than how well it retrieves. Each condition varies one degradation:
+
+- a zero offset up to 0.3°, isotropic strain up to 1.2 %, crystallite size down to 10 nm, or counting noise;
+- March–Dollase texture along (001) for every structure, with r from 0.5 to 0.9;
+- March–Dollase texture along each structure's own Bravais–Friedel–Donnay–Harker axis, the normal of its largest-d
+  allowed reflection [@donnay1937bfdh], for plates (r = 0.5–0.9) and needles (r = 1.1–2.0);
+- an anisotropic thermal strain for a temperature change of 50–200 K, with per-axis expansion coefficients drawn so that
+  the mean volumetric coefficient (about 1.65 × 10⁻⁴ K⁻¹) matches the CSD survey of ref. [@bond2021thermal];
+- or combinations of these with random offsets and strains.
+
+Texture is averaged over the symmetry-equivalent reflections of each peak. Every method scores the same rendered
+queries, intervals come from a bootstrap over families, and each condition's random draws are seeded from a checksum
+of its name, so the sweep can be regenerated exactly. The sweep has 42 distinct conditions, a zero offset of 0° being
+the clean condition.
 
 ### 3.8 A library closer to the measurements
 
