@@ -19,7 +19,8 @@ python -c "import torch; assert torch.cuda.is_available(); print(torch.__version
 export NUMPY_MADVISE_HUGEPAGE=0 MALLOC_MMAP_MAX_=0 MALLOC_TRIM_THRESHOLD_=68719476736
 mkdir -p logs_d3 results
 RUNS="d3_fix d3_sym_s0 d3_sym_s1"
-GROUPS="clean zero_offset sign strain domain_nm counts march= march_bfdh thermal field"
+# not GROUPS: bash reserves it (the user's group ids), ignores the assignment and expands it to the primary gid
+CONDS="clean zero_offset sign strain domain_nm counts march= march_bfdh thermal field"
 fail=0
 
 for r in $RUNS; do
@@ -40,12 +41,25 @@ sweep() {   # <run> <condition prefix>; 12 rewrites its json after every conditi
 }
 export -f sweep
 for r in $RUNS; do
-  printf '%s\n' $GROUPS | xargs -P 7 -I{} bash -c "sweep $r {}"
+  printf '%s\n' $CONDS | xargs -P 7 -I{} bash -c "sweep $r {}"
 done
 
-n_ok=$(ls results/sbv3_*.done 2>/dev/null | wc -l)
-echo "sweep outputs $n_ok / $(( $(echo $RUNS | wc -w) * $(echo $GROUPS | wc -w) ))"
-[ "$n_ok" -eq $(( $(echo $RUNS | wc -w) * $(echo $GROUPS | wc -w) )) ] || fail=1
+# complete = every run has a result for every condition of 12's conditions() (43), not N marker files
+python -W ignore - $RUNS <<'PY' || fail=1
+import json, os, sys
+from importlib import import_module
+sys.path.insert(0, "scripts")
+want = set(import_module("12_strong_baselines").conditions())
+bad = 0
+for r in sys.argv[1:]:
+    have = set()
+    for f in os.listdir("results"):
+        if f.startswith(f"sbv3_{r}_") and f.endswith(".json"):
+            have |= set(json.load(open(os.path.join("results", f)))["conditions"])
+    print(f"sweep {r}: {len(have & want)} / {len(want)} conditions", flush=True)
+    bad += have != want
+sys.exit(bad)
+PY
 tar -cf d3_eval_out.tar logs_d3 results/sbv3_* $(for r in $RUNS; do echo cache/real_bench_$r; done)
 md5sum d3_eval_out.tar > d3_eval_out.tar.md5
 echo "END fail=$fail $(du -h d3_eval_out.tar | cut -f1) $(date -u +%FT%TZ)"

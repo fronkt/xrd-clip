@@ -174,6 +174,8 @@ def main() -> int:
     if args.only:
         pref = tuple(args.only.split(","))
         conds = {k: v for k, v in conds.items() if k.startswith(pref)}
+        if not conds:
+            raise SystemExit(f"--only {args.only!r} matches no condition")
 
     methods = ["model", "pearson", "peak_list", "pearson_zs", "wcc_0.5", "wcc_1", "wcc_2", "lnq"]
     if args.lnq_version == 2:

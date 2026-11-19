@@ -647,3 +647,14 @@ prose = full ARIS rewrite, Frank reviews. -> D1 started.
   - [ ] E3 pull embeddings to cache/real_bench_<run>; local 30 eval (ladder, measured, p2p) -> results/model_gap_<run>.json,
         28 eval --tag main --base main -> results/rescore_main_<run>.json (paired vs the original model).
   - [ ] E4 summary table for Frank (which checkpoint is the paper's model), then D4 rewrite.
+- 11-18: E2 job 22284873 FAILED in 3 min, nothing wrong written (both guards fired):
+  - 44 GPU/CPU parity 6.7e-4 > 1e-4 on all three runs. Diagnosis on gpu-debug (22302566, the first 256 entries of
+    shard_000, d3_fix + d3_sym_s0): nn.TransformerEncoderLayer's CUDA fused inference fast path gives 6.7e-4 /
+    5.8e-4 (cosine 1.3e-3 / 1.5e-3) whether SDPA = auto or math, batch 1024 or 128; fast path off -> 1.8e-6 / 1.4e-6
+    (cosine 4.5e-6); CPU padding b1024 vs b128 = 9e-8. Fix: 44 turns the fast path off around every --device call;
+    the CPU reference keeps the default path, as 19 did (CPU smoke vs cache/real_bench_realism: 2.4e-7 / 6.7e-8).
+    12 unchanged on purpose: the submitted sweep (sbv2) ran 12 on a GPU with the fast path, so sbv3 matches it.
+  - the sweep ran one empty group per run: GROUPS is a bash special variable (the user's group ids), the assignment
+    is ignored and $GROUPS = the gid (7026335), so --only matched nothing, 12 exited 0 and the N-markers check
+    passed (3 = 3 x 1). Fixes: CONDS; 12 exits 1 when --only matches no condition; the job now checks that every run
+    has all 43 conditions of 12's conditions() (tested on fake results: 43/43 ok, 42/43 and 0/43 fail).

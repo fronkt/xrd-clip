@@ -3,8 +3,11 @@
 Writes the two embedding sets the real-pattern evaluations read from an --emb_dir:
   emb_<stickdir>_<shard>_<n>.npy   structure embeddings of every library entry (19's naming; read by 28 eval, 30 eval)
   lib_pattern_emb.npy              pattern embeddings of the clean library renderings (30 pemb's output; 30 eval p2p)
-The computations are 19's _embed_shard and 30's cmd_pemb, moved to --device with larger batches. TF32 is off so the
-GPU numbers match the CPU path (checked on the first --parity entries of each set before anything is written).
+The computations are 19's _embed_shard and 30's cmd_pemb, moved to --device with larger batches. The GPU numbers
+match the CPU path (checked on the first --parity entries of each set before anything is written) only with TF32 off
+AND the CUDA fused-attention inference fast path of nn.TransformerEncoderLayer off: with the fast path the structure
+embeddings differ from the CPU ones by up to 6.7e-4 (cosine 1.3e-3), without it by 1.8e-6; the SDPA backend and the
+batch padding change nothing (A100, torch 2.8, 11-18). The CPU parity reference keeps the default path, as 19 did.
 A symops checkpoint refuses to run unless every shard has its symmetry-operator twin: without one, load_records
 hands the encoder identity operators and nothing complains.
 
@@ -16,6 +19,7 @@ hands the encoder identity operators and nothing complains.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import os
 import sys
 import time
@@ -47,6 +51,17 @@ def encode_patterns(model, x: np.ndarray, device: str, batch: int) -> np.ndarray
             z = np.stack([A.standardize(y.astype(np.float32)) for y in x[i:i + batch]])
             out.append(model.encode_pattern(torch.from_numpy(z).unsqueeze(1).to(device)).cpu().numpy())
     return np.concatenate(out)
+
+
+@contextlib.contextmanager
+def device_path(device: str):
+    """Around every --device encoding: on CUDA, nn.TransformerEncoderLayer's fused inference path off (see above)."""
+    old = torch.backends.mha.get_fastpath_enabled()
+    torch.backends.mha.set_fastpath_enabled(old and not device.startswith("cuda"))
+    try:
+        yield
+    finally:
+        torch.backends.mha.set_fastpath_enabled(old)
 
 
 def parity(name: str, a: np.ndarray, b: np.ndarray, tol: float) -> None:
@@ -99,7 +114,8 @@ def main() -> int:
             raise SystemExit(f"[d3_embed] {p}: entries without operators")
         store = {str(i): r for i, r in enumerate(recs)}
         ids = [str(i) for i in range(m)]
-        emb = embed_library(model, store, ids, args.device, batch=args.batch)
+        with device_path(args.device):
+            emb = embed_library(model, store, ids, args.device, batch=args.batch)
         if emb.shape[0] != m or not np.isfinite(emb).all():
             raise SystemExit(f"[d3_embed] {p}: bad embeddings {emb.shape}")
         if cpu_model is not None:
@@ -126,12 +142,14 @@ def main() -> int:
     if cpu_model is not None:
         k = min(args.parity, N)
         x = np.asarray(lib[:k])
-        parity("lib patterns", encode_patterns(model, x, args.device, args.batch), encode_patterns(cpu_model, x, "cpu", 256),
-               args.tol)
+        with device_path(args.device):
+            pg = encode_patterns(model, x, args.device, args.batch)
+        parity("lib patterns", pg, encode_patterns(cpu_model, x, "cpu", 256), args.tol)
     step = 16384
     pe = None
     for i in range(0, N, step):
-        z = encode_patterns(model, np.asarray(lib[i:min(i + step, N)]), args.device, args.batch)
+        with device_path(args.device):
+            z = encode_patterns(model, np.asarray(lib[i:min(i + step, N)]), args.device, args.batch)
         pe = np.empty((N, z.shape[1]), np.float32) if pe is None else pe
         pe[i:i + len(z)] = z
         print(f"[pemb] {min(i + step, N):,}/{N:,} {(time.time() - t0) / 60:.1f} min", flush=True)
