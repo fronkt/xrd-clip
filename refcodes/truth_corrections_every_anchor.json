@@ -1,0 +1,53 @@
+{
+ "_doc": "SENSITIVITY VARIANT (not the primary labels): truth_corrections.json plus every same-form entry that scripts/47 finds when each family member is compared with EVERY anchor, not only the two lowest-RMSD anchors scripts/18 uses. Scored with XRD_TRUTH_CORRECTIONS=refcodes/truth_corrections_every_anchor.json.",
+ "pattern_100.json": {
+  "reason": "QQQAUJ04 (anchor) vs GOFWUV 15/15 rmsd 0.103, vs GOFWUV01 15/15 rmsd 0.140, vs GOFWUV02 15/15 rmsd 0.133 (CCDC packing similarity, 15-molecule shell, H positions ignored, 2026-11-10)",
+  "add_same_form": [
+   {
+    "refcode": "GOFWUV",
+    "n_matched": 15,
+    "rmsd": 0.1032,
+    "is_anchor": false,
+    "temperature": "294 K",
+    "is_powder_study": true,
+    "has_disorder": false,
+    "formula": "C9 H11 N1 O2"
+   },
+   {
+    "refcode": "GOFWUV01",
+    "n_matched": 15,
+    "rmsd": 0.1395,
+    "is_anchor": false,
+    "temperature": "120 K",
+    "is_powder_study": false,
+    "has_disorder": false,
+    "formula": "C9 H11 N1 O2"
+   },
+   {
+    "refcode": "GOFWUV02",
+    "n_matched": 15,
+    "rmsd": 0.1333,
+    "is_anchor": false,
+    "temperature": "120.0 K",
+    "is_powder_study": false,
+    "has_disorder": false,
+    "formula": "C9 H11 N1 O2"
+   }
+  ]
+ },
+ "pattern_188.json": {
+  "reason": "EPIVEF vs anchor EPIVEF02 15/15 rmsd 0.5 (scripts/47, strict settings); vs the two lowest-RMSD anchors 11/15, so scripts/18 scored it other_form",
+  "add_same_form": [
+   {
+    "refcode": "EPIVEF",
+    "n_matched": 15,
+    "rmsd": 0.5,
+    "is_anchor": false,
+    "temperature": "at 296 K",
+    "is_powder_study": false,
+    "has_disorder": false,
+    "formula": "C12 H5 N2 O1 S4"
+   }
+  ]
+ }
+}

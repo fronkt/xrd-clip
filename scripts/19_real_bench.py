@@ -130,8 +130,10 @@ def build_queries(truth_path: str, patterns_path: str, gidx: dict) -> "tuple[lis
             if m.sum() * A.STEP < 10.0:       # pattern_706: 2theta axis runs 0.01-0.83 (radians?)
                 excluded[t["id"]] = f"covers {m.sum() * A.STEP:.1f} deg of the 5-50 deg grid (axis {o['tt_range']})"
     truth = [t for t in all_truth if t["id"] not in excluded]
-    # audited label corrections (resubmission D2); XRD_NO_TRUTH_CORRECTIONS=1 reproduces the submitted labels
-    corr_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "refcodes", "truth_corrections.json")
+    # audited label corrections (resubmission D2); XRD_NO_TRUTH_CORRECTIONS=1 reproduces the submitted labels,
+    # XRD_TRUTH_CORRECTIONS=<file> scores a sensitivity variant (e.g. refcodes/truth_corrections_every_anchor.json)
+    corr_path = os.environ.get("XRD_TRUTH_CORRECTIONS") or os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "..", "refcodes", "truth_corrections.json")
     if os.path.exists(corr_path) and not os.environ.get("XRD_NO_TRUTH_CORRECTIONS"):
         corr = json.load(open(corr_path))
         for t in truth:
