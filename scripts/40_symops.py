@@ -9,6 +9,11 @@ full cell pymatgen parses from the CIF.
 
     PYTHONPATH=src python scripts/40_symops.py
     PYTHONPATH=src python scripts/40_symops.py --check 500
+
+The open COD replica (R5) keeps no stage-1 CIF shards locally, so --cod_cif_root reads each entry's CIF from COD's
+rsync layout (scripts/31 cod_path, the files 31 `shards` read) and writes the twins of --cod_sticks:
+
+    PYTHONPATH=src python scripts/40_symops.py --cod_cif_root <dir with 1/00/00/1000006.cif ...> [--check 500]
 """
 from __future__ import annotations
 
@@ -18,13 +23,33 @@ import gzip
 import json
 import os
 import sys
+from importlib import import_module
 
 import numpy as np
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, "..", "src"))
+sys.path.insert(0, HERE)
 from xrdclip.data.symops import expand, parse_symops  # noqa: E402
 
 PAIRS = (("cache/csd", "cache/sticks"), ("cache/real_extra", "cache/sticks_extra"))
+
+
+class CodCifs:
+    """refcode (COD id) -> CIF text, read on demand from COD's rsync layout, decoded as 31 `shards` decoded it."""
+
+    def __init__(self, root: str):
+        self.root, self.path = root, import_module("31_cod_library").cod_path
+
+    def _p(self, rc: str) -> str:
+        return os.path.join(self.root, self.path(rc))
+
+    def __contains__(self, rc: str) -> bool:
+        return os.path.exists(self._p(rc))
+
+    def __getitem__(self, rc: str) -> str:
+        with open(self._p(rc), encoding="utf-8", errors="replace") as fh:
+            return fh.read()
 
 
 def load_cifs() -> dict:
@@ -41,11 +66,16 @@ def load_cifs() -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", type=int, default=0)
+    ap.add_argument("--cod_cif_root", default="", help="COD replica: CIFs from this rsync-layout directory")
+    ap.add_argument("--cod_sticks", default="cod/sticks", help="COD replica: the stick shards to write twins for")
     a = ap.parse_args()
-    cifs = load_cifs()
-    print(f"{len(cifs)} CIFs", flush=True)
+    if a.cod_cif_root:
+        cifs, pairs = CodCifs(a.cod_cif_root), ((None, a.cod_sticks),)
+    else:
+        cifs = load_cifs()
+        print(f"{len(cifs)} CIFs", flush=True)
+        pairs = PAIRS[1:] if a.check and os.environ.get("SYMOPS_CHECK_EXTRA_ONLY") else PAIRS
     rng = np.random.default_rng(0)
-    pairs = PAIRS[1:] if a.check and os.environ.get("SYMOPS_CHECK_EXTRA_ONLY") else PAIRS
     for _, stick_dir in pairs:
         out_dir = stick_dir + "_symops"          # dataset.symops_twin
         os.makedirs(out_dir, exist_ok=True)
@@ -53,10 +83,10 @@ def main() -> int:
             with np.load(path, allow_pickle=True) as z:
                 refs = z["refcode"]
                 frac = z["atom_frac"] if a.check else None
-            ops = [parse_symops(cifs[str(r)]) for r in refs]
-            missing = sum(str(r) not in cifs for r in refs)
+            missing = [str(r) for r in refs if str(r) not in cifs]
             if missing:
-                raise SystemExit(f"{path}: {missing} refcodes have no CIF")
+                raise SystemExit(f"{path}: {len(missing)} refcodes have no CIF, e.g. {missing[:10]}")
+            ops = [parse_symops(cifs[str(r)]) for r in refs]
             if a.check:
                 from pymatgen.core import Structure
                 idx = rng.choice(len(refs), size=min(a.check, len(refs)), replace=False)

@@ -15,6 +15,9 @@ hands the encoder identity operators and nothing complains.
   smoke (CPU, reproduces cache/real_bench_realism):
   PYTHONPATH=src python scripts/44_d3_embed.py --ckpt runs/xrdclip_realism/best.pt --emb_dir <tmp> --device cpu \
       --smoke 512 --compare cache/real_bench_realism
+  open COD replica (structure embeddings only; its twins come from 40 --cod_cif_root):
+  XRD_STICK_DIRS=cod/sticks PYTHONPATH=src python scripts/44_d3_embed.py --ckpt runs/d3_sym_s0/best.pt \
+      --emb_dir cache/real_bench_cod_d3_sym_s0 --structures_only --device cpu
 """
 from __future__ import annotations
 
@@ -81,6 +84,8 @@ def main() -> int:
     ap.add_argument("--tol", type=float, default=1e-4)
     ap.add_argument("--smoke", type=int, default=0, help="only the first N entries of the first shard / library")
     ap.add_argument("--compare", default="", help="smoke: an emb_dir made by the old path with the same checkpoint")
+    ap.add_argument("--structures_only", action="store_true",
+                    help="library structure embeddings only (a library without 30's clean renderings, e.g. COD)")
     args = ap.parse_args()
 
     from xrdclip.data.dataset import symops_twin
@@ -130,6 +135,9 @@ def main() -> int:
         save(out, emb)
         print(f"[d3_embed] {out} ({time.time() - t0:.0f} s)", flush=True)
 
+    if args.structures_only:
+        print(f"[d3_embed] structures only ({time.time() - t0:.0f} s) DONE", flush=True)
+        return 0
     lib = np.load(gap.LIB, mmap_mode="r")
     n_lib = sum(n for _, n, _ in bench.shard_table(None))
     if lib.shape[0] != n_lib:
