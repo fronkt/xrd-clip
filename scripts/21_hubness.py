@@ -524,7 +524,7 @@ def cmd_eval(args) -> int:
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     with open(args.out, "w") as fh:
         json.dump(res, fh, indent=1)
-    np.savez_compressed(os.path.join(args.work, "hub_ranks.npz"),
+    np.savez_compressed(args.ranks_out or os.path.join(args.work, "hub_ranks.npz"),
                         **{f"{corr}|{td}|{key}": r for (corr, td, key), r in ranks.items()})
     write_table(res, args.table)
     print(f"[eval] wrote {args.out} + {args.table} ({time.time() - t_start:.0f}s)", flush=True)
@@ -665,6 +665,8 @@ def main() -> int:
     ap.add_argument("--ref_ranks", default=None, help="19's ranks.npz (default: <work>/ranks.npz)")
     ap.add_argument("--out", default="results/real_bench_hub.json")
     ap.add_argument("--table", default="results/real_bench_hub_table.md")
+    ap.add_argument("--ranks_out", default=None, help="eval: ranks file (default: <work>/hub_ranks.npz, the "
+                    "submitted model's; a retrained model writes its own)")
     args = ap.parse_args()
     args.ref_ranks = args.ref_ranks or os.path.join(args.work, "ranks.npz")
     if hasattr(sys.stdout, "reconfigure"):
