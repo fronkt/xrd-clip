@@ -4,7 +4,7 @@
 
 The RSOS version of scripts/23 (which stays the record of the RSC Advances figures). Styles, sizes and helpers come
 from 23; the data from results/rsos_numbers.json (48), the model's sweep (results/d3/sbv3_<model>_*.json) and
-cache/real_bench/case_zzzuwk.npz (24). Figure 2, the model schematic, is paper/rsos/figs/gen_fig_model.py.
+cache/real_bench/case_zzzuwk_rsos.npz (24) with cache/sticks_extra/shard_extra.npz.pre_occ (the sticks before 53). Figure 2, the model schematic, is paper/rsos/figs/gen_fig_model.py.
 """
 from __future__ import annotations
 
@@ -183,17 +183,19 @@ def fig_ladder(lad: dict) -> None:
     fig, (a, b) = plt.subplots(1, 2, figsize=(DOUBLE, 0.40 * DOUBLE))
     xs = np.arange(len(LADDER))
     mc = STYLE["model"]["color"]
-    series = (("pearson", lad[nums.MODEL]["results"], "Pearson, fixed grid", STYLE["pearson"]["color"], ":", "o", True),
-              ("model", lad[nums.MODEL]["results"], "Learned model, seed 0", mc, "-", "o", True),
-              ("model", lad[nums.SEED2]["results"], "Learned model, seed 1", mc, "--", "s", False),
-              ("model", lad[nums.ORIGINAL]["results"], f"Earlier model (ref. {ref_number('cai2026urtc')})", "0.45", "-.", "^", False))
-    for meth, res, lab, c, ls, mk, filled in series:
+    # the rungs are categories, not a scale: markers only (board review F6), dodged so that the series do not overlap
+    series = (("pearson", lad[nums.MODEL]["results"], "Pearson, fixed grid", STYLE["pearson"]["color"], 0.0, "D", True),
+              ("model", lad[nums.MODEL]["results"], "Learned model, seed 0", mc, -0.16, "o", True),
+              ("model", lad[nums.SEED2]["results"], "Learned model, seed 1", mc, 0.0, "s", False),
+              ("model", lad[nums.ORIGINAL]["results"], f"Earlier model (ref. {ref_number('cai2026urtc')})", "0.35", 0.16, "^",
+               False))
+    for meth, res, lab, c, dx, mk, filled in series:
         top1 = [res[f"{k}|{meth}|std"]["macro_top1"]["value"] for k, _ in LADDER]
         med = [res[f"{k}|{meth}|std"]["per_pattern"]["median_rank"] for k, _ in LADDER]
-        kw = dict(color=c, ls=ls, marker=mk, ms=3, lw=1.0, mfc=c if filled else "white", label=lab)
-        a.plot(xs, top1, **kw)
+        kw = dict(color=c, ls="none", marker=mk, ms=3.6, mew=0.8, mfc=c if filled else "white", label=lab)
+        a.plot(xs + dx, top1, **kw)
         if meth == "model":
-            b.plot(xs, med, **kw)
+            b.plot(xs + dx, med, **kw)
     for ax in (a, b):
         ax.axvline(len(LADDER) - 1.5, color="0.5", lw=0.6, ls="--")
         ax.set_xticks(xs, [t for _, t in LADDER], rotation=55, ha="right", rotation_mode="anchor")
@@ -209,15 +211,69 @@ def fig_ladder(lad: dict) -> None:
     save(fig, "fig6_effect_ladder")
 
 
+def fig_case(rn: dict, z) -> None:
+    """ZZZUWK: the measured 303 K pattern, its own entry simulated with the CSD site occupancies (the library) and with
+    every disorder site at full occupancy (the sticks before scripts/53), and the patterns each score ranks first."""
+    case = rn["case"]
+    ents, ids, grid = [str(e) for e in z["entries"]], [str(i) for i in z["q_ids"]], z["grid"]
+    q = z["q_raw"][ids.index("pattern_522.json")]       # 303 K pattern; its own Rietveld entry is ZZZUWK01
+    own = z["raw"][ents.index("ZZZUWK01")]
+    bench = import_module("19_real_bench")
+    with np.load("cache/sticks_extra/shard_extra.npz.pre_occ", allow_pickle=True) as sh:
+        i = [str(r) for r in sh["refcode"]].index("ZZZUWK01")
+        full = bench.render([{f: sh[f][i] for f in ("two_theta", "intensity", "hkl", "d_hkl", "recip")}])[0]
+    fig, (a, b) = plt.subplots(1, 2, figsize=(DOUBLE, 0.36 * DOUBLE), gridspec_kw=dict(width_ratios=[1.5, 1]))
+    sc = lambda v: (v - v.min()) / (v.max() - v.min())
+    rows = ((2.7, q, "k", "measured, 303 K"),
+            (1.35, own, "#0072B2", "ZZZUWK01, site occupancies"),
+            (0.0, full, "#D55E00", "ZZZUWK01, full occupancy"))
+    for off, v, c, t in rows:
+        a.plot(grid, sc(v) + off, color=c, lw=0.6)
+        a.text(49.5, off + 0.45, t, ha="right", va="bottom", fontsize=6, color=c)
+    for hkl, tt in (("001", 12.0), ("101", 18.6), ("110", 20.1), ("111", 23.5), ("200", 28.6)):
+        for off, v, _, _ in rows:
+            win = np.abs(grid - tt) <= 0.3
+            a.text(tt, off + sc(v)[win].max() + 0.03, hkl, ha="center", va="bottom", fontsize=4.8, color="0.3")
+    a.set_xlim(5, 50)
+    a.set_yticks([])
+    a.spines["left"].set_visible(False)
+    a.set_xlabel("2θ (°, Cu Kα1)")
+    label(a, 0, x=-0.03)
+    t1, t0 = case["top1_of_20"], case["top1_of_20_full_occupancy"]
+    keys = ["pearson_bkg", "cos_zs_bkg", "wcc_1_bkg", "wcc_2_bkg", "lnq_bkg"]
+    nm = ["Pearson,\nfixed", "Cosine +\nzero scan", "WCC\nl = 1°", "WCC\nl = 2°", "$\\ln q$\nscan"]
+    xs, w = np.arange(len(keys)), 0.27
+    col = [STYLE[REAL[k]]["color"] for k in keys]
+    bars = ((-w, [t0.get(f"none|{k}") for k in keys], dict(color="0.82", edgecolor="0.5", lw=0.6),
+             "full occupancy"),
+            (0.0, [t1[f"none|{k}"] for k in keys], dict(color=col), "site occupancies"),
+            (w, [t1[f"csls_aug_k10|{k}"] for k in keys], dict(color="white", edgecolor=col, hatch="////", lw=0.8),
+             "site occupancies + CSLS"))
+    for dx, vals, kw, lab in bars:
+        xv = [x + dx for x, v in zip(xs, vals) if v is not None]
+        b.bar(xv, [v for v in vals if v is not None], w, label=lab, **kw)
+        for x, v in zip(xs, vals):
+            if v == 0:
+                b.text(x + dx, 0.3, "0", ha="center", va="bottom", fontsize=5.5)
+            elif v is None:
+                b.text(x + dx, 0.3, "–", ha="center", va="bottom", fontsize=5.5, color="0.4")
+    b.set_xticks(xs, nm)
+    b.set_ylabel(f"ZZZUWK patterns ranked first (of {case['n_patterns']})")
+    b.set_ylim(0, 24.5)
+    b.set_yticks([0, 5, 10, 15, 20])
+    b.legend(frameon=False, loc="upper center", ncol=3, fontsize=5.4, bbox_to_anchor=(0.5, 1.02), handlelength=1.2,
+             columnspacing=0.8)
+    label(b, 1, x=-0.2)
+    fig.tight_layout()
+    save(fig, "fig5_case_zzzuwk")
+
+
 def main() -> int:
     rn = json.load(open("results/rsos_numbers.json"))
     fig_schematic(rn)
     fig_sweep(nums.sweep(nums.MODEL))
     fig_real(rn)
-    f23.fig_case(rn, rn["case"], np.load("cache/real_bench/case_zzzuwk_rsos.npz"))
-    import os
-    os.replace("paper/rsos/figs/fig4_case_zzzuwk.pdf", "paper/rsos/figs/fig5_case_zzzuwk.pdf")
-    os.replace("paper/rsos/figs/fig4_case_zzzuwk.png", "paper/rsos/figs/fig5_case_zzzuwk.png")
+    fig_case(rn, np.load("cache/real_bench/case_zzzuwk_rsos.npz"))
     fig_ladder(rn["ladder"])
     return 0
 

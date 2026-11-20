@@ -18,13 +18,13 @@ Purdue University, West Lafayette, Indiana, USA. E-mail: cai485@purdue.edu. ORCI
 
 Contrastive models that embed powder X-ray diffraction patterns and crystal structures in a shared space are
 proposed for structure retrieval but mostly evaluated on simulated patterns. We built a benchmark of 188
-measured patterns of 123 organic compounds, identified each pattern's crystal form in the Cambridge Structural
+measured patterns of 121 organic compounds, identified each pattern's crystal form in the Cambridge Structural
 Database by packing similarity, and ranked every pattern against 309,080 simulated entries. When the
-correct answer must be an independent single-crystal structure determined at ambient pressure (38 patterns of 26
-compounds), shift-tolerant classical profile scores rank it first for a compound-weighted fraction of 0.45–0.62. A
+correct answer must be an independent single-crystal structure determined at ambient pressure (38 patterns of 24
+compounds), shift-tolerant classical profile scores rank it first for a compound-weighted fraction of 0.53–0.69. A
 contrastive model with a space-group-aware structure encoder, trained with every measurement effect we could
 simulate, ranks it first for none of these compounds, and a second training seed for one. When the entry refined
-against the pattern itself also counts, the classical scores reach 0.71–0.88 and the model reaches 0.02.
+against the pattern itself also counts, the classical scores reach 0.72–0.90 and the model reaches 0.02.
 Simulations of these patterns with their own measurement effects are retrieved by the model at a median rank of 8,
 whereas the measured patterns sit at a median rank of about 5,600, and the 19 profiles of a small external set at
 4. We release the benchmark, an open replica and every per-pattern rank.
@@ -123,7 +123,7 @@ patterns, and the rank of the first correct entry is recorded under each answer 
 
 Of the 196 patterns, 189 were identified; the other seven, three of them Si frameworks or silsesquioxanes that passed
 the element filter, have no packing match. One identified pattern records its 2θ axis in radians (0.01
-to 0.83) and was excluded, which leaves 188 patterns of 123 compounds. Most compounds have one pattern (110 of 123),
+to 0.83) and was excluded, which leaves 188 patterns of 121 compounds. Most compounds have one pattern (106 of 121),
 but a few have many: ZZZUWK has 20, a variable-temperature series, ZZZIZM 12 and NAPHTA 10.
 
 Three checks test these labels (Supplementary Section S2). Because same-form sets were built within the anchors'
@@ -149,23 +149,23 @@ For 184 of the 188 patterns the CSD contains a powder-study entry that reproduce
 pattern's self-entry. Finding the self-entry tests whether a method can read a measured pattern, but it is close to
 self-retrieval, so we score three answer sets.
 
-- **Independent single-crystal entries at ambient pressure**, the ambient single-crystal set (38 patterns, 26
+- **Independent single-crystal entries at ambient pressure**, the ambient single-crystal set (38 patterns, 24
   compounds). Same-form entries that are powder studies are removed from the ranking, so they count neither as correct
   nor as errors, and the answer must be an independent single-crystal determination; patterns from variable-pressure
   studies are reported separately. This is the realistic case of a new measurement checked against a database, and it
   is our primary set.
 - **Pressure series** (22 patterns, 5 compounds). Patterns from room-temperature compression studies whose
   single-crystal references were determined at other pressures, scored like the primary set. Together the two sets
-  form the single-crystal set (60 patterns, 31 compounds). We separated the two after the first results on the whole
+  form the single-crystal set (60 patterns, 29 compounds). We separated the two after the first results on the whole
   single-crystal set were known, because the pressure series are not the routine case of a new measurement; results
   on the whole set are also reported (Section 4.3).
-- **Any same-form entry** (188 patterns, 123 compounds). Every entry in the pattern's same-form set is correct,
+- **Any same-form entry** (188 patterns, 121 compounds). Every entry in the pattern's same-form set is correct,
   including the self-entry. Every answer of the other sets is also an answer here, so a score's top-k on this set can
   only be higher.
 
 A compound is a CSD refcode family, except that two families whose same-form sets share an entry are one compound
 (two such pairs). We also report within-family retrieval, the rank of the correct form among the compound's own forms
-in the library (51 patterns of 35 compounds; chance 0.40, the mean over patterns of the fraction of candidates that
+in the library (51 patterns of 33 compounds; chance 0.40, the mean over patterns of the fraction of candidates that
 are correct), which isolates the polymorph-identification question.
 
 ### 2.4 Library
@@ -179,8 +179,8 @@ search. Stick patterns (Cu Kα1) were computed with the XRDCalculator module of 
 recomputing 296 randomly drawn entries with pymatgen 2026.4.16 reproduces the stored sticks exactly. The sticks were
 rendered with one pseudo-Voigt profile (Caglioti-type width, U = 0.002, V = −0.001, W = 0.004 deg², η = 0.5)
 [@caglioti1958], without Debye–Waller factors, texture, background or noise; a library closer to the measurements is
-tested in Section 4.7. Disordered entries, which occur only among the added entries, are simulated from their CSD
-site occupancies or, where the CSD gives coordinates for the major disorder component only, as that component at full
+tested in Section 4.7. The CIFs written by the CSD Python API carry no site occupancies, so disordered entries, which
+occur only among the added entries, are simulated from the occupancies of the CSD's asymmetric unit or, where the CSD gives coordinates for the major disorder component only, as that component at full
 occupancy, whichever agrees better with the CCDC's own powder simulation of the entry ({{n_resim}} entries,
 {{n_major}} as the major component). After both patterns are smoothed to a common peak width, our simulation agrees
 with the CCDC's with a median correlation of {{sim_rand_med}} for 100 randomly drawn library entries, {{sim_zzz_med}}
@@ -221,7 +221,7 @@ from that of every same-form entry stays an ordinary library entry and counts as
 answer, because excluding the 2,670 such candidates would remove the hardest decoys and flatter every score.
 Same-formula candidates that cannot be compared (23) are excluded as before, and powder or single-crystal is read from
 the COD method field, else from the powder tags of the CIF. Of the 196 patterns, 191 are identified in the COD, all 189 identified in the CSD and two more, and 190
-patterns of 125 compounds are scored. Only 35 patterns of 9 compounds have a single-crystal same-form entry, so the
+patterns of 123 compounds are scored. Only 35 patterns of 9 compounds have a single-crystal same-form entry, so the
 replica tests the any-same-form result. The replica is scored with the classical scores of Section 3.2 and the
 model, without the corrections of Sections 3.6 and 3.8.
 
@@ -338,8 +338,8 @@ hubness with probe patterns rather than with the benchmark patterns: 4,000 libra
 drawn only from compounds outside the benchmark, with pairs from the same compound excluded. For each score and library entry, N₁₀ is the number of
 probes that have the entry among their ten best matches, and we report its skewness over the entries. With 4,000 probes and
 309,080 entries the mean N₁₀ is 0.13, so these skewness values are not comparable with those in the hubness
-literature. The analysis is exploratory, prompted by one entry that was the wrong first answer for many patterns
-(Section 4.5). The correction is cross-domain similarity local scaling (CSLS) [@conneau2018muse] on the library side,
+literature. The analysis is exploratory; it was prompted by one entry that was the wrong first answer for all 20 patterns of
+one compound before the simulation of that compound's entries was corrected (Section 4.5). The correction is cross-domain similarity local scaling (CSLS) [@conneau2018muse] on the library side,
 s′(q, r) = s(q, r) − h₁₀(r)/2, where h₁₀(r) is the mean of entry r's ten highest scores against the degraded probes;
 CSLS subtracts the mean of a query term and an entry term, and the query term is the same for every entry and does not
 change ranks. As sensitivity checks we report k = 1–100, clean probes, library-side z-normalisation and
@@ -435,12 +435,12 @@ offsets between the points of their 0.02° grid (0.05° and 0.15°), and the ln 
 ### 4.2 Independent single-crystal references at ambient pressure
 
 When the self-entry is excluded and only independent single-crystal determinations at ambient pressure count, the
-shift-tolerant classical scores reach a compound-weighted top-1 of 0.45–0.62 and fixed-grid Pearson 0.33 (table 1,
+shift-tolerant classical scores reach a compound-weighted top-1 of 0.53–0.69 and fixed-grid Pearson 0.42 (table 1,
 figure 4a). The model reaches 0.00, and its second seed {{amb_s1}}. The first correct entry lies beyond rank 1,000 for
 {{amb_frac_gt1000_range}} of these patterns under the classical scores and for {{amb_model_frac_gt1000}} under the
-model. Paired over compounds, WCC with l = 1° beats fixed-grid Pearson by {{amb_paired_wcc1_pearson}}, and the ln q
-scan beats it by {{amb_paired_lnq_pearson}}; cosine + zero scan and WCC with l = 2° are not statistically
-distinguishable from it. Among the shift-tolerant scores, only WCC with l = 1° and cosine + zero scan differ
+model. Paired over compounds, WCC with l = 1° beats fixed-grid Pearson by {{amb_paired_wcc1_pearson}}; the interval
+of the ln q scan's gain reaches zero ({{amb_paired_lnq_pearson}}), and cosine + zero scan and WCC with l = 2° are not
+statistically distinguishable from it either. Among the shift-tolerant scores, only WCC with l = 1° and cosine + zero scan differ
 ({{amb_paired_wcc1_coszs}}).
 
 Re-ranking the ln q top 50 with VC-GPWDF gives {{c2_amb}}, against {{c2_amb_lnq}} for the ln q scan on the same
@@ -473,8 +473,8 @@ none of the compounds is retrieved, and treating the {{amb_n_compounds}} compoun
 
 **Figure 4.** Retrieval of 188 measured patterns from 309,080 simulated CSD entries (background-subtracted queries).
 (a) Compound-weighted top-1 with 95 % compound-bootstrap intervals for the ambient single-crystal set (open squares,
-26 compounds) and the any-same-form set (filled circles, 123 compounds); vertical bars mark the value with the CSLS
-hubness correction. (b) Compound-weighted top-1 against library size (any same-form entry; random decoy subsets; the
+24 compounds) and the any-same-form set (filled circles, 121 compounds); vertical bars mark the any-same-form value with
+the CSLS hubness correction. (b) Compound-weighted top-1 against library size (any same-form entry; random decoy subsets; the
 standard deviation over five draws is below 0.02).
 
 ### 4.3 Pressure series
@@ -494,8 +494,8 @@ the classical scores reach a compound-weighted top-1 of {{sc_all_range}} and the
 
 ### 4.4 When the self-entry counts
 
-With every same-form entry correct, the classical scores reach a compound-weighted top-1 of 0.71–0.88 (table 1): the
-ln q scan 0.88, cosine + zero scan 0.85, fixed-grid Pearson 0.84, WCC with l = 1° 0.84 and with l = 2° 0.71. Paired
+With every same-form entry correct, the classical scores reach a compound-weighted top-1 of 0.72–0.90 (table 1): the
+ln q scan 0.90, cosine + zero scan 0.87, fixed-grid Pearson 0.85, WCC with l = 1° 0.85 and with l = 2° 0.72. Paired
 over compounds, only WCC with l = 2° differs from Pearson ({{std_paired_wcc2_pearson}}). The model reaches 0.02, with
 a median rank of about 5,600, far from the median of about {{random_med}} that a random ordering would give, and its
 second seed reaches {{s1_std}}. Within families, with only the compound's own
@@ -505,39 +505,45 @@ Background subtraction matters for the classical scores. Without it, compound-we
 {{raw_pearson}} for Pearson, {{raw_coszs}} for cosine + zero scan, {{raw_wcc1}} for WCC with l = 1° and {{raw_wcc2}}
 for l = 2°. The loss is larger with a triangle weight than without one, presumably because the triangle averages each
 comparison over neighbouring points, so a slowly varying background contributes to every overlap. Our background
-removal is a simple rolling minimum, and a better one may help further. All classical scores also lose 0.06–0.12 in
+removal is a simple rolling minimum, and a better one may help further. All classical scores also lose 0.05–0.13 in
 compound-weighted top-1 between a 2,000-entry library and the full one (figure 4b), so results on small libraries
 overstate accuracy at database scale.
 
-### 4.5 One compound, twenty patterns, and the hubness correction
+### 4.5 Disordered entries and the hubness correction
 
-One entry, GUSRIV, was the wrong first answer of cosine + zero scan for 20 of its {{gusriv_misses}} misses, which looks
-like a hub. All 20 are patterns of ZZZUWK, propan-1-aminium chloride, measured as a variable-temperature series, and
-each belongs to its own powder-study entry, ZZZUWK01–20. The confusion is a property of this compound rather than of a
-hub. The tetragonal salt has 24 reflections between 5° and 50° 2θ, where the median same-form entry of the benchmark
-has about 130, and its measured relative intensities differ strongly from those simulated for its self-entry (figure
-5a). A March–Dollase texture fitted along each of 49 low-index axes, with r from 0.25 to 4, raises the median Pearson
-correlation of the 20 patterns with their self-entries only from 0.72 to 0.79, and the (101) and (202) reflections,
-which share a plane normal and so must be scaled alike by any texture, have measured-to-simulated peak-height ratios of 0.32 and
-2.49. Preferred orientation therefore cannot explain the mismatch. All 20 self-entries are disordered and omit H
-atoms, so our simulation of them is the more likely cause. Unrelated entries with strong reflections near ZZZUWK's two
-strongest measured peaks, such as GUSRIV and ZZZLWW01, then outscore the self-entry, and the more peak-tolerant the
-score, the more such decoys pass it. Fixed-grid Pearson, the least tolerant score, ranks the self-entry first for 12
-of the 20 patterns (figure 5b).
+ZZZUWK, propan-1-aminium chloride, contributes 20 patterns, a variable-temperature series, and each belongs to its own
+powder-study entry, ZZZUWK01–20, in which the cation is disordered and the H atoms are omitted. Simulated with every
+disorder site at full occupancy, which is what a CIF without occupancies implies, these entries agree with the CCDC's
+simulation at a median correlation of only {{case_sim_full}}. Cosine + zero scan and both WCC widths then rank a
+same-form entry first for none of the 20 patterns, fixed-grid Pearson for {{case_full_pearson}}, and one unrelated
+entry, {{case_full_hub}}, is the first answer of cosine + zero scan for all {{case_full_hub_n}}, which looks like a hub.
+Simulated with their site occupancies (Section 2.4), the entries agree with the CCDC's simulation at {{sim_zzz_med}},
+and cosine + zero scan, WCC with l = 1° and the ln q scan rank a same-form entry first for all 20 patterns, fixed-grid
+Pearson for {{case_pearson}} and WCC with l = 2° for {{case_wcc2}} (figure 5); the model ranks a same-form entry first
+for none of them. Every result in this paper uses the corrected simulation.
+
+The salt has 24 reflections between 5° and 50° 2θ, where the median same-form entry of the benchmark has about 130, so
+a few relative intensities decide every score, and these still differ from the simulation. The (101) and (202)
+reflections, which share a plane normal and so must be scaled alike by any texture, have measured-to-simulated
+peak-height ratios of {{case_r101}} and {{case_r202}}, and a March–Dollase texture fitted along each of 49 low-index
+axes, with r from 0.25 to 4, raises the median Pearson correlation of the 20 patterns with their self-entries only from
+{{case_tex0}} to {{case_tex1}}. The remaining mismatch is therefore not preferred orientation alone.
+
+Hubness itself depends on the score. The skewness of N₁₀ over the degraded probes is 18.7 for cosine + zero scan,
+12.5 for the ln q scan, 8.0 for Pearson, 3.6 for both WCC widths and 3.1 for the model. CSLS raises the
+compound-weighted top-1 of the classical scores by {{csls_std_range}} when any same-form entry counts and by
+{{csls_sc_range}} on the single-crystal set. Of these paired differences only the gain of WCC with l = 2° on the
+any-same-form set excludes zero ({{csls_wcc2_std}}), and {{csls_wcc2_zzzuwk}} patterns it gains are ZZZUWK's.
+CSLS leaves the model unchanged. The correction is cheap and repairs some confusions, but it does not change any
+comparison between the classical scores and the model.
 
 ![](figs/fig5_case_zzzuwk.pdf)
 
 **Figure 5.** The ZZZUWK case. (a) The measured pattern of propan-1-aminium chloride whose CSD entry, ZZZUWK01, was
-refined at 303 K (background removed), the simulated pattern of that entry, and the unrelated entry GUSRIV that cosine
-+ zero scan ranks first. (b) Number of the compound's 20 patterns for which each score ranks a same-form entry first,
-without and with CSLS.
-
-Hubness itself depends on the score. The skewness of N₁₀ over the degraded probes is 18.7 for cosine + zero scan,
-12.6 for the ln q scan, 8.0 for Pearson, 3.6 for both WCC widths and 3.1 for the model. CSLS fixes ZZZUWK for cosine
-+ zero scan (0 of 20 → 20 of 20) and raises the compound-weighted top-1 of the classical scores by 0.01–0.04 when any
-same-form entry counts and by 0.01–0.08 on the single-crystal set; no 95 % interval of these paired differences
-excludes zero. CSLS leaves the model unchanged. We detect no compound-level gain from the correction, which is a
-cheap option that removes hub-like confusions when they occur.
+refined at 303 K (background removed), and that entry simulated with its CSD site occupancies, as in the library, and
+with every disorder site at full occupancy. (b) Number of the compound's 20 patterns for which each score ranks a
+same-form entry first, with the full-occupancy simulation, with the site occupancies, and with the site occupancies
+and CSLS. The ln q scan in its present version was not run on the full-occupancy library.
 
 ### 4.6 Why the learned model fails
 
@@ -553,11 +559,11 @@ split have a median rank of {{ov_train_med}}, and patterns whose form is in no s
 
 The effect ladder shows that the model has learned the effects we simulated (figure 6). Rendered with each effect of
 its measurement, the self-entries stay near the clean result: with Kα2 the model reaches 0.25 (median rank 6), with
-the Debye–Waller factor 0.39 (median rank 4), and with the first six effects together 0.22 (median rank 12). With
-those six plus the Debye–Waller factor it reaches 0.23 at a median rank of 8, and with intensity jitter added 0.21 at
+the Debye–Waller factor 0.38 (median rank 4), and with the first six effects together 0.22 (median rank 12). With
+those six plus the Debye–Waller factor it reaches 0.23 at a median rank of 8, and with intensity jitter added 0.22 at
 a median rank of 12. The earlier model of ref. [@cai2026urtc], trained without these effects and without the
-operator tokens, falls to a median rank of 744 on the rendering with the six effects and the Debye–Waller factor. Yet on the measured patterns the retrained model
-stays at 0.02 with a median rank of about 5,600. Fixed-grid Pearson, by contrast, reaches 0.84 on the measured
+operator tokens, falls to a median rank of 298 on the rendering with the six effects and the Debye–Waller factor. Yet on the measured patterns the retrained model
+stays at 0.02 with a median rank of about 5,600. Fixed-grid Pearson, by contrast, reaches 0.85 on the measured
 patterns, close to its value on the fully rendered self-entries. The measured patterns therefore differ from our
 simulations in a way that barely affects fixed-grid correlation but moves this model's embeddings far. We have not
 identified it. Candidates include the peak asymmetry and angle-dependent shifts caused by axial divergence and specimen
@@ -565,8 +571,8 @@ transparency, which a constant offset does not absorb, anisotropic broadening an
 
 Matching patterns to patterns involves the pattern encoder only. Matched against the clean library patterns
 in the model's pattern space, without the structure encoder, the measured patterns reach a compound-weighted top-1 of
-0.17 (median rank 156), whereas fixed-grid Pearson, which also compares the two patterns point by point without an
-alignment search, reaches 0.84. The encoder places measured patterns away from simulations of the same structures
+0.17 (median rank 164), whereas fixed-grid Pearson, which also compares the two patterns point by point without an
+alignment search, reaches 0.85. The encoder places measured patterns away from simulations of the same structures
 before the structure side is involved. The seeds and the ablation agree with this reading. The second seed reaches
 {{s1_std}} on the measured patterns with a median rank of about 3,300, the model without operator tokens 0.03 with a
 median rank of about 4,100, and none of the three is statistically distinguishable from the earlier model (paired
@@ -574,7 +580,7 @@ differences {{paired_vs_orig_range}}). The operator tokens raise the model's wit
 sweep by about 0.02 over the ablation (in all 42 conditions for seed 0 and 41 for seed 1, although in no single
 condition do the intervals separate), but they leave the measured benchmark unchanged. As a shortlist for a classical re-rank the model also fails: its top 1,000 holds a correct
 entry for {{model_recall_1000}} of the patterns, and re-ranking that list with the ln q scan gives a compound-weighted
-top-1 of {{hybrid_lnq}}, against 0.88 for the ln q scan on the whole library.
+top-1 of {{hybrid_lnq}}, against 0.90 for the ln q scan on the whole library.
 
 The model's ranks also depend on where the patterns come from, a split we examined only after seeing the external set
 of Section 4.8. On the opXRD patterns its median rank is {{inst_labcu_med}} for the {{inst_labcu_n}} laboratory Cu
@@ -593,7 +599,7 @@ resolution, and the way their structures were refined, are candidates.
 **Figure 6.** Effect ladder. Each pattern's self-entry is rendered cleanly, with one effect of its measurement at a
 time, with the first six together, and with an overall Debye–Waller factor (B), log-normal intensity jitter per
 reflection (σ = 0.3) or both added; the last point is the measured patterns themselves (Section 3.5). Answer set:
-any same-form entry (188 patterns, 123 compounds). (a) Compound-weighted top-1 for fixed-grid Pearson, the model (two
+any same-form entry (188 patterns, 121 compounds). (a) Compound-weighted top-1 for fixed-grid Pearson, the model (two
 seeds) and the earlier model of ref. [@cai2026urtc]; (b) median rank of the first correct entry for the models.
 
 ### 4.7 Robustness of the benchmark
@@ -621,7 +627,7 @@ Supplementary Sections S2 and S12.
 ### 4.8 The open replica and an external set
 
 Against the 108,902 COD entries, the 190 patterns reproduce the main result when any same-form entry counts: the
-classical scores reach a compound-weighted top-1 of {{cod_std_range}} (125 compounds) and the model {{cod_model}}. The
+classical scores reach a compound-weighted top-1 of {{cod_std_range}} (123 compounds) and the model {{cod_model}}. The
 replica's single-crystal set has 35 patterns but only 9 compounds, 20 of its patterns are ZZZUWK, scored against a
 1950 room-temperature structure that the CSD benchmark excludes as not comparable, and its 5 % cell window leaves out,
 by construction, the large cell differences that dominate the CSD failures, so it cannot test the single-crystal
@@ -646,8 +652,8 @@ patterns. The model's much better ranks on these profiles than on the opXRD patt
 On these measured organic patterns, all from one contributor to opXRD and searched against the CSD, simple classical
 scores on background-subtracted patterns set the level that a learned retrieval method would have to reach. When the
 reference is an independent single-crystal structure determined at ambient pressure, the shift-tolerant scores reach
-a compound-weighted top-1 of 0.45–0.62 over 26 compounds, and when the pattern's self-entry is in the library they
-reach up to 0.88, with even fixed-grid Pearson correlation at 0.84. Whether the same ordering holds for other sources
+a compound-weighted top-1 of 0.53–0.69 over 24 compounds, and when the pattern's self-entry is in the library they
+reach up to 0.90, with even fixed-grid Pearson correlation at 0.85. Whether the same ordering holds for other sources
 of measured patterns is untested beyond the small external set of Section 4.8. We suggest that learned PXRD retrieval
 be reported on measured patterns, against a library of realistic size, against shift- and strain-tolerant correlation
 scores with background subtraction, with compound-weighted metrics and a compound-level bootstrap whenever compounds
@@ -680,8 +686,8 @@ of learning than a stand-alone retriever.
 
 Our study has several limitations. We tested one model architecture, trained with two seeds and one ablation; another
 architecture, loss or training strategy could do better, and our conclusions about learning concern this model. The
-benchmark has 123 compounds, all organic, from one contributor to opXRD, and most patterns are the data their own
-entry was refined against. The ambient single-crystal set has 26 compounds, so its intervals are wide, and the open
+benchmark has 121 compounds, all organic, from one contributor to opXRD, and most patterns are the data their own
+entry was refined against. The ambient single-crystal set has 24 compounds, so its intervals are wide, and the open
 replica's single-crystal set has only 9. The main library is simulated with one peak profile and without
 Debye–Waller factors or Kα2; a package of such changes moved little but does not exhaust them, uses one
 Debye–Waller factor for every temperature, and disordered entries are simulated from the CSD's site occupancies, of
@@ -704,9 +710,9 @@ forms only; crystal structure prediction combined with pattern matching can iden
 
 We searched 188 measured organic powder patterns against 309,080 simulated CSD entries. When the answer is an
 independent single-crystal structure determined at ambient pressure, shift-tolerant classical profile scores rank it
-first for a compound-weighted 0.45–0.62 of the 26 compounds. A contrastive model with a space-group-aware structure
+first for a compound-weighted 0.53–0.69 of the 24 compounds. A contrastive model with a space-group-aware structure
 encoder ranks it first for none of them. When the pattern's self-entry also counts, the classical scores reach
-0.71–0.88 and the model reaches 0.02. The model retrieves simulated patterns of the same targets, including patterns
+0.72–0.90 and the model reaches 0.02. The model retrieves simulated patterns of the same targets, including patterns
 rendered with the effects of their own measurements, but not the measured patterns, and its pattern encoder already
 places measured patterns away from their simulations. These controls establish the discrepancy for this model on the opXRD patterns, not its
 cause or how common it is elsewhere: on high-resolution synchrotron profiles from one external source the model does

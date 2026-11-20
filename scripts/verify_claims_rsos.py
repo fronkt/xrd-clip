@@ -131,6 +131,8 @@ tex = CASE["analysis"]["context"]["texture"]
 refl = CASE["analysis"]["context"]["reflections_5_50"]
 TF = CASE["texture_fit"]
 RFL = {r["hkl"]: r["ratio_measured_over_sim"] for r in TF["reflections"]}
+CASE_T1, CASE_FULL = CASE["top1_of_20"], CASE["top1_of_20_full_occupancy"]
+CSLS_EXCL = [(td, k) for td in ("std", "sc") for k in CLS if not incl0(pair[f"{td}|{k}"]["macro_diff_ci"])]
 
 
 def cod_m(td, key):
@@ -202,7 +204,17 @@ PH = {
     "s1_std": f2(MOD[S1]["std_macro_top1"]["value"]),
     "raw_pearson": f2(b("pearson_raw")["macro_top1"]), "raw_coszs": f2(b("cos_zs_raw")["macro_top1"]),
     "raw_wcc1": f2(b("wcc_1_raw")["macro_top1"]), "raw_wcc2": f2(b("wcc_2_raw")["macro_top1"]),
-    "gusriv_misses": str(hub["cos_zs_bkg"]["n_miss_none"]),
+    "case_sim_full": f"{P['simulation_check']['pre_occ_groups']['zzzuwk']['median']:.3f}",
+    "case_full_pearson": str(CASE_FULL["none|pearson_bkg"]),
+    "case_full_hub": CASE["wrong_top1_cos_zs_full_occupancy"][0],
+    "case_full_hub_n": str(CASE["wrong_top1_cos_zs_full_occupancy"][1]),
+    "case_pearson": str(CASE_T1["none|pearson_bkg"]), "case_wcc2": str(CASE_T1["none|wcc_2_bkg"]),
+    "case_r101": f2(RFL["(1, 0, 1)"]), "case_r202": f2(RFL["(2, 0, 2)"]),
+    "case_tex0": f2(TF["median_pearson_no_texture"]), "case_tex1": f2(TF["median_pearson_best_texture"]),
+    "csls_std_range": rng(csls_std), "csls_sc_range": rng(csls_sc),
+    "csls_wcc2_std": f"{f2(pair['std|wcc_2_bkg']['macro_diff'])} {ci(pair['std|wcc_2_bkg']['macro_diff_ci'])}",
+    "csls_wcc2_zzzuwk": f"{dict(pair['std|wcc_2_bkg']['fixed'])['ZZZUWK']} of the "
+                        f"{sum(n for _, n in pair['std|wcc_2_bkg']['fixed'])}",
     "probe_sim_top1": f"{pct(mp['sim']['top1'])} %", "probe_sim_med": med(mp["sim"]["median_rank"]),
     "probe_aug_top1": f"{pct(mp['aug']['top1'])} %", "probe_aug_med": med(mp["aug"]["median_rank"]),
     "ov_train_med": med(ov["model_bkg_train"]["median_rank"]), "ov_none_med": med(ov["model_bkg_none"]["median_rank"]),
@@ -446,10 +458,11 @@ CLAIMS = [
     f"The model reaches {f2(AS['model']['macro_top1']['value'])}, and its second seed {PH['amb_s1']}",
     f"beyond rank 1,000 for {PH['amb_frac_gt1000_range']} of these patterns under the classical scores and for "
     f"{PH['amb_model_frac_gt1000']} under the model",
-    need(AS["paired_wcc_1_minus_pearson"]["ci"][0] > 0 and AS["paired_lnq_minus_pearson"]["ci"][0] > 0
+    need(AS["paired_wcc_1_minus_pearson"]["ci"][0] > 0 and AS["paired_lnq_minus_pearson"]["ci"][0] == 0
          and incl0(AS["paired_vs_pearson"]["cos_zs"]["ci"]) and incl0(AS["paired_vs_pearson"]["wcc_2"]["ci"]),
-         f"WCC with l = 1° beats fixed-grid Pearson by {PH['amb_paired_wcc1_pearson']}, and the ln q scan beats it by "
-         f"{PH['amb_paired_lnq_pearson']}; cosine + zero scan and WCC with l = 2° are not statistically distinguishable from it"),
+         f"WCC with l = 1° beats fixed-grid Pearson by {PH['amb_paired_wcc1_pearson']}; the interval of the ln q scan's "
+         f"gain reaches zero ({PH['amb_paired_lnq_pearson']}), and cosine + zero scan and WCC with l = 2° are not "
+         f"statistically distinguishable from it either"),
     need([k for k, v in pt_tol.items() if not incl0(v["ci"])] == ["cos_zs-wcc_1"],
          f"Among the shift-tolerant scores, only WCC with l = 1° and cosine + zero scan differ ({PH['amb_paired_wcc1_coszs']})"),
     need(incl0(AS["paired_critic2_minus_lnq"]["ci"]),
@@ -504,26 +517,35 @@ CLAIMS = [
     f"All classical scores also lose {rng(lc_drop)} in compound-weighted top-1 between a 2,000-entry library and the full one",
     need(max(v[1] for k, cv in lc.items() for v in cv.values()) < 0.02, "the standard deviation over five draws is below 0.02"),
     # ---- 4.5
-    need(hub["cos_zs_bkg"]["wrong_top1_none"][0][0] == "GUSRIV",
-         f"was the wrong first answer of cosine + zero scan for {hub['cos_zs_bkg']['wrong_top1_none'][0][1]} of its "
-         f"{PH['gusriv_misses']} misses"),
+    f"agree with the CCDC's simulation at a median correlation of only {PH['case_sim_full']}",
+    need(CASE_FULL["none|cos_zs_bkg"] == CASE_FULL["none|wcc_1_bkg"] == CASE_FULL["none|wcc_2_bkg"] == 0,
+         "Cosine + zero scan and both WCC widths then rank a same-form entry first for none of the 20 patterns"),
+    need(CASE["wrong_top1_cos_zs_full_occupancy"][1] == CASE["n_patterns"]
+         and CASE["wrong_top1_cos_zs_full_occupancy"][3] == [["ZZZUWK", CASE["n_patterns"]]]
+         and not CASE["wrong_top1_cos_zs_full_occupancy"][0].startswith("ZZZUWK"),
+         f"one unrelated entry, {PH['case_full_hub']}, is the first answer of cosine + zero scan for all {PH['case_full_hub_n']}"),
+    need(CASE_T1["none|cos_zs_bkg"] == CASE_T1["none|wcc_1_bkg"] == CASE_T1["none|lnq_bkg"] == CASE["n_patterns"] == 20,
+         "cosine + zero scan, WCC with l = 1° and the ln q scan rank a same-form entry first for all 20 patterns"),
+    need(CASE_T1["none|model_bkg"] == 0, "the model ranks a same-form entry first for none of them"),
     need(refl["benchmark_entries_frac_fewer"] < 0.01,
-         f"The tetragonal salt has {refl['case_entry']} reflections between 5° and 50° 2θ, where the median same-form entry of "
-         f"the benchmark has about {round(refl['benchmark_entries_median'], -1):.0f}"),
-    f"A March–Dollase texture fitted along each of {TF['axes_tested']} low-index axes, with r from {TF['r_grid'][0]:g} to "
+         f"The salt has {refl['case_entry']} reflections between 5° and 50° 2θ, where the median same-form entry of the "
+         f"benchmark has about {round(refl['benchmark_entries_median'], -1):.0f}"),
+    need(abs(RFL["(1, 0, 1)"] - RFL["(2, 0, 2)"]) > 0.3,
+         f"have measured-to-simulated peak-height ratios of {f2(RFL['(1, 0, 1)'])} and {f2(RFL['(2, 0, 2)'])}"),
+    f"March–Dollase texture fitted along each of {TF['axes_tested']} low-index axes, with r from {TF['r_grid'][0]:g} to "
     f"{TF['r_grid'][1]:g}, raises the median Pearson correlation of the {TF['n_patterns']} patterns with their self-entries only "
     f"from {f2(TF['median_pearson_no_texture'])} to {f2(TF['median_pearson_best_texture'])}",
-    f"have measured-to-simulated peak-height ratios of {f2(RFL['(1, 0, 1)'])} and {f2(RFL['(2, 0, 2)'])}",
-    f"ranks the self-entry first for {CASE['top1_of_20']['none|pearson_bkg']} of the 20 patterns (figure 5b)",
     f"The skewness of N₁₀ over the degraded probes is {hub['cos_zs_bkg']['N10_skew_aug']:.1f} for cosine + zero scan, "
     f"{hub['lnq_bkg']['N10_skew_aug']:.1f} for the ln q scan, {hub['pearson_bkg']['N10_skew_aug']:.1f} for Pearson, "
     f"{hub['wcc_1_bkg']['N10_skew_aug']:.1f} for both WCC widths and {hub['model_bkg']['N10_skew_aug']:.1f} for the model",
-    need(f"{hub['wcc_1_bkg']['N10_skew_aug']:.1f}" == f"{hub['wcc_2_bkg']['N10_skew_aug']:.1f}",
-         f"CSLS fixes ZZZUWK for cosine + zero scan ({CASE['top1_of_20']['none|cos_zs_bkg']} of 20 → "
-         f"{CASE['top1_of_20']['csls_aug_k10|cos_zs_bkg']} of 20)"),
-    need(all(incl0(pair[f"{td}|{k}"]["macro_diff_ci"]) for td in ("std", "sc") for k in CLS),
-         f"raises the compound-weighted top-1 of the classical scores by {rng(csls_std)} when any same-form entry counts and by "
-         f"{rng(csls_sc)} on the single-crystal set; no 95 % interval of these paired differences excludes zero"),
+    need(f"{hub['wcc_1_bkg']['N10_skew_aug']:.1f}" == f"{hub['wcc_2_bkg']['N10_skew_aug']:.1f}", "for both WCC widths"),
+    f"CSLS raises the\ncompound-weighted top-1 of the classical scores by {rng(csls_std)} when any same-form entry counts and by\n"
+    f"{rng(csls_sc)} on the single-crystal set",
+    need(min(csls_std + csls_sc) > 0, "CSLS raises the"),
+    need(CSLS_EXCL == [("std", "wcc_2_bkg")] and pair["std|wcc_2_bkg"]["macro_diff_ci"][0] > 0,
+         "Of these paired differences only the gain of WCC with l = 2° on the\nany-same-form set excludes zero"),
+    need(dict(pair["std|wcc_2_bkg"]["fixed"])["ZZZUWK"] == CASE_T1["csls_aug_k10|wcc_2_bkg"] - CASE_T1["none|wcc_2_bkg"],
+         f"and {PH['csls_wcc2_zzzuwk']} patterns it gains are ZZZUWK's"),
     need(pair["std|model_bkg"]["macro_diff"] == 0 and pair["sc|model_bkg"]["macro_diff"] == 0, "CSLS leaves the model unchanged"),
     # ---- 4.6
     f"it ranks the probe's own entry first for {PH['probe_sim_top1']} of probes (median rank {PH['probe_sim_med']}), and for "

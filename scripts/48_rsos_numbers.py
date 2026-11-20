@@ -140,6 +140,9 @@ def main() -> int:
         "n_identified": sum(bool(t["true_stems"]) for t in truth.values()),
         "n_excluded": len(excluded), "excluded": excluded,
         "n_queries": nq, "n_compounds": n_uniq,
+        # refcode families joined into one compound because their same-form sets share an entry (19.compound_ids)
+        "compound_merges": sorted(sorted(fs) for fs in ({c: {x["family"] for x in meta if x["stem"] == c}
+                                                          for c in set(stems.tolist())}).values() if len(fs) > 1),
         "n_lab_cu": int(sum(1.53 < w < 1.55 for w in wl)),
         "n_synchrotron_or_other": int(sum(not (1.53 < w < 1.55) for w in wl)),
         "wavelengths_non_cu": sorted({round(w, 4) for w in wl if not (1.53 < w < 1.55)}),
@@ -245,10 +248,19 @@ def main() -> int:
     out["simulation_check"] = {"groups": sx["groups"], "n_resimulated": len(pat),
                                "n_major_component": sum(v["variant"] == "B_major_component" for v in pat.values()),
                                "worst": sorted(best.items(), key=lambda kv: kv[1])[:3],
-                               "min_except_worst": rd(sorted(best.values())[1])}
+                               "min_except_worst": rd(sorted(best.values())[1]),
+                               # the same cross-check on the sticks simulated with every disorder site at full
+                               # occupancy (scripts/51 run on shard_extra.npz.pre_occ before scripts/53)
+                               "pre_occ_groups": load("cache/sim_check/sim_crosscheck_pre_occ.json")["groups"]}
     out["case"] = {"stem": CASE, "n_patterns": int(rows.sum()),
                    "formula": truth[meta[int(np.nonzero(rows)[0][0])]["id"]]["same_form"][0]["formula"],
                    "top1_of_20": {f"{c}|{k}": int(((R[f"{c}|std|{k}"] == 0) & rows).sum()) for c in CORRS for k in KEYS},
+                   # the same count from the committed record of the pipeline before the disorder fix (scripts/22,
+                   # results/paper_numbers.json: ZZZUWK's self-entries simulated with every site at full occupancy;
+                   # its labels are unchanged by the corrections, and the Pearson, cosine and WCC scores are the same)
+                   "top1_of_20_full_occupancy": {k: v for k, v in load("results/paper_numbers.json")["case"]["top1_of_20"].items()
+                                                 if "lnq" not in k and "model" not in k},
+                   "wrong_top1_cos_zs_full_occupancy": load("results/paper_numbers.json")["hubness"]["cos_zs_bkg"]["wrong_top1_none"][0],
                    "analysis": {"context": cz["context"],
                                 "decoys": {mm: {rc: {f: v[f] for f in ("beats_truth_with_scan", "beats_truth_at_offset0",
                                                                       "beats_truth_pearson", "best_offset_deg_median")}
