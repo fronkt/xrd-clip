@@ -79,6 +79,31 @@ def cmd_render(args) -> int:
     return 0
 
 
+def cmd_patch(args) -> int:
+    """Board review 11-19 (A07): re-render the given library chunks into the shared clean render (unless --no_render)
+    and re-encode those rows into --emb_dir's pattern embeddings with --ckpt. Chunk 78 = the added entries, whose
+    disordered members were re-simulated with their occupancies (scripts/52, 53)."""
+    shards = bench.shard_table(None)
+    want = {int(c) for c in args.chunks.split(",")}
+    jobs = [j for j in bench.chunk_jobs(shards, 4096) if j[0] in want]
+    if not args.no_render:
+        lib = np.lib.format.open_memmap(LIB, mode="r+")
+        for j in jobs:
+            g0, y = _render_job(j)
+            lib[g0:g0 + len(y)] = y
+        lib.flush()
+        del lib
+        print(f"[patch] re-rendered chunks {sorted(want)} into {LIB}", flush=True)
+    lib = np.load(LIB, mmap_mode="r")
+    model = load_model(args)
+    pe = np.lib.format.open_memmap(os.path.join(args.emb_dir, PEMB), mode="r+")
+    for _, _, lo, hi, g0 in jobs:
+        pe[g0:g0 + hi - lo] = encode(model, np.asarray(lib[g0:g0 + hi - lo])).numpy()
+    pe.flush()
+    print(f"[patch] re-encoded chunks {sorted(want)} into {os.path.join(args.emb_dir, PEMB)}", flush=True)
+    return 0
+
+
 def load_model(args):
     import torch
     from xrdclip.models.clip import load_checkpoint
@@ -303,7 +328,7 @@ def cmd_eval(args) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=("render", "pemb", "eval"))
+    ap.add_argument("cmd", choices=("render", "pemb", "patch", "eval"))
     ap.add_argument("--truth", default=f"{bench.DATA}/opxrd/opxrd_truth.json")
     ap.add_argument("--patterns", default=f"{bench.DATA}/opxrd/opxrd_cnrs_organic.json")
     ap.add_argument("--ckpt", default="runs/xrdclip_poly/best.pt")
@@ -312,12 +337,14 @@ def main() -> int:
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--threads", type=int, default=4)
     ap.add_argument("--out", default="results/model_gap.json")
+    ap.add_argument("--chunks", default="78", help="patch: comma-separated library chunk ids")
+    ap.add_argument("--no_render", action="store_true", help="patch: re-encode only (the render is already patched)")
     ap.add_argument("--variants", default="", help="comma-separated variant names to (re)run; merged into --out")
     ap.add_argument("--bkg_all", action="store_true",
                     help="background removal on every variant (10-14 referee check: the realism retrain's training "
                          "inputs were all background-removed, the single-effect rungs were not)")
     args = ap.parse_args()
-    return {"render": cmd_render, "pemb": cmd_pemb, "eval": cmd_eval}[args.cmd](args)
+    return {"render": cmd_render, "pemb": cmd_pemb, "patch": cmd_patch, "eval": cmd_eval}[args.cmd](args)
 
 
 if __name__ == "__main__":

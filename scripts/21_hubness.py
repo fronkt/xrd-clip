@@ -291,6 +291,84 @@ def cmd_score(args) -> int:
     return 0
 
 
+def cmd_patch(args) -> int:
+    """Re-score selected library chunks into an existing score pass (board review 11-19, A07: the disordered added
+    entries of chunk 78 were re-simulated with their occupancies). Query rows and per-entry probe statistics of those
+    columns are overwritten exactly; in each probe's top-NN list the old entries of the chunk are dropped and the new
+    scores merged in, so every top-k with k <= NN - (entries dropped) is exact (N10 always is). Run with the same
+    LNQ_VERSION as the original pass. The previous hub_stats.npz is kept as hub_stats.pre_patch.npz."""
+    import shutil
+    import torch
+    from xrdclip.eval import wcc_torch as WT
+    WT.full_precision()
+    bench.unthrottle()
+    dev = "cpu"
+    torch.set_num_threads(args.threads)
+    hub = np.load(os.path.join(args.work, "hub_ctx.npz"))
+    shards = bench.shard_table(args.limit)
+    lib_rc = library_refcodes(shards)
+    N = len(lib_rc)
+    assert N == int(hub["n_library"]), f"library mismatch: {N:,} here vs {int(hub['n_library']):,} in hub_ctx"
+    stem = torch.from_numpy(stems_of(lib_rc)).to(dev)
+    P = int(hub["n_probe"])
+    pstem = stem[torch.from_numpy(hub["probe_g"]).to(dev)]
+    Q = {k[3:]: hub[k] for k in hub.files if k.startswith("Q__")}
+    nq = Q["raw_bkg"].shape[0]
+    probes = hub["P__raw"]
+    out = os.path.join(args.work, "full")
+    st_path = os.path.join(out, "hub_stats.npz")
+    if not os.path.exists(os.path.join(out, "hub_stats.pre_patch.npz")):
+        shutil.copy2(st_path, os.path.join(out, "hub_stats.pre_patch.npz"))
+    old = np.load(st_path)
+    arrays = {k: old[k].copy() for k in old.files}
+    ks = [int(k) for k in arrays["ks"]]
+    rows = {"pearson": torch.from_numpy(np.concatenate([Q["std_raw"], Q["std_bkg"], WT.standardize_rows(probes)])).to(dev)}
+    layout = {"pearson": {"pearson_raw": slice(0, nq), "pearson_bkg": slice(nq, 2 * nq)}}
+    scorers = {}
+    for m, spec in bench.SPECS.items():
+        scorers[m] = WT.TorchWCC(**spec, device=dev, **({"version": LNQ_VERSION} if m == "lnq" else {}))
+        vs = bench.VARIANTS[m]
+        rows[m] = scorers[m].prep_rows(np.concatenate([Q[f"raw_{v}"] for v in vs] + [probes]))
+        layout[m] = {f"{m}_{v}": slice(i * nq, (i + 1) * nq) for i, v in enumerate(vs)}
+    for m in METHODS:
+        q_end = max(s.stop for s in layout[m].values())
+        layout[m]["probes"] = slice(q_end, q_end + 2 * P)
+    S = {k: np.lib.format.open_memmap(os.path.join(out, f"S_{k}.npy"), mode="r+") for k in bench.CLASSICAL_KEYS}
+    want = {int(c) for c in args.chunks.split(",")}
+    jobs = [j for j in bench.chunk_jobs(shards, args.chunk) if j[0] in want]
+    for job in jobs:
+        cid, g0, raw, rstd, rlnq = _render_job(job)
+        C = raw.shape[0]
+        cstem = stem[g0:g0 + C]
+        blocks = {"pearson": WT.pearson(rows["pearson"], torch.from_numpy(rstd).to(dev))}
+        for m, sc in scorers.items():
+            blocks[m] = sc.scores(rows[m], sc.prep_refs(rlnq if sc.lnq else raw, already_lnq=sc.lnq))
+        for m, s in blocks.items():
+            for key, sl in layout[m].items():
+                if key != "probes":
+                    S[key][:, g0:g0 + C] = s[sl].cpu().numpy()
+            sp = s[layout[m]["probes"]]
+            for i, ps in enumerate(PROBE_SETS):
+                spi, mask = sp[i * P:(i + 1) * P], pstem[i * P:(i + 1) * P, None] == cstem[None, :]
+                mean, std, topk = probe_stats(spi, mask, ks)
+                arrays[f"{m}__{ps}__mean"][g0:g0 + C] = mean.cpu().numpy()
+                arrays[f"{m}__{ps}__std"][g0:g0 + C] = std.cpu().numpy()
+                arrays[f"{m}__{ps}__topk"][:, g0:g0 + C] = topk.cpu().numpy()
+                nn_s = torch.from_numpy(arrays[f"{m}__{ps}__nn_s"].astype(np.float32))
+                nn_i = torch.from_numpy(arrays[f"{m}__{ps}__nn_i"].astype(np.int64))
+                inside = (nn_i >= g0) & (nn_i < g0 + C)
+                nn_s = nn_s.masked_fill(inside, float("-inf"))
+                v3, i3 = merge_nn(nn_s, nn_i, spi, mask, g0)
+                arrays[f"{m}__{ps}__nn_s"] = v3.cpu().numpy()
+                arrays[f"{m}__{ps}__nn_i"] = i3.cpu().numpy().astype(np.int32)
+                print(f"[patch] chunk {cid} {m} {ps}: {int(inside.sum())} old top-{NN} hits dropped", flush=True)
+    for s in S.values():
+        s.flush()
+    bench.save_npz(st_path, **arrays)
+    print(f"[patch] PATCH_DONE chunks {sorted(want)} in {args.work} (LNQ_VERSION {LNQ_VERSION})", flush=True)
+    return 0
+
+
 # ------------------------------------------------------------------------------------------------
 # eval (local)
 # ------------------------------------------------------------------------------------------------
@@ -648,7 +726,7 @@ def write_table(res: dict, path: str) -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=("check", "prep", "score", "eval"))
+    ap.add_argument("cmd", choices=("check", "prep", "score", "patch", "eval"))
     ap.add_argument("--work", default="cache/real_bench")
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--truth", default=f"{DATA}/opxrd/opxrd_truth.json")
@@ -659,6 +737,7 @@ def main() -> int:
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--threads", type=int, default=4)
     ap.add_argument("--chunk", type=int, default=4096)
+    ap.add_argument("--chunks", default="78", help="patch: comma-separated chunk ids to re-score")
     ap.add_argument("--ckpt", default="runs/xrdclip_poly/best.pt")
     ap.add_argument("--embed_dim", type=int, default=256)
     ap.add_argument("--emb_dir", default=None, help="library embeddings from 19 (default: --work)")
@@ -671,7 +750,7 @@ def main() -> int:
     args.ref_ranks = args.ref_ranks or os.path.join(args.work, "ranks.npz")
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
-    return {"check": cmd_check, "prep": cmd_prep, "score": cmd_score, "eval": cmd_eval}[args.cmd](args)
+    return {"check": cmd_check, "prep": cmd_prep, "score": cmd_score, "patch": cmd_patch, "eval": cmd_eval}[args.cmd](args)
 
 
 if __name__ == "__main__":
