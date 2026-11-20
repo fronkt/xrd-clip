@@ -1,10 +1,18 @@
 {
+ "pattern_100": {
+  "top1_entry": "GOFWUV01",
+  "wavelength": 1.5406,
+  "delta_native_deg": -0.1,
+  "delta_cu_equiv_deg": -0.1,
+  "cosine": 0.4987,
+  "at_edge": false
+ },
  "pattern_1006": {
   "top1_entry": "ROHWIX01",
   "wavelength": 1.5418,
   "delta_native_deg": -0.04003,
   "delta_cu_equiv_deg": -0.04,
-  "cosine": 0.5645,
+  "cosine": 0.9202,
   "at_edge": false
  },
  "pattern_1008": {

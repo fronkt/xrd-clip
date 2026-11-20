@@ -1,11 +1,16 @@
 {
  "meta": {
   "k": 50,
-  "n_queries": 59,
-  "n_planned": 59,
-  "n_comparisons": 2950,
-  "n_failed_comparisons": 1,
+  "n_queries": 60,
+  "n_planned": 60,
+  "n_comparisons": 3000,
+  "n_failed_comparisons": 2,
   "failed": [
+   [
+    "pattern_100",
+    "HAJQAN",
+    "timeout/empty"
+   ],
    [
     "pattern_730",
     "GOGZOU",
@@ -13,65 +18,65 @@
    ]
   ],
   "incomplete": [],
-  "recall_at_k": 0.6101694915254238,
-  "timing_wall_s_median": 137.25,
-  "cpu_s_median": 132.0,
+  "recall_at_k": 0.6333333333333333,
+  "timing_wall_s_median": 143.9,
+  "cpu_s_median": 138.0,
   "cpu_s_max": 10666.0,
-  "cpu_h_total": 399.7997222222222
+  "cpu_h_total": 418.0316666666667
  },
  "critic2_vcgpwdf": {
   "top1": {
-   "n_compounds": 30,
-   "value": 0.5333,
+   "n_compounds": 29,
+   "value": 0.569,
    "ci": [
-    0.3667,
-    0.7
+    0.3966,
+    0.7414
    ]
   },
   "top10": {
-   "n_compounds": 30,
-   "value": 0.62,
+   "n_compounds": 29,
+   "value": 0.6414,
    "ci": [
-    0.4533,
-    0.7867
+    0.4724,
+    0.8103
    ]
   },
-  "per_pattern_top1": 0.4576271186440678
+  "per_pattern_top1": 0.4666666666666667
  },
  "lnq_v2_full_library": {
   "top1": {
-   "n_compounds": 30,
-   "value": 0.4548,
+   "n_compounds": 29,
+   "value": 0.4532,
    "ci": [
-    0.2762,
-    0.6333
+    0.2931,
+    0.6256
    ]
   },
   "top10": {
-   "n_compounds": 30,
-   "value": 0.6114,
+   "n_compounds": 29,
+   "value": 0.6153,
    "ci": [
-    0.4448,
-    0.7714
+    0.4546,
+    0.7759
    ]
   },
   "per_pattern_top1": 0.423728813559322
  },
  "paired_critic2_minus_lnq": {
   "top1": {
-   "n_compounds": 30,
-   "diff": 0.0786,
+   "n_compounds": 29,
+   "diff": 0.0985,
    "ci": [
-    -0.0524,
-    0.2119
+    -0.0074,
+    0.2365
    ]
   },
   "top10": {
-   "n_compounds": 30,
-   "diff": 0.0086,
+   "n_compounds": 29,
+   "diff": 0.0089,
    "ci": [
-    -0.0943,
-    0.1086
+    -0.0911,
+    0.1054
    ]
   }
  },
@@ -95,6 +100,10 @@
   "pattern_96": {
    "critic2": 46,
    "lnq_shortlist": 22
+  },
+  "pattern_100": {
+   "critic2": 0,
+   "lnq_shortlist": 0
   },
   "pattern_180": {
    "critic2": 0,
@@ -249,8 +258,8 @@
    "lnq_shortlist": 3
   },
   "pattern_887": {
-   "critic2": 50,
-   "lnq_shortlist": 50
+   "critic2": 47,
+   "lnq_shortlist": 0
   },
   "pattern_891": {
    "critic2": 50,
