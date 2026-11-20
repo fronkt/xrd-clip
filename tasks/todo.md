@@ -787,3 +787,11 @@ F7 Package paper/dd/submissions/RSOS/ (manuscript, ESI, cover letter stating the
 - [FRANK] grid-step averaging crosses the 10-14 rule for WCC 2 deg only (+0.06 ambient, +0.05 [0.00, 0.14] sc; CI
   reaches 0): text keeps interpolation and says so; rule said PROPOSE -> Frank decides (promote = GPU rescore ~$0.5).
 - Re-audit (fresh thread) running.
+- Claim audit 2 (thread 01a1f9ff, FAIL 2 MAJOR): ladder + probe check used the alphabetically first anchor, not the
+  self-entry -> bench.self_entry (19), 26/30 rerun (e6a5dc4, 498d520): 184 patterns, median 8 holds, earlier model 350,
+  p2p 0.18 vs Pearson 0.84; probes described as run (no realism effects); wrong-top-1 audit repeated on final scores
+  (363 cases, none same-form; first audit kept as results/wrong_top1_audit_first.json).
+- Claim audit 3 (thread 01a1fa30, FAIL 3 MAJOR): self-entry threshold now in 29 control / 48 cell + subgroups
+  (control 28/35, cells 57, <=1 % 22/32); BFDH axis = lowest-angle simulated reflection, text says proxy; "anisotropically
+  > 1 %" -> at least one reduced-cell length; model timing measured (55: 19 ms encode + 12 ms search, was unrecorded 5 ms);
+  injection rule, 256-atom cap, external "first correct entry" median 2 (b2ecd25). Audit 4 running.
