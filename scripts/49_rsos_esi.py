@@ -398,8 +398,10 @@ def s7_model() -> list:
           "Memorised training structures would show up as better retrieval of the first group; the control finds none. "
           f"Recall of the model's top 100 / 1,000: {f2(EX['model_recall']['100'])} / {f2(EX['model_recall']['1000'])}.", ""]
     L += ["", f"{T()} Search cost per query over the full library. CPU: per-pair wall time of the simulated sweep (one core) "
-          f"times {D['n_library']:,}; with precomputed embeddings the model searches the library in about "
-          f"{P['run_facts']['model_query_ms_cpu']} ms per query.", ""]
+          f"times {D['n_library']:,}. Model (scripts/55, {P['model_timing']['threads']} CPU threads, median of "
+          f"{P['model_timing']['repeats']} repeats): encoding one pattern {P['model_timing']['encode_ms_median']:.0f} ms, its "
+          f"product with the {P['model_timing']['n_library']:,} precomputed library embeddings and the top-10 selection "
+          f"{P['model_timing']['search_ms_median']:.0f} ms.", ""]
     cpu_names = {"pearson": "Pearson, fixed grid", "pearson_zs": "Pearson + zero scan", "wcc_1": "WCC, l = 1° + zero scan",
                  "wcc_2": "WCC, l = 2° + zero scan", "lnq": "ln q lag + zero scan"}
     L += table(["score", "CPU s per query (estimate)"],
@@ -416,7 +418,7 @@ DEVIATIONS = [
      "applied (every draw)", "each Kα2 copy keeps its own wavelength under strain (unit test through the training path)",
      "code defect found while re-checking the training simulation"],
     ["March–Dollase texture", "applied to the stored representative reflection of each merged peak; (001) axis for every "
-     "structure, r ≤ 1", "averaged over the symmetry-equivalent reflections of each peak; (001) and each structure's BFDH axis; "
+     "structure, r ≤ 1", "averaged over the symmetry-equivalent reflections of each peak; (001) and a proxy for each structure's BFDH axis (the normal of its lowest-angle reflection simulated in 5–50°); "
      "plates and needles (r 0.5–2)", "the single-reflection factor is wrong for higher symmetry (cubic {100}, r = 0.5: "
      "0.35 instead of 2.90); referee request"],
     ["labels", "as built", "GOFWUV family added to one QQQAUJ pattern (wrong-top-1 audit on the final score matrices); "

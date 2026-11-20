@@ -290,7 +290,7 @@ Paired over ambient compounds: ln q − Pearson +0.16 [0.00, +0.34]; WCC 1° −
 | correct entries only among the added entries | 101 / 53 | 0.85 / 0.89 | 0.82 / 0.81 | 0.88 / 0.84 | 0.80 / 0.81 | 0.59 / 0.71 | 0.00 / 0.00 |
 | Cu Kα | 120 / 82 | 0.92 / 0.89 | 0.88 / 0.85 | 0.88 / 0.86 | 0.87 / 0.82 | 0.68 / 0.67 | 0.00 / 0.00 |
 | other wavelengths | 68 / 40 | 0.72 / 0.93 | 0.76 / 0.90 | 0.84 / 0.83 | 0.68 / 0.90 | 0.56 / 0.82 | 0.03 / 0.05 |
-| self-entry ordered | 163 / 116 | 0.82 / 0.90 | 0.82 / 0.86 | 0.86 / 0.85 | 0.78 / 0.86 | 0.66 / 0.73 | 0.01 / 0.02 |
+| self-entry ordered | 159 / 113 | 0.82 / 0.89 | 0.81 / 0.85 | 0.86 / 0.84 | 0.77 / 0.85 | 0.65 / 0.72 | 0.01 / 0.02 |
 | self-entry disordered | 25 / 6 | 1.00 / 1.00 | 1.00 / 1.00 | 0.92 / 0.98 | 0.92 / 0.67 | 0.48 / 0.42 | 0.00 / 0.00 |
 
 ## S5 GPU and CPU scores
@@ -391,7 +391,7 @@ Operator tokens in the simulated sweep (each seed minus the ablation, within-fam
 Training-split control: the crystal form of 81 patterns has an entry in the training split, 1 in the validation split, 5 in the test split and 101 in no split. Model top-1 / median rank for patterns whose form is in the training split 0.01 / 6,093 (n = 81) and in no split 0.00 / 5,151 (n = 101). Memorised training structures would show up as better retrieval of the first group; the control finds none. Recall of the model's top 100 / 1,000: 0.10 / 0.26.
 
 
-**Table S23** Search cost per query over the full library. CPU: per-pair wall time of the simulated sweep (one core) times 309,080; with precomputed embeddings the model searches the library in about 5 ms per query.
+**Table S23** Search cost per query over the full library. CPU: per-pair wall time of the simulated sweep (one core) times 309,080. Model (scripts/55, 8 CPU threads, median of 200 repeats): encoding one pattern 19 ms, its product with the 309,080 precomputed library embeddings and the top-10 selection 12 ms.
 
 | score | CPU s per query (estimate) |
 |---|---|
@@ -488,7 +488,7 @@ Positive control: each pattern against its own self-entry; its DIFF is ranked am
 | pattern_921 | EPIVEF | yes | 6.18 | 3 | 29 | 1,419 | – | 1 | 1 |
 | pattern_252 | FOPKOK |  | 0.06 | 2 | 176 | 1 | 1 | 1 | n/a |
 | pattern_1041 | GOFWOP |  | 0.54 | 101 | 211 | 1,676 | – | 1 | 1 |
-| pattern_100 | GOFWUV |  | 0.24 | 175 | 199 | 1 | 1 | 1 | n/a |
+| pattern_100 | GOFWUV |  | n/a | n/a | 199 | 1 | 1 | n/a | n/a |
 | pattern_530 | GOFWUV |  | 0.24 | 175 | 143 | 22,003 | – | 5 | 51 |
 | pattern_326 | HOJQII | yes | 17.61 | 193 | 46 | 21,134 | – | 10 | 48 |
 | pattern_1022 | HOJQII | yes | 10.30 | 193 | 49 | 10,437 | – | 10 | 19 |
@@ -524,7 +524,7 @@ Positive control: each pattern against its own self-entry; its DIFF is ranked am
 | pattern_77 | TAQBIY |  | 4.81 | n/a | 213 | 7 | 1 | 1 | n/a |
 | pattern_180 | UPOJER |  | 0.25 | 0 | 296 | 1 | 1 | 1 | n/a |
 | pattern_487 | VELWIV |  | 0.34 | 3 | 157 | 2 | 1 | 1 | n/a |
-| pattern_586 | ZIZRUX |  | 0.30 | 0 | 82 | 1 | 1 | 1 | n/a |
+| pattern_586 | ZIZRUX |  | n/a | n/a | 82 | 1 | 1 | n/a | n/a |
 | pattern_205 | ZZZIZM |  | 0.38 | n/a | 167 | 1 | 1 | 1 | n/a |
 | pattern_209 | ZZZIZM |  | 0.30 | n/a | 146 | 1 | 1 | 1 | n/a |
 | pattern_359 | ZZZIZM |  | 0.62 | n/a | 147 | 1 | 1 | 1 | n/a |
@@ -537,7 +537,7 @@ Positive control: each pattern against its own self-entry; its DIFF is ranked am
 | pattern_787 | ZZZIZM |  | 0.71 | n/a | 140 | 1 | 1 | 1 | n/a |
 | pattern_901 | ZZZIZM |  | 0.54 | n/a | 153 | 1 | 1 | 1 | n/a |
 
-Positive control: self-entry ranked first for 30 of 37 ambient and 1 of 22 pressure-series patterns. Injection: the missing answer would rank first for 1 of 5 ambient and 1 of 17 pressure-series patterns. Fitted peaks: 66–296 (ambient) and 11–49 (pressure series). Patterns whose cells differ by more than 1 % (25): pressure series 16; recorded temperatures more than 50 K apart (not pressure series) 7; supercell description 1; none of these 1 (pattern_77).
+Positive control: self-entry ranked first for 28 of 35 ambient and 1 of 22 pressure-series patterns. Injection: the missing answer would rank first for 1 of 5 ambient and 1 of 17 pressure-series patterns. Fitted peaks: 66–296 (ambient) and 11–49 (pressure series). Patterns whose cells differ by more than 1 % (25): pressure series 16; recorded temperatures more than 50 K apart (not pressure series) 7; supercell description 1; none of these 1 (pattern_77).
 
 ### Sensitivity of the re-rank to the zero offset and to the peak fits
 

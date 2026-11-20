@@ -293,7 +293,8 @@ structure embedding.
 ![](figs/fig_model.pdf)
 
 **Figure 2.** The learned model. The pattern encoder maps a powder pattern to a unit vector z_p; the structure
-encoder maps one lattice token, one token per asymmetric-unit atom and one token per symmetry operator to a unit
+encoder maps one lattice token, one token per asymmetric-unit atom (at most 256 in training) and one token per
+symmetry operator to a unit
 vector z_s. Training pulls the two embeddings of the same crystal together against the other crystals in a batch;
 retrieval ranks every library entry by their cosine similarity s. The operator tokens (orange) are added in this work.
 
@@ -360,9 +361,9 @@ falls from that starting point rather than how well it retrieves. Each condition
 
 - a zero offset up to 0.3°, isotropic strain up to 1.2 %, crystallite size down to 10 nm, or counting noise;
 - March–Dollase texture along (001) for every structure, with r from 0.5 to 0.9;
-- March–Dollase texture along each structure's own Bravais–Friedel–Donnay–Harker axis, which we take to be the normal
-  of its largest-d symmetry-allowed reflection, the face that the Bravais–Friedel–Donnay–Harker rule ranks first
-  [@donnay1937bfdh], with r = 0.5–0.9, which models plates lying on that face, and r = 1.1–2.0, the opposite sense
+- March–Dollase texture along a proxy for each structure's Bravais–Friedel–Donnay–Harker axis [@donnay1937bfdh]: the
+  normal of its lowest-angle reflection among those simulated in 5–50° (weak reflections are pruned, so this is
+  not always the largest-d allowed reflection), with r = 0.5–0.9, which models plates lying on that face, and r = 1.1–2.0, the opposite sense
   along the same axis; this choice of a single axis is our
   convention;
 - an anisotropic thermal strain for a temperature change of 50–200 K, with per-axis expansion coefficients drawn so that
@@ -403,8 +404,8 @@ Kα1 2θ of 5–50°). The shortlist of each single-crystal pattern is the 50 be
 entries left out; a pattern whose answer is not in its shortlist counts as a miss, and a comparison that fails or runs
 past 4 hours of wall time counts as maximally dissimilar. Entries with a disorder model are given as their major
 component. Two checks accompany the re-rank: a positive control, in which each pattern is compared with its own
-self-entry, and an injection test, in which each answer missing from a shortlist is compared with its pattern to see
-where it would rank. Two variants were run as sensitivity checks: the peaks of each pattern shifted by an answer-blind
+self-entry, and an injection test, in which, for each pattern whose shortlist holds no answer, the single-crystal answer
+closest in cell is compared with the pattern to see where it would rank. Two variants were run as sensitivity checks: the peaks of each pattern shifted by an answer-blind
 zero offset, the one that best aligns the pattern with its ln q top-1 entry, and new fits of the 10 patterns whose
 measured range begins with zero-intensity points, after dropping those points (Supplementary Section S10).
 
@@ -422,8 +423,8 @@ model's curves stay between 0.53 and 0.59, and the model's clean within-family t
 Pearson's weakness: Pearson + zero scan scores 1.00 at every offset that is a multiple of its 0.02° step, and the dips
 at 0.05° and 0.15° are offsets that fall between grid points. The ln q scan, whose offsets are 0.04° apart, dips to
 0.87–0.88 at every offset off that grid (0.05°, 0.1°, 0.15° and 0.3°) and holds 0.89 at 1.2 % isotropic strain.
-Texture lowers the scores that compare peaks over a window rather than point by point. Along each structure's
-Bravais–Friedel–Donnay–Harker axis, WCC with l = 1° falls from 1.00 to 0.75 for plates with r = 0.5 and to 0.82 at r = 2, much as it does along (001) (0.73 at r = 0.5), while fixed-grid Pearson stays at 1.00 and
+Texture lowers the scores that compare peaks over a window rather than point by point. Along the
+Bravais–Friedel–Donnay–Harker proxy axis, WCC with l = 1° falls from 1.00 to 0.75 for plates with r = 0.5 and to 0.82 at r = 2, much as it does along (001) (0.73 at r = 0.5), while fixed-grid Pearson stays at 1.00 and
 Pearson + zero scan at 0.98; the model stays at 0.57–0.59 throughout. Even at r = 0.5 every classical score remains
 above the model, the lowest being WCC with l = 2° at 0.66. The smallest gap, 0.10, comes from the largest anisotropic
 thermal strain (ΔT = 200 K), where WCC with l = 2° reaches 0.67 and the model 0.57.
@@ -432,8 +433,8 @@ thermal strain (ΔT = 200 K), where WCC with l = 2° reaches 0.67 and the model 
 
 **Figure 3.** Simulated stress test: within-family top-1 over 1,077 polymorph families (2,835 queries). Bands are
 95 % family-bootstrap intervals; the dashed line is composition-only chance (0.38). (a) 2θ zero offset, (b) isotropic
-lattice strain, (c) anisotropic thermal strain, (d) crystallite size, (e) March–Dollase texture along each structure's
-Bravais–Friedel–Donnay–Harker axis (plates r < 1, the opposite sense r > 1; r = 1 is the clean condition), (f) counting
+lattice strain, (c) anisotropic thermal strain, (d) crystallite size, (e) March–Dollase texture along the
+Bravais–Friedel–Donnay–Harker proxy axis (plates r < 1, the opposite sense r > 1; r = 1 is the clean condition), (f) counting
 statistics. The texture conditions along (001) are in Supplementary Section S8. In (a) the zero-scan scores dip at
 offsets between the points of their 0.02° grid (0.05° and 0.15°), and the ln q score at offsets off its 0.04° grid.
 
@@ -452,12 +453,12 @@ Re-ranking the ln q top 50 with VC-GPWDF gives 0.69 [0.50, 0.83], against 0.58 [
 patterns, and the paired difference, +0.10 [−0.04, 0.27], does not distinguish them. The re-rank's reach is limited by
 its shortlist, which holds the answer for 33 of the 38 patterns. Compared with its own self-entry, the
 structure refined against the same data, the pipeline ranks that entry above every wrong entry of the shortlist for
-30 of the 37 ambient patterns that have one.
+28 of the 35 ambient patterns that have one.
 
 What separates success from failure is how well the cells agree. We compared the primitive Niggli-reduced cells of
 each pattern's self-entry and of its closest single-crystal same-form entry over the whole single-crystal set
-(59 patterns with a self-entry). Where every reduced cell length agrees within 1 %, the ln q scan ranks a
-single-crystal entry first for 24 of 34 patterns; where the cells differ by more, it does
+(57 patterns with a self-entry). Where every reduced cell length agrees within 1 %, the ln q scan ranks a
+single-crystal entry first for 22 of 32 patterns; where the cells differ by more, it does
 so for 2 of 25. Most of the differences have identifiable causes: 16 of
 the 25 patterns with differing cells come from the pressure series, and in 7 of the others
 the recorded temperatures of the two entries differ by more than 50 K. Thermal expansion of molecular crystals is
@@ -496,8 +497,8 @@ standard deviation over five draws is below 0.02).
 The 22 pressure-series patterns of 5 compounds are hard for every score. The classical scores reach a
 compound-weighted top-1 of 0.00–0.10 and the variable-cell re-rank 0.00, with the model at 0.00. These
 patterns were measured at high pressure in diamond-anvil cells at short synchrotron wavelengths, and their
-single-crystal references were determined at other pressures, so their cells differ anisotropically by more than the
-isotropic lag or a constant offset can absorb. The variable-cell re-rank is designed for this case but is limited by
+single-crystal references were determined at other pressures, so their cells differ by more than the isotropic lag or a
+constant offset can absorb, and in general anisotropically. The variable-cell re-rank is designed for this case but is limited by
 its peak fits: on these patterns the automated fit finds 11–49 peaks (median 37), against
 66–296 (median 156) on the ambient patterns, and the pipeline ranks the self-entry first
 for only 1 of the 22. New fits of the 10 patterns whose measured range begins with zero-intensity points
@@ -690,15 +691,15 @@ repeat, and separately for queries whose reference is an independent determinati
 and the source of the patterns recorded. The benchmark released with this paper supports each of
 these, and its open replica lets the any-same-form results be checked without a CSD licence.
 
-The model is faster. With precomputed library embeddings, the similarity product of one query with 309,080 entries
-takes about 5 ms on a CPU, whereas, extrapolated from timed comparisons, one CPU core needs about 0.4 s per query for fixed-grid Pearson, about 20 s for a zero scan and about
+The model is faster. With precomputed library embeddings, encoding a query takes about 19 ms and its product with 309,080 entries
+about 12 ms on a laptop CPU, whereas, extrapolated from timed comparisons, one CPU core needs about 0.4 s per query for fixed-grid Pearson, about 20 s for a zero scan and about
 6 min for the ln q scan, and one GPU needs about 0.09 s per pattern for all five classical scores
-together (8,188 patterns against the full library in 761 s). The variable-cell re-rank is much slower, at a median of 2.3 CPU-minutes per comparison. Speed
+together (8,188 patterns against the full library in 761 s, with the first version of the ln q scan). The variable-cell re-rank is much slower, at a median of 2.3 CPU-minutes per comparison. Speed
 matters only once accuracy does, however, and a shortlist from this model loses most correct entries.
 
 Two problems remain open, and both concern the gap between simulated and measured patterns. For independent
 single-crystal references, retrieval fails when the reference was determined at another pressure or temperature and
-the cells differ anisotropically by more than about 1 %. The published variable-cell method gives no gain that we can
+the cells differ by more than about 1 % in at least one reduced-cell length. The published variable-cell method gives no gain that we can
 distinguish here, is bounded by the shortlist it re-ranks, and in its automated form fits peaks poorly on the
 high-pressure patterns that make up most of the mismatched cells. Its bottleneck is the shortlist: refitted, the
 pressure-series patterns rank an injected answer first for 5 of 9, so a shortlist that
@@ -706,7 +707,7 @@ tolerates anisotropic cell differences, followed by a well-fitted variable-cell 
 gap; we have not tested it. This case is also where a learned method could show its value. For the learned model, the
 gap lies between simulated and measured patterns: it persists against a library of 2,000 entries (compound-weighted
 top-1 0.13) and with the operator tokens, and it survives the more realistic training simulation. How far the model falls differs between sources of
-measured patterns: on high-resolution synchrotron profiles from one external source it ranks the self-entry at a median of
+measured patterns: on high-resolution synchrotron profiles from one external source its first correct entry is at a median rank of
 2, against thousands on the opXRD patterns, and which property of those profiles matters is open.
 Full-profile generative models have shown the same
 sensitivity to how realistic the training patterns are [@segal2026xrdiff]. A learned method aimed at that transfer,
@@ -749,7 +750,7 @@ cause or how common it is elsewhere: on high-resolution synchrotron profiles fro
 far better, for reasons we have not identified. A more realistic library, a different intensity convention and the label checks leave
 the comparison between the classical scores and the model unchanged, and an open replica built from the COD reproduces the any-same-form result. The hard
 open case is a measured pattern whose only reference was determined at another temperature or pressure, so that the
-cells differ anisotropically by more than about 1 %. We release the benchmark so that learned methods can be compared
+cells differ by more than about 1 % in at least one reduced-cell length. We release the benchmark so that learned methods can be compared
 with these numbers on measured data.
 
 ## Ethics

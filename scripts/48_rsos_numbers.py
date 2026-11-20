@@ -126,7 +126,7 @@ def main() -> int:
     boot = bench.compound_bootstrap(stems)
     n_uniq = len(np.unique(stems))
     cboot = np.random.default_rng(0).integers(0, n_uniq, (2000, n_uniq))
-    out: dict = {"run_facts": RUN_FACTS, "model_name": m}
+    out: dict = {"run_facts": RUN_FACTS, "model_name": m, "model_timing": load("results/model_timing.json")}   # scripts/55
 
     # ---- dataset -------------------------------------------------------------------------------------------
     truth = corrected_truth(args.truth)
@@ -376,12 +376,13 @@ def main() -> int:
     # disordered SELF-entry: the powder-study anchor closest to the deposited structure (as scripts/34 and 29 pick
     # it), not any disordered anchor (claim audit 2026-11-20: the any-anchor rule gave 28 / 9 instead of 25 / 6)
     def self_disordered(t):
-        ps = [y for y in t["same_form"] if y["is_powder_study"] and y["is_anchor"]]
-        return bool(ps) and min(ps, key=lambda y: (t["anchors"][y["refcode"]]["rmsd"], y["refcode"]))["has_disorder"]
+        se = bench.self_entry(t, gidx)
+        return se is not None and next(y["has_disorder"] for y in t["same_form"] if y["refcode"] == se)
     dis = np.array([self_disordered(truth[x["id"]]) for x in meta])
+    has_self = np.array([bench.self_entry(truth[x["id"]], gidx) is not None for x in meta])
     ex["own_entry_disordered"] = {"n_patterns": int(dis.sum()), "n_compounds": int(len(set(stems[dis])))}
     groups = {"tier_strict": tier == "strict", "tier_lenient": tier == "lenient", "corpus_entry": in_corpus,
-              "extra_only": ~in_corpus, "cu": wlc == "Cu", "non_cu": wlc != "Cu", "disordered": dis, "ordered": ~dis}
+              "extra_only": ~in_corpus, "cu": wlc == "Cu", "non_cu": wlc != "Cu", "disordered": dis, "ordered": has_self & ~dis}
     ex["subgroups"] = {}
     for gname, sel in groups.items():
         d = {"n_patterns": int(sel.sum()), "n_compounds": int(len(set(stems[sel])))}
@@ -426,8 +427,9 @@ def main() -> int:
     need, rows_c = set(), []
     for x in meta:
         t = truth[x["id"]]
-        ps = [y["refcode"] for y in t["same_form"] if y["is_powder_study"] and y["is_anchor"] and y["refcode"] in gidx]
-        own = [min(ps, key=lambda rc_: (t["anchors"][rc_]["rmsd"], rc_))] if ps else []
+        # the self-entry as defined in the text (bench.self_entry: RMSD < 0.05 A); claim audit 3 found the closest
+        # powder-study anchor used here without the threshold (pattern_100 0.103 A, pattern_586 0.065 A)
+        own = [x_ for x_ in (bench.self_entry(t, gidx),) if x_ is not None]
         scs = [y["refcode"] for y in t["same_form"] if not y["is_powder_study"] and y["refcode"] in gidx]
         rows_c.append((own, scs))
         need |= set(own) | set(scs)
@@ -459,7 +461,8 @@ def main() -> int:
     assert ((rank_c2 >= 0) == (R["none|sc|lnq_bkg"] >= 0)).all(), "critic2 must cover exactly the sc queries"
     small, large = sel & (dq <= 0.01), sel & (dq > 0.01)
     ex["sc_cell_mismatch"] = {"n": int(sel.sum()), "median_max_axis_rel": rd(np.median(dq[sel])),
-                              "n_small": int(small.sum()), "n_large": int(large.sum())}
+                              "n_small": int(small.sum()), "n_large": int(large.sum()),
+                              "n_sc_with_self_entry": int((has_self & (R["none|sc|lnq_bkg"] >= 0)).sum())}
     for name, r in split_ranks.items():
         ex["sc_cell_mismatch"][f"{name}_top1_small"] = rd((r[small] == 0).mean())
         ex["sc_cell_mismatch"][f"{name}_top1_large"] = rd((r[large] == 0).mean())
@@ -527,6 +530,8 @@ def main() -> int:
     ctl = {}
     for ln in open("cache/critic2/control.jsonl"):
         r_ = json.loads(ln)
+        if r_["cand"] != bench.self_entry(truth[r_["pid"] + ".json"], gidx):
+            continue                        # not a self-entry (no RMSD < 0.05 A anchor), or a superseded own entry
         od = r_["diff"] if r_["diff"] is not None else 1.0
         sl = [dd[(r_["pid"], c)] for c in plan_[r_["pid"]]["shortlist"][:k_c2] if c not in plan_[r_["pid"]]["truth"]]
         ctl[r_["pid"]] = {"own": r_["cand"], "diff": rd(od), "rank_in_shortlist": int(sum(x < od for x in sl)) + 1,

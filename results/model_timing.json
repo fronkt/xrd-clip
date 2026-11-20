@@ -1,0 +1,10 @@
+{
+ "n_library": 309080,
+ "dim": 256,
+ "repeats": 200,
+ "encode_ms_median": 18.63,
+ "search_ms_median": 12.17,
+ "cpu": "Intel64 Family 6 Model 189 Stepping 1, GenuineIntel",
+ "threads": 8,
+ "torch": "2.11.0+cpu"
+}

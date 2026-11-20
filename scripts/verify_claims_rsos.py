@@ -478,7 +478,7 @@ CLAIMS = [
          f"same patterns, and the paired difference, {PH['c2_amb_paired']}, does not distinguish them"),
     f"which holds the answer for {amb_in_list} of the {AS['n_ambient_patterns']} patterns",
     f"for {PH['c2_ctl_amb']} ambient patterns that have one",
-    need(CM["n"] == D["n_sc_patterns"] - 1, f"over the whole single-crystal set ({CM['n']} patterns with a self-entry)"),
+    need(CM["n"] == CM["n_sc_with_self_entry"], f"over the whole single-crystal set ({CM['n']} patterns with a self-entry)"),
     f"the ln q scan ranks a single-crystal entry first for {CM['lnq_hits_small']} of {CM['n_small']} patterns; where the cells "
     f"differ by more, it does so for {CM['lnq_hits_large']} of {CM['n_large']}",
     f"{CD['pressure_series']} of the {CD['n']} patterns with differing cells come from the pressure series, and in "
@@ -632,7 +632,7 @@ CLAIMS = [
          f"Of those {PH['kad_sync_n']} self-entries, {PH['kad_sync_train']} are in the model's training split, but on the opXRD "
          f"patterns membership made no difference, and the {PH['kad_sync_nontrain_n']} that are not rank {PH['kad_sync_nontrain']}"),
     need(min(ISP[M][g]["median_rank"] for g in INST_G) >= 1000,
-         f"it ranks the self-entry at a median of {PH['kad_sync_med']}, against thousands on the opXRD patterns"),
+         f"its first correct entry is at a median rank of\n{PH['kad_sync_med']}, against thousands on the opXRD patterns"),
     need(KK[M]["synchrotron"]["median_rank"] < 0.01 * min(ISP[M][g]["median_rank"] for g in INST_G),
          "on high-resolution synchrotron profiles from one external source the model does far better, for reasons we have "
          "not identified"),
@@ -640,11 +640,13 @@ CLAIMS = [
     f"the shift-tolerant scores reach a compound-weighted top-1 of {rng(amb_tol)} over {AS['n_ambient_compounds']} compounds, and "
     f"when the pattern's self-entry is in the library they reach up to {f2(max(std_cls))}, with even fixed-grid Pearson "
     f"correlation at {f2(b('pearson_bkg')['macro_top1'])}",
-    f"the similarity product of one query with {D['n_library']:,} entries\ntakes about {RF['model_query_ms_cpu']} ms on a CPU",
+    f"encoding a query takes about {P['model_timing']['encode_ms_median']:.0f} ms and its product with "
+    f"{D['n_library']:,} entries\nabout {P['model_timing']['search_ms_median']:.0f} ms on a laptop CPU",
     f"about {cpu['pearson']:.1f} s per query for fixed-grid Pearson, about {round(cpu['wcc_1'], -1):.0f} s for a zero scan and "
     f"about {round(cpu['lnq'] / 60):.0f} min for the ln q scan",
     f"one GPU needs about {PH['gpu_s_per_pattern']} s per pattern for all five classical scores together "
-    f"({D['n_queries'] + 2 * D['n_probe_per_set']:,} patterns against the full library in {RF['hub_wall_s']} s)",
+    f"({D['n_queries'] + 2 * D['n_probe_per_set']:,} patterns against the full library in {RF['hub_wall_s']} s, with the first "
+    f"version of the ln q scan)",
     f"at a median of {PH['c2_cpu_min']} CPU-minutes per comparison",
     f"We searched {D['n_queries']} measured organic powder patterns against {D['n_library']:,} simulated CSD entries",
     f"first for a compound-weighted {rng(amb_tol)} of the {AS['n_ambient_compounds']} compounds",

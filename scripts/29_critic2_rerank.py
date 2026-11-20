@@ -264,11 +264,10 @@ def cmd_control(args) -> int:
     truth = {t["id"].replace(".json", ""): t for t in json.load(open(args.truth))}
     shards = bench.shard_table(None)
     gidx = {rc: i for i, rc in enumerate(hubm.library_refcodes(shards))}
-    def own_entry(t):    # the powder-study anchor closest to the deposited structure (its own Rietveld refinement)
-        ps = [x["refcode"] for x in t["same_form"] if x["is_powder_study"] and x["is_anchor"] and x["refcode"] in gidx]
-        return min(ps, key=lambda rc: (t["anchors"][rc]["rmsd"], rc)) if ps else None
-    own = {pid: own_entry(truth[pid]) for pid in plan}
-    own = {pid: rc for pid, rc in own.items() if rc is not None}     # pattern_484 (BAPLOT) has no powder study
+    # the self-entry (bench.self_entry: closest powder-study anchor within 0.05 A RMSD); patterns without one are
+    # skipped. Before 2026-11-20 the RMSD threshold was missing here (pattern_100 and pattern_586 got a control).
+    own = {pid: bench.self_entry(truth[pid], gidx) for pid in plan}
+    own = {pid: rc for pid, rc in own.items() if rc is not None}
     todo = set(own.values()) - {f[:-4] for f in os.listdir(os.path.join(ROOT, "cif"))}
     for src in CIF_SOURCES:
         if not todo:
