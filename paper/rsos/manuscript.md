@@ -58,7 +58,8 @@ trained on synthetic crystals lost much of its accuracy on measured diffractogra
 fields too, simple heuristics often outperformed the neural recommender systems that could be reproduced
 [@ferraridacrema2019progress], a fair comparison left little of the reported progress in deep metric
 learning [@musgrave2020reality], and in a mass-spectrometry benchmark ranking candidates by their simulated spectra
-beat the best spectrum-to-fingerprint retrieval model [@bushuiev2024massspecgym].
+scored higher than the best spectrum-to-fingerprint retrieval model, although on a subset of the spectra
+[@bushuiev2024massspecgym].
 
 We previously trained a contrastive model of this kind on molecular crystals from the CSD [@cai2026urtc]. Within
 families of polymorphs it was more robust to a 2θ zero offset and to lattice strain than fixed-grid Pearson
@@ -90,7 +91,7 @@ from the COD are CC0) [@hollarek2025opxrd; @opxrd2025zenodo]. Its CNRS contribut
 COD entries that deposit powder data, most with the refined structure as a full atom list. We kept the patterns
 whose phase contains C and H and no element outside {C, H, N, O, S, P, F, Cl, Br, I, B, Si}, which left 196. Of the
 188 patterns used in the end (Section 2.2), 120 were measured with Cu Kα radiation, 61 with synchrotron radiation
-(0.34–1.30 Å) and 7 at Mo, Co or other wavelengths. opXRD records no wavelength for 3 of the 120, and a fit of the
+(0.33–1.30 Å) and 7 at Mo, Co or other wavelengths. opXRD records no wavelength for 3 of the 120, and a fit of the
 peak positions to each pattern's deposited cell places all three at Cu Kα (Supplementary Section S1). Every pattern
 was converted to a Cu Kα1 2θ axis through its d-spacings and interpolated onto the grid used throughout this work,
 5–50° 2θ in 0.02° steps (2,251 points), without removing the Kα2 component. In 31 of the 188 refined structures the
@@ -173,7 +174,7 @@ are correct), which isolates the polymorph-identification question.
 ### 2.4 Library
 
 The library holds 309,080 simulated patterns: the 308,862 molecular crystals of the corpus of ref. [@cai2026urtc]
-(organic CSD entries without disorder, R ≤ 7.5 %, Z′ ≤ 2, after removing duplicate redeterminations) and 218
+(organic CSD entries without disorder, R ≤ 7.5 %, Z′ ≤ 2; redeterminations are kept) and 218
 same-form or polymorph entries of the benchmark compounds that the corpus filter had removed; 28 further entries
 have no coordinates in the CSD. We did not use the whole CSD, because its inorganic and metal–organic entries cannot
 be the answer to an organic query and the corpus filter keeps the organic search space that a crystallographer would
@@ -182,8 +183,8 @@ recomputing 296 randomly drawn entries with pymatgen 2026.4.16 reproduces the st
 rendered with one pseudo-Voigt profile (Caglioti-type width, U = 0.002, V = −0.001, W = 0.004 deg², η = 0.5)
 [@caglioti1958], without Debye–Waller factors, texture, background or noise; a library closer to the measurements is
 tested in Section 4.7. The CIFs written by the CSD Python API carry no site occupancies, so disordered entries, which
-occur only among the added entries, are simulated from the occupancies of the CSD's asymmetric unit or, where the CSD gives coordinates for the major disorder component only, as that component at full
-occupancy, whichever agrees better with the CCDC's own powder simulation of the entry (37 entries,
+occur only among the added entries, are simulated from the occupancies of the CSD's asymmetric unit or, where the CSD gives coordinates for the major disorder component only, as that component (sites of
+occupancy 0.5 or more set to full occupancy, other partial sites kept), whichever agrees better with the CCDC's own powder simulation of the entry (37 entries,
 8 as the major component). After both patterns are smoothed to a common peak width, our simulation agrees
 with the CCDC's with a median correlation of 0.995 for 100 randomly drawn library entries, 0.984
 for the 20 ZZZUWK self-entries and at least 0.93 for every re-simulated entry but one, an other-form decoy
@@ -692,7 +693,7 @@ and the source of the patterns recorded. The benchmark released with this paper 
 these, and its open replica lets the any-same-form results be checked without a CSD licence.
 
 The model is faster. With precomputed library embeddings, encoding a query takes about 19 ms and its product with 309,080 entries
-about 12 ms on a laptop CPU, whereas, extrapolated from timed comparisons, one CPU core needs about 0.4 s per query for fixed-grid Pearson, about 20 s for a zero scan and about
+about 12 ms on a laptop CPU, whereas, extrapolated from comparisons timed in 4-thread CPU jobs, a CPU needs about 0.4 s per query for fixed-grid Pearson, about 20 s for a zero scan and about
 6 min for the ln q scan, and one GPU needs about 0.09 s per pattern for all five classical scores
 together (8,188 patterns against the full library in 761 s, with the first version of the ln q scan). The variable-cell re-rank is much slower, at a median of 2.3 CPU-minutes per comparison. Speed
 matters only once accuracy does, however, and a shortlist from this model loses most correct entries.

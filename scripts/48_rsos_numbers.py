@@ -145,7 +145,7 @@ def main() -> int:
                                                           for c in set(stems.tolist())}).values() if len(fs) > 1),
         "n_lab_cu": int(sum(1.53 < w < 1.55 for w in wl)),
         "n_synchrotron_or_other": int(sum(not (1.53 < w < 1.55) for w in wl)),
-        "wavelengths_non_cu": sorted({round(w, 4) for w in wl if not (1.53 < w < 1.55)}),
+        "wavelengths_non_cu": sorted({round(w, 6) for w in wl if not (1.53 < w < 1.55)}),
         "n_h_omitted": int(sum(bool(truth[x["id"]]["h_omitted"]) for x in meta)),
         "n_own_powder_study": int(sum(x["own_powder"] for x in meta)),
         "n_sc_patterns": int(sc_ok.sum()), "n_sc_compounds": int(len(set(stems[sc_ok]))),
