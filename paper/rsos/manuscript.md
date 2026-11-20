@@ -690,8 +690,9 @@ benchmark has 121 compounds, all organic, from one contributor to opXRD, and mos
 entry was refined against. The ambient single-crystal set has 24 compounds, so its intervals are wide, and the open
 replica's single-crystal set has only 9. The main library is simulated with one peak profile and without
 Debye–Waller factors or Kα2; a package of such changes moved little but does not exhaust them, uses one
-Debye–Waller factor for every temperature, and disordered entries are simulated from the CSD's site occupancies, of
-which one entry (an other-form decoy) lists only one disorder component. The entries added to the library are
+Debye–Waller factor for every temperature. Disordered entries are simulated from the CSD's site occupancies or as their
+major component, and one of them, an other-form decoy, still disagrees with the CCDC's simulation because the CSD lists
+only one of its disorder components. The entries added to the library are
 answers and other forms of the benchmark compounds that the corpus filter had removed; entries of other compounds
 that the filter removes are not added, so the library holds some disordered or poorly refined answers without decoys
 of the same kind. The measured
