@@ -190,8 +190,8 @@ distinguishable.
 ### 2.6 An open replica
 
 The CSD licence does not allow the library or the answer sets to be redistributed. So that the results can be
-checked without a licence, we rebuilt the benchmark from the COD (CC0) [@grazulis2009cod; @vaitkus2021cod], the source
-of the opXRD patterns themselves. The queries are unchanged, and the library applies the corpus filter of Section
+checked without a licence, we rebuilt the benchmark from the COD [@grazulis2009cod; @vaitkus2021cod], whose entries
+are released under CC0 [@cod2026website] and are the source of the CNRS patterns of opXRD [@hollarek2025opxrd]. The queries are unchanged, and the library applies the corpus filter of Section
 2.4 to the COD metadata (C-containing entries with coordinates, no disorder flag, R ≤ 7.5 %, Z′ of 1–2, no element outside
 H, C, N, O, F, S, Cl, Br, I and P), which keeps 108,716 entries, and adds 854 candidate entries of the queries that the
 filter removes. Of these 109,570 entries, 108,902 gave stick patterns, computed and rendered as for the CSD library.
@@ -338,8 +338,10 @@ falls from that starting point rather than how well it retrieves. Each condition
 
 - a zero offset up to 0.3°, isotropic strain up to 1.2 %, crystallite size down to 10 nm, or counting noise;
 - March–Dollase texture along (001) for every structure, with r from 0.5 to 0.9;
-- March–Dollase texture along each structure's own Bravais–Friedel–Donnay–Harker axis, the normal of its largest-d
-  allowed reflection [@donnay1937bfdh], for plates (r = 0.5–0.9) and needles (r = 1.1–2.0);
+- March–Dollase texture along each structure's own Bravais–Friedel–Donnay–Harker axis, which we take to be the normal
+  of its largest-d symmetry-allowed reflection, the face that the Bravais–Friedel–Donnay–Harker rule ranks first
+  [@donnay1937bfdh], for plates (r = 0.5–0.9) and needles (r = 1.1–2.0); this choice of a single axis is our
+  convention;
 - an anisotropic thermal strain for a temperature change of 50–200 K, with per-axis expansion coefficients drawn so that
   the mean volumetric coefficient (about 1.65 × 10⁻⁴ K⁻¹) matches the CSD survey of ref. [@bond2021thermal];
 - or combinations of these with random offsets and strains.
