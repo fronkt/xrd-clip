@@ -351,7 +351,7 @@ CLAIMS = [
     f"{EX['unknown_entries']['patterns_with_any']} patterns; {EX['unknown_in_library']['pairs']} pairs\nof "
     f"{EX['unknown_in_library']['distinct']} entries over {EX['unknown_in_library']['patterns']} patterns concern library entries",
     need(AS['answer_pressure']['ambient_with_pressured_answer'] == 0,
-         f"none of the {AS['answer_pressure']['ambient_answers']} answer entries of these patterns carries a CSD pressure"),
+         f"none of the {AS['answer_pressure']['ambient_answers']} answer entries of these patterns carries one"),
     need(D["n_opxrd_organic"] - D["n_identified"] == 7, f"Of the {D['n_opxrd_organic']} patterns, {D['n_identified']} were "
          f"identified; the other seven"),
     need(D["n_identified"] - D["n_queries"] == 1, f"which leaves {D['n_queries']} patterns of {D['n_compounds']} compounds"),
@@ -359,8 +359,10 @@ CLAIMS = [
     need([tuple(x) for x in D["patterns_per_compound_top"][:3]] == [("ZZZUWK", 20), ("ZZZIZM", 12), ("NAPHTA", 10)],
          "ZZZUWK has 20, a variable-temperature series, ZZZIZM 12 and NAPHTA 10"),
     need({(c["stem"], c["wrong"]) for c in EX["wrong_top1_audit"]["same_form_cases"]} == {("QQQAUJ", "GOFWUV")},
-         f"classical scores ({EX['wrong_top1_audit']['n_cases']} cases) with the pattern's anchors, and one family, GOFWUV, "
+         f"In the first audit ({EX['wrong_top1_audit']['n_cases']} cases) one family, GOFWUV, "
          f"matches the anchor of one QQQAUJ pattern 15 of 15"),
+    need(not EX["wrong_top1_audit_final"]["same_form_cases"],
+         f"the audit repeated on the final scores ({EX['wrong_top1_audit_final']['n_cases']} cases) finds no further same-form entry"),
     need(AC["every_anchor"]["patterns_with_new_same_form"] == 1 and len(ea_new) == 1,
          f"adds one entry ({ea_new[0]['refcode']}, for one pattern), which matches the third anchor 15 of 15 at an RMSD of "
          f"{ea_new[0]['rmsd']:.2f} Å"),
@@ -422,7 +424,7 @@ CLAIMS = [
     f"without the operator tokens reaches {f3(MOD[FIX]['best_degraded_val_top1'])}",
     # ---- 3.5, 3.6, 3.7, 3.8
     f"(B = {R2META['B']:.2f} Å², from the library, Section 3.8)",
-    f"{D['n_probe_per_set']:,} library entries simulated cleanly and {D['n_probe_per_set']:,} simulated with the training degradations",
+    f"{D['n_probe_per_set']:,} library entries simulated cleanly and {D['n_probe_per_set']:,} degraded ones",
     f"the mean N₁₀ is {D['n_probe_per_set'] * 10 / D['n_library']:.2f}",
     need((G["n_families"], G["n_queries"]) == (1077, 2835), "1,077 held-out polymorph families with 2,835 query structures"),
     f"(composition-only chance {f2(G['chance'])})",
@@ -555,7 +557,7 @@ CLAIMS = [
     need(pair["std|model_bkg"]["macro_diff"] == 0 and pair["sc|model_bkg"]["macro_diff"] == 0, "CSLS leaves the model unchanged"),
     # ---- 4.6
     f"it ranks the probe's own entry first for {PH['probe_sim_top1']} of probes (median rank {PH['probe_sim_med']}), and for "
-    f"the probes with the training degradations for {PH['probe_aug_top1']} (median rank {PH['probe_aug_med']})",
+    f"the degraded probes\nfor {PH['probe_aug_top1']} (median rank {PH['probe_aug_med']})",
     f"it reaches a compound-weighted top-1 of {f2(gm(M, 'own_clean')[0])} and a median rank of {mr(gm(M, 'own_clean')[1])}, "
     f"against {f2(measured[0])} and about {about(measured[1])} on the measured patterns of the same targets",
     f"split have a median rank of {PH['ov_train_med']}, and patterns whose form is in no split {PH['ov_none_med']}",
@@ -566,11 +568,12 @@ CLAIMS = [
     f"with intensity jitter added {f2(gm(M, 'own_all_dw_int30')[0])} at a median rank of {mr(gm(M, 'own_all_dw_int30')[1])}",
     f"falls to a median rank of {mr(gm(ORIG, 'own_all_dw')[1])} on the rendering with the six effects and the Debye–Waller factor",
     f"stays at {f2(measured[0])} with a median rank of about {about(measured[1])}",
-    need(abs(gm(M, "own_all_dw_int30", "pearson")[0] - gm(M, "measured", "pearson")[0]) <= 0.02,
-         f"Fixed-grid Pearson, by contrast, reaches {f2(gm(M, 'measured', 'pearson')[0])} on the measured patterns, close to its "
-         f"value on the fully rendered self-entries"),
+    need(gm(M, "own_all_dw_int30", "pearson")[0] - gm(M, "measured", "pearson")[0] <= 0.05,
+         f"Fixed-grid Pearson, by contrast, reaches {f2(gm(M, 'measured', 'pearson')[0])} on the measured patterns, against "
+         f"{f2(gm(M, 'own_all_dw_int30', 'pearson')[0])} on the fully rendered self-entries"),
     f"the measured patterns reach a compound-weighted top-1 of {f2(gm(M, 'measured', 'p2p')[0])} (median rank "
     f"{mr(gm(M, 'measured', 'p2p')[1])}), whereas fixed-grid Pearson",
+    f"alignment search, reaches {f2(gm(M, 'measured', 'pearson')[0])} on the same patterns",
     need(all(incl0(v["ci"]) for v in pvo.values()),
          f"The second seed reaches {PH['s1_std']} on the measured patterns with a median rank of about "
          f"{about(MOD[S1]['std_median_rank'])}, the model without operator tokens {f2(MOD[FIX]['std_macro_top1']['value'])} with a "
@@ -637,7 +640,7 @@ CLAIMS = [
     f"the shift-tolerant scores reach a compound-weighted top-1 of {rng(amb_tol)} over {AS['n_ambient_compounds']} compounds, and "
     f"when the pattern's self-entry is in the library they reach up to {f2(max(std_cls))}, with even fixed-grid Pearson "
     f"correlation at {f2(b('pearson_bkg')['macro_top1'])}",
-    f"it searches {D['n_library']:,} entries in about {RF['model_query_ms_cpu']} ms per query on a CPU",
+    f"the similarity product of one query with {D['n_library']:,} entries\ntakes about {RF['model_query_ms_cpu']} ms on a CPU",
     f"about {cpu['pearson']:.1f} s per query for fixed-grid Pearson, about {round(cpu['wcc_1'], -1):.0f} s for a zero scan and "
     f"about {round(cpu['lnq'] / 60):.0f} min for the ln q scan",
     f"one GPU needs about {PH['gpu_s_per_pattern']} s per pattern for all five classical scores together "

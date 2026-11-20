@@ -676,7 +676,10 @@ def main() -> int:
     wf_rows = [x for x in meta if x["n_other"] > 0]
     ex["within_family_chance"] = rd(np.mean([x["n_same_in_lib"] / (x["n_same_in_lib"] + x["n_other"]) for x in wf_rows]))
     ex["model_probe_check"] = load(f"results/d3/model_probe_check_{m}.json")
-    ex["wrong_top1_audit"] = load("results/wrong_top1_audit.json")
+    # the first audit (scores before the label correction and the disorder fix; it found GOFWUV) and its repeat on the
+    # final score matrices (scripts/27 pairs/compare/report, 2026-11-20)
+    ex["wrong_top1_audit"] = load("results/wrong_top1_audit_first.json")
+    ex["wrong_top1_audit_final"] = load("results/wrong_top1_audit.json")
     out["extra"] = ex
     out["critic2_rerank"] = rnd(c2)
 

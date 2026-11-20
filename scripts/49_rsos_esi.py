@@ -125,9 +125,12 @@ def s2_labels() -> list:
     au, ac = EX["wrong_top1_audit"], ROB["anchor_checks"]
     ls = ROB["label_sensitivity"]
     L = ["## S2 Ground-truth checks", "",
-         f"Wrong first-ranked entries: {au['n_cases']} cases (five classical scores, both answer sets, final score matrices) "
-         f"were compared with the pattern's anchors by packing similarity ({au['n_pairs']} pairs). Same form: " +
-         "; ".join(sorted({f"{c['wrong']} for {c['id']} ({c['stem']})" for c in au["same_form_cases"]})) + ". The label "
+         f"Wrong first-ranked entries: {au['n_cases']} cases (five classical scores, both answer sets, score matrices before "
+         f"the label correction and the re-simulation of Section S1) were compared with the pattern's anchors by packing "
+         f"similarity ({au['n_pairs']} pairs). Same form: " +
+         "; ".join(sorted({f"{c['wrong']} for {c['id']} ({c['stem']})" for c in au["same_form_cases"]})) + ". Repeated on the "
+         f"final score matrices: {EX['wrong_top1_audit_final']['n_cases']} cases, "
+         f"{'no further same-form entry' if not EX['wrong_top1_audit_final']['same_form_cases'] else 'SAME-FORM CASES FOUND'}. The label "
          "correction applied throughout the article: " + "; ".join(f"{k}: {v}" for k, v in D["label_corrections"].items()) + ".",
          "",
          f"Every anchor: the same-form step compares each family member with the two anchors closest to the deposited structure. "
@@ -278,7 +281,7 @@ def s5_s6() -> list:
     tf = P["case"]["texture_fit"]
     L += ["## S6 The ZZZUWK case", "",
           f"ZZZUWK (propan-1-aminium chloride, P4/nmm) contributes {CZ['n_patterns']} patterns, a 303–398 K series; each is "
-          f"the refinement data of its self-entry ZZZUWK01–20. Self-entry score, median over its patterns vs the other "
+          f"the refinement data of its self-entry ZZZUWK01–20. Best score of any same-form entry, median over its patterns vs the other "
           "benchmark patterns: " + "; ".join(f"{k.replace('_bkg', '')} {v['own_score_median_case']:.2f} vs "
                                             f"{v['own_score_median_rest']:.2f}" for k, v in cx.items()
                                             if k in ("pearson_bkg", "cos_zs_bkg", "wcc_1_bkg")) + ".", "",
@@ -332,7 +335,7 @@ def s7_model() -> list:
          "asymmetric-unit atom and one token per CIF symmetry operator; 256-dimensional unit embeddings; "
          f"{P['run_facts']['model_params_millions']} million parameters. Symmetric InfoNCE with a learnable temperature, AdamW "
          f"(learning rate {tr['lr']:g}, weight decay {tr['weight_decay']:g}, {tr['warmup']} warm-up epochs), batch "
-         f"{tr['batch_size']}, {tr['epochs']} epochs; sibling polymorphs in the same batch; scaffold- and polymorph-family "
+         f"{tr['batch_size']}, {tr['epochs']} epochs; up to eight sibling polymorphs per family in the same batch; scaffold- and polymorph-family "
          "split 247,089 / 30,887 / 30,886. Training simulation: zero offset, isotropic strain, Caglioti and Scherrer "
          "broadening, March–Dollase texture averaged over the symmetry-equivalent reflections of each peak, background and "
          "Poisson noise, plus Kα2 (probability 0.6, I₂/I₁ = 0.5, each copy at its own wavelength under strain), an overall "

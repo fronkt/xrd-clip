@@ -129,9 +129,9 @@ but a few have many: ZZZUWK has 20, a variable-temperature series, ZZZIZM 12 and
 
 Three checks test these labels (Supplementary Section S2). Because same-form sets were built within the anchors'
 refcode family, an entry of the same form deposited under another refcode would be scored as an error. We therefore
-compared every wrong first-ranked entry of the classical scores (455 cases) with the pattern's anchors, and one
-family, GOFWUV, matches the anchor of one QQQAUJ pattern 15 of 15; it is added to that pattern's answers in every
-result reported here. Comparing each family member with every anchor, rather than the two closest, adds one entry
+compared every wrong first-ranked entry of the classical scores with the pattern's anchors. In the first audit (455
+cases) one family, GOFWUV, matches the anchor of one QQQAUJ pattern 15 of 15; it is added to that pattern's answers
+in every result reported here, and the audit repeated on the final scores (363 cases) finds no further same-form entry. Comparing each family member with every anchor, rather than the two closest, adds one entry
 (EPIVEF, for one pattern), which matches the third anchor 15 of 15 at an RMSD of 0.50 Å but the two closest anchors
 only 11 of 15; we keep the labels as built and report the variant as a sensitivity check. Finally, in all 35
 lenient patterns the components of the deposited structure and of its anchors contain the same non-H elements, so
@@ -153,7 +153,8 @@ self-retrieval, so we score three answer sets.
 - **Independent single-crystal entries at ambient pressure**, the ambient single-crystal set (38 patterns, 24
   compounds). Same-form entries that are powder studies are removed from the ranking, so they count neither as correct
   nor as errors, and the answer must be an independent single-crystal determination; patterns from variable-pressure
-  studies are reported separately, and none of the 49 answer entries of these patterns carries a CSD pressure. This is the realistic case of a new measurement checked against a database, and it
+  studies are reported separately. We take an entry as determined at ambient pressure when the CSD records no
+  pressure for it, as it does for non-ambient determinations; none of the 49 answer entries of these patterns carries one. This is the realistic case of a new measurement checked against a database, and it
   is our primary set.
 - **Pressure series** (22 patterns, 5 compounds). Patterns from room-temperature compression studies whose
   single-crystal references were determined at other pressures, scored like the primary set. Together the two sets
@@ -272,7 +273,8 @@ The full-library ranks were first computed on CPUs. The hubness analysis (Sectio
 only ranks, so we ported the scores to PyTorch [@paszke2019pytorch]. Folding the triangle weight into the reference
 turns every zero offset into one matrix product: for weights w_k and shift d, Σ_k w_k Σ_x q(x) r(x + d + k) =
 Σ_x q(x) r_w(x + d), with r_w the reference convolved with w. On one RTX 4090 the scores of 8,188 rows (benchmark
-patterns and probes) against all 309,080 entries took 761 s, and the GPU scores agree with the CPU scores to
+patterns and probes) against all 309,080 entries took 761 s with the first version of the ln q scan (the revised
+version, rescored on its own, took 405 s), and the GPU scores agree with the CPU scores to
 4 × 10⁻⁶ with no change of any top-1 (Supplementary Section S5).
 
 ### 3.4 Learned model
@@ -296,8 +298,8 @@ vector z_s. Training pulls the two embeddings of the same crystal together again
 retrieval ranks every library entry by their cosine similarity s. The operator tokens (orange) are added in this work.
 
 The model was trained for 60 epochs with a symmetric InfoNCE loss [@oord2018cpc; @radford2021clip] (batch size 512,
-AdamW, learning rate 3 × 10⁻⁴, weight decay 0.05, 3 warm-up epochs), with the sibling polymorphs of each family placed
-in the same batch as hard negatives, on 247,089 CSD structures of a scaffold- and polymorph-family split
+AdamW, learning rate 3 × 10⁻⁴, weight decay 0.05, 3 warm-up epochs), with up to eight sibling polymorphs of each family placed
+in the same batch as hard negatives (further siblings are sampled singly), on 247,089 CSD structures of a scaffold- and polymorph-family split
 [@cai2026urtc]. Patterns were simulated on the fly with a random zero offset, isotropic strain, Caglioti and
 crystallite-size broadening, March–Dollase texture [@dollase1986] averaged over the symmetry-equivalent reflections of
 each peak, background and Poisson noise. The simulation also included further effects seen in the benchmark
@@ -315,7 +317,7 @@ in Supplementary Section S7.
 ### 3.5 Diagnostics of the learned model
 
 Four diagnostics probe the model's failure (Section 4.6). The first, an effect ladder, renders each pattern's
-self-entry cleanly and then with one effect of the measurement at a time. Three effects are estimated from the measured
+self-entry cleanly and then with one effect of the measurement at a time (the 184 patterns that have a self-entry). Three effects are estimated from the measured
 pattern: its 2θ coverage, its peak width and its noise level. Kα2 is added to every laboratory Cu pattern, because
 opXRD does not record monochromatisation, and the pattern's own background is added and then removed by the background
 subtraction of Section 3.1. The zero offset is the one that best aligns the pattern with its self-entry, and the
@@ -326,7 +328,7 @@ variant is scored with the answer sets of the measured pattern. One effect, the 
 the ladder diagnoses the model and is not a retrieval method. The second diagnostic matches patterns to patterns:
 the clean library patterns are passed through the model's pattern encoder, so measured patterns are compared with
 simulated patterns in the learned space without the structure encoder. The third scores 4,000 library entries
-simulated cleanly and 4,000 simulated with the training degradations (the probes of Section 3.6) against the whole
+simulated cleanly and 4,000 degraded ones (the probes of Section 3.6) against the whole
 library, which tests whether the model can discriminate at library scale. The fourth splits the measured patterns by
 whether their crystal form is in the model's training split. If the model had memorised its training structures,
 patterns whose form it was trained on would be retrieved better than the rest, so this split is a control for
@@ -336,7 +338,8 @@ overfitting and not a test of generalisation.
 
 A hub is a library entry that scores highly against many unrelated queries [@radovanovic2010hubs]. We measured
 hubness with probe patterns rather than with the benchmark patterns: 4,000 library entries simulated cleanly and
-4,000 simulated with the training-time degradations and then background-subtracted like the measured patterns,
+4,000 simulated with a random zero offset, isotropic strain, broadening, texture (one reflection per peak), background
+and noise, without the further effects of Section 3.4, and then background-subtracted like the measured patterns,
 drawn only from compounds outside the benchmark, with pairs from the same compound excluded. For each score and library entry, N₁₀ is the number of
 probes that have the entry among their ten best matches, and we report its skewness over the entries. With 4,000 probes and
 309,080 entries the mean N₁₀ is 0.13, so these skewness values are not comparable with those in the hubness
@@ -560,30 +563,30 @@ and CSLS. The ln q scan in its present version was not run on the full-occupancy
 
 On simulated patterns the model discriminates well among the 309,080 entries. For the clean simulated probes of
 Section 3.5 it ranks the probe's
-own entry first for 42 % of probes (median rank 2), and for the probes with the training
-degradations for 30 % (median rank 3). For clean simulated patterns of the benchmark's
-self-entries, scored with the answer sets of the measured patterns, it reaches a compound-weighted top-1 of 0.25 and
-a median rank of 5, against 0.02 and about 5,600 on the measured patterns of the same targets. A classical score would
+own entry first for 42 % of probes (median rank 2), and for the degraded probes
+for 30 % (median rank 3). For clean simulated patterns of the benchmark's
+self-entries, scored with the answer sets of the measured patterns, it reaches a compound-weighted top-1 of 0.23 and
+a median rank of 6, against 0.02 and about 5,600 on the measured patterns of the same targets. A classical score would
 rank a clean rendering of a library entry first by construction, so this test only diagnoses the model. Training-split
 membership makes little difference on the measured patterns: patterns whose crystal form is in the model's training
 split have a median rank of 6,093, and patterns whose form is in no split 5,151.
 
 The effect ladder shows that the model has learned the effects we simulated (figure 6). Rendered with each effect of
-its measurement, the self-entries stay near the clean result: with Kα2 the model reaches 0.25 (median rank 6), with
-the Debye–Waller factor 0.38 (median rank 4), and with the first six effects together 0.22 (median rank 12). With
-those six plus the Debye–Waller factor it reaches 0.23 at a median rank of 8, and with intensity jitter added 0.22 at
-a median rank of 12. The earlier model of ref. [@cai2026urtc], trained without these effects and without the
-operator tokens, falls to a median rank of 298 on the rendering with the six effects and the Debye–Waller factor. Yet on the measured patterns the retrained model
-stays at 0.02 with a median rank of about 5,600. Fixed-grid Pearson, by contrast, reaches 0.85 on the measured
-patterns, close to its value on the fully rendered self-entries. The measured patterns therefore differ from our
+its measurement, the self-entries stay near the clean result: with Kα2 the model reaches 0.23 (median rank 7), with
+the Debye–Waller factor 0.36 (median rank 5), and with the first six effects together 0.20 (median rank 12). With
+those six plus the Debye–Waller factor it reaches 0.21 at a median rank of 8, and with intensity jitter added 0.20 at
+a median rank of 10. The earlier model of ref. [@cai2026urtc], trained without these effects and without the
+operator tokens, falls to a median rank of 350 on the rendering with the six effects and the Debye–Waller factor. Yet on the measured patterns the retrained model
+stays at 0.02 with a median rank of about 5,600. Fixed-grid Pearson, by contrast, reaches 0.84 on the measured
+patterns, against 0.88 on the fully rendered self-entries. The measured patterns therefore differ from our
 simulations in a way that barely affects fixed-grid correlation but moves this model's embeddings far. We have not
 identified it. Candidates include the peak asymmetry and angle-dependent shifts caused by axial divergence and specimen
 transparency, which a constant offset does not absorb, anisotropic broadening and real preferred orientation.
 
 Matching patterns to patterns involves the pattern encoder only. Matched against the clean library patterns
 in the model's pattern space, without the structure encoder, the measured patterns reach a compound-weighted top-1 of
-0.17 (median rank 164), whereas fixed-grid Pearson, which also compares the two patterns point by point without an
-alignment search, reaches 0.85. The encoder places measured patterns away from simulations of the same structures
+0.18 (median rank 164), whereas fixed-grid Pearson, which also compares the two patterns point by point without an
+alignment search, reaches 0.84 on the same patterns. The encoder places measured patterns away from simulations of the same structures
 before the structure side is involved. The seeds and the ablation agree with this reading. The second seed reaches
 0.03 on the measured patterns with a median rank of about 3,300, the model without operator tokens 0.03 with a
 median rank of about 4,100, and none of the three is statistically distinguishable from the earlier model (paired
@@ -610,7 +613,7 @@ resolution, and the way their structures were refined, are candidates.
 **Figure 6.** Effect ladder. Each pattern's self-entry is rendered cleanly, with one effect of its measurement at a
 time, with the first six together, and with an overall Debye–Waller factor (B), log-normal intensity jitter per
 reflection (σ = 0.3) or both added; the last point is the measured patterns themselves (Section 3.5). Answer set:
-any same-form entry (188 patterns, 121 compounds). (a) Compound-weighted top-1 for fixed-grid Pearson, the model (two
+any same-form entry (the 184 patterns with a self-entry, 118 compounds). (a) Compound-weighted top-1 for fixed-grid Pearson, the model (two
 seeds) and the earlier model of ref. [@cai2026urtc]; (b) median rank of the first correct entry for the models.
 
 ### 4.7 Robustness of the benchmark
@@ -687,8 +690,8 @@ repeat, and separately for queries whose reference is an independent determinati
 and the source of the patterns recorded. The benchmark released with this paper supports each of
 these, and its open replica lets the any-same-form results be checked without a CSD licence.
 
-The model is faster. With precomputed library embeddings it searches 309,080 entries in about 5 ms per query on a
-CPU, whereas one CPU core needs about 0.4 s per query for fixed-grid Pearson, about 20 s for a zero scan and about
+The model is faster. With precomputed library embeddings, the similarity product of one query with 309,080 entries
+takes about 5 ms on a CPU, whereas, extrapolated from timed comparisons, one CPU core needs about 0.4 s per query for fixed-grid Pearson, about 20 s for a zero scan and about
 6 min for the ln q scan, and one GPU needs about 0.09 s per pattern for all five classical scores
 together (8,188 patterns against the full library in 761 s). The variable-cell re-rank is much slower, at a median of 2.3 CPU-minutes per comparison. Speed
 matters only once accuracy does, however, and a shortlist from this model loses most correct entries.

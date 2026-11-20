@@ -51,7 +51,7 @@ Lowest agreement after the re-simulation: QQQAUJ07 0.496; RIXNES03 0.930; RIXNES
 
 ## S2 Ground-truth checks
 
-Wrong first-ranked entries: 455 cases (five classical scores, both answer sets, final score matrices) were compared with the pattern's anchors by packing similarity (874 pairs). Same form: GOFWUV for pattern_100.json (QQQAUJ). The label correction applied throughout the article: pattern_100.json: QQQAUJ04 (anchor) vs GOFWUV 15/15 rmsd 0.103, vs GOFWUV01 15/15 rmsd 0.140, vs GOFWUV02 15/15 rmsd 0.133 (CCDC packing similarity, 15-molecule shell, H positions ignored, 2026-11-10).
+Wrong first-ranked entries: 455 cases (five classical scores, both answer sets, score matrices before the label correction and the re-simulation of Section S1) were compared with the pattern's anchors by packing similarity (874 pairs). Same form: GOFWUV for pattern_100.json (QQQAUJ). Repeated on the final score matrices: 363 cases, no further same-form entry. The label correction applied throughout the article: pattern_100.json: QQQAUJ04 (anchor) vs GOFWUV 15/15 rmsd 0.103, vs GOFWUV01 15/15 rmsd 0.140, vs GOFWUV02 15/15 rmsd 0.133 (CCDC packing similarity, 15-molecule shell, H positions ignored, 2026-11-10).
 
 Every anchor: the same-form step compares each family member with the two anchors closest to the deposited structure. Comparing every non-same-form member with every remaining anchor (1,163 comparisons over the 59 patterns with more than two anchors) adds EPIVEF for pattern_188.json (15/15 against EPIVEF02, RMSD 0.50 Å; previously other form). The labels are kept as built; the variant that counts it is a sensitivity check (Table S5).
 
@@ -299,7 +299,7 @@ Maximum |GPU − CPU| score over all benchmark patterns and their special entrie
 
 ## S6 The ZZZUWK case
 
-ZZZUWK (propan-1-aminium chloride, P4/nmm) contributes 20 patterns, a 303–398 K series; each is the refinement data of its self-entry ZZZUWK01–20. Self-entry score, median over its patterns vs the other benchmark patterns: pearson 0.84 vs 0.78; cos_zs 0.85 vs 0.84; wcc_1 0.91 vs 0.98.
+ZZZUWK (propan-1-aminium chloride, P4/nmm) contributes 20 patterns, a 303–398 K series; each is the refinement data of its self-entry ZZZUWK01–20. Best score of any same-form entry, median over its patterns vs the other benchmark patterns: pearson 0.84 vs 0.78; cos_zs 0.85 vs 0.84; wcc_1 0.91 vs 0.98.
 
 The cation is disordered over four orientations by symmetry, each at occupancy 0.25. Patterns (of 20) for which each score ranks a same-form entry first, with the self-entries simulated with every disorder site at full occupancy (the record of the pipeline before the re-simulation of Section S1) and with their site occupancies, without / with CSLS: ln q lag + zero scan – / – before, 20 / 20 after; Cosine + zero scan 0 / 20 before, 20 / 20 after; Pearson, fixed grid 12 / 17 before, 18 / 19 after; WCC, l = 1° + zero scan 0 / 0 before, 20 / 20 after; WCC, l = 2° + zero scan 0 / 0 before, 10 / 18 after; Learned model – / – before, 0 / 0 after. With the full-occupancy simulation, GUSRIV was the wrong first answer of cosine + zero scan for 20 patterns. The ln q scan in its present version and the model were not scored against the full-occupancy library.
 
@@ -350,16 +350,16 @@ Texture fit: March–Dollase along each of 49 low-index axes, r from 0.25 to 4.0
 
 ## S7 Learned model
 
-Model card. Dual encoder (figure 2 of the article): a one-dimensional residual CNN over the standardised 2,251-point pattern; a Transformer (4 layers, width 256, 8 heads, pre-norm) over one lattice token, one token per asymmetric-unit atom and one token per CIF symmetry operator; 256-dimensional unit embeddings; 6.2 million parameters. Symmetric InfoNCE with a learnable temperature, AdamW (learning rate 0.0003, weight decay 0.05, 3 warm-up epochs), batch 512, 60 epochs; sibling polymorphs in the same batch; scaffold- and polymorph-family split 247,089 / 30,887 / 30,886. Training simulation: zero offset, isotropic strain, Caglioti and Scherrer broadening, March–Dollase texture averaged over the symmetry-equivalent reflections of each peak, background and Poisson noise, plus Kα2 (probability 0.6, I₂/I₁ = 0.5, each copy at its own wavelength under strain), an overall Debye–Waller factor (B uniform in 0–8 Å²), log-normal intensity jitter per reflection (σ uniform in 0–0.5), 2θ range cuts (probability 0.25) and the background subtraction of the measured patterns. Checkpoint: the epoch with the best in-batch top-1 on a fixed degraded draw of the validation structures. The checkpoints were trained on CSD data.
+Model card. Dual encoder (figure 2 of the article): a one-dimensional residual CNN over the standardised 2,251-point pattern; a Transformer (4 layers, width 256, 8 heads, pre-norm) over one lattice token, one token per asymmetric-unit atom and one token per CIF symmetry operator; 256-dimensional unit embeddings; 6.2 million parameters. Symmetric InfoNCE with a learnable temperature, AdamW (learning rate 0.0003, weight decay 0.05, 3 warm-up epochs), batch 512, 60 epochs; up to eight sibling polymorphs per family in the same batch; scaffold- and polymorph-family split 247,089 / 30,887 / 30,886. Training simulation: zero offset, isotropic strain, Caglioti and Scherrer broadening, March–Dollase texture averaged over the symmetry-equivalent reflections of each peak, background and Poisson noise, plus Kα2 (probability 0.6, I₂/I₁ = 0.5, each copy at its own wavelength under strain), an overall Debye–Waller factor (B uniform in 0–8 Å²), log-normal intensity jitter per reflection (σ uniform in 0–0.5), 2θ range cuts (probability 0.25) and the background subtraction of the measured patterns. Checkpoint: the epoch with the best in-batch top-1 on a fixed degraded draw of the validation structures. The checkpoints were trained on CSD data.
 
 **Table S20** The four checkpoints. Real benchmark: compound-weighted top-1 [95 % CI] and median rank; ladder: the self-entries rendered with the first six effects and the Debye–Waller factor; sweep: within-family top-1 range over the 42 distinct conditions.
 
 | checkpoint | degraded validation top-1 | single-crystal, macro top-1 | ambient single-crystal | any same-form, macro top-1 | median rank | − earlier model (any same-form) | ladder: six + B | pattern to pattern | sweep |
 |---|---|---|---|---|---|---|---|---|---|
-| symmetry-aware, seed 0 (the model) | 0.864 (epoch 59) | 0.00 [0.00, 0.00] | 0.00 | 0.02 [0.00, 0.04] | 5,573.5 | 0.00 [−0.02, +0.02] | 0.23 / 8.0 | 0.17 | 0.47–0.59 |
-| symmetry-aware, seed 1 | 0.862 (epoch 59) | 0.03 [0.00, 0.10] | 0.04 | 0.03 [0.00, 0.06] | 3,344.0 | +0.01 [−0.02, +0.04] | 0.28 / 8.5 | 0.17 | 0.48–0.58 |
-| without operator tokens | 0.842 (epoch 57) | 0.00 [0.00, 0.00] | 0.00 | 0.03 [0.01, 0.07] | 4,062.5 | +0.02 [0.00, +0.04] | 0.23 / 17.5 | 0.24 | 0.47–0.57 |
-| earlier model [ref. 18] | – | 0.00 [0.00, 0.00] | 0.00 | 0.02 [0.00, 0.04] | 5,989.0 | – | 0.05 / 298.0 | 0.13 | 0.47–0.57 |
+| symmetry-aware, seed 0 (the model) | 0.864 (epoch 59) | 0.00 [0.00, 0.00] | 0.00 | 0.02 [0.00, 0.04] | 5,573.5 | 0.00 [−0.02, +0.02] | 0.21 / 8.5 | 0.18 | 0.47–0.59 |
+| symmetry-aware, seed 1 | 0.862 (epoch 59) | 0.03 [0.00, 0.10] | 0.04 | 0.03 [0.00, 0.06] | 3,344.0 | +0.01 [−0.02, +0.04] | 0.27 / 9.5 | 0.17 | 0.48–0.58 |
+| without operator tokens | 0.842 (epoch 57) | 0.00 [0.00, 0.00] | 0.00 | 0.03 [0.01, 0.07] | 4,062.5 | +0.02 [0.00, +0.04] | 0.21 / 18.5 | 0.24 | 0.47–0.57 |
+| earlier model [ref. 18] | – | 0.00 [0.00, 0.00] | 0.00 | 0.02 [0.00, 0.04] | 5,989.0 | – | 0.05 / 349.5 | 0.13 | 0.47–0.57 |
 
 **Table S21** The model (symmetry-aware, seed 0) on simulated and measured queries against all 309,080 entries. Probes: library entries outside the benchmark compounds, their own refcode family excluded. Self-entries: the clean simulated pattern of each benchmark pattern's self-entry, scored with the measured pattern's answer sets.
 
@@ -367,10 +367,10 @@ Model card. Dual encoder (figure 2 of the article): a one-dimensional residual C
 |---|---|---|---|---|
 | clean simulated probes | 4000 | 0.42 | 0.84 | 2.0 |
 | degraded simulated probes | 4000 | 0.30 | 0.70 | 3.0 |
-| self-entries, clean simulated (any same-form) | 188 | 0.24 | 0.62 | 5.0 |
-| self-entries, clean simulated (single-crystal) | 60 | 0.38 | 0.53 | 7.5 |
-| measured patterns (any same-form) | 188 | 0.01 | 0.04 | 5573.5 |
-| measured patterns (single-crystal) | 60 | 0.00 | 0.00 | 13995.0 |
+| self-entries, clean simulated (any same-form) | 184 | 0.18 | 0.62 | 5.5 |
+| self-entries, clean simulated (single-crystal) | 57 | 0.21 | 0.54 | 9.0 |
+| measured patterns (any same-form) | 184 | 0.01 | 0.04 | 5573.5 |
+| measured patterns (single-crystal) | 57 | 0.00 | 0.00 | 13930.0 |
 
 Operator tokens in the simulated sweep (each seed minus the ablation, within-family top-1 over the 42 distinct conditions): seed 0 mean +0.02 (range 0.00 to +0.03, higher in 42 conditions), seed 1 mean +0.01 (range 0.00 to +0.03, higher in 41); in no condition do the 95 % family-bootstrap intervals separate; mean absolute difference between the two seeds 0.008.
 
@@ -576,39 +576,39 @@ Each pattern's self-entry, rendered with effects estimated from its measurement:
 
 | rendering | symmetry-aware, seed 0 (the model) | symmetry-aware, seed 1 | without operator tokens | earlier model [ref. 18] | Pearson | pattern to pattern, seed 0 |
 |---|---|---|---|---|---|---|
-| clean | 0.25 / 5.0 | 0.33 / 4.0 | 0.25 / 7.5 | 0.27 / 5.0 | 1.00 | 1.00 |
-| coverage | 0.26 / 5.0 | 0.33 / 4.0 | 0.23 / 9.0 | 0.26 / 6.0 | 1.00 | 0.99 |
-| peak width | 0.27 / 7.0 | 0.34 / 5.0 | 0.26 / 9.0 | 0.27 / 7.0 | 0.99 | 0.99 |
-| noise | 0.24 / 8.0 | 0.26 / 9.5 | 0.18 / 14.0 | 0.22 / 11.0 | 1.00 | 0.94 |
-| Kα2 | 0.25 / 5.5 | 0.35 / 4.0 | 0.25 / 7.0 | 0.18 / 33.0 | 1.00 | 0.99 |
-| background + subtraction | 0.18 / 11.5 | 0.27 / 8.5 | 0.26 / 54.5 | 0.24 / 109.5 | 1.00 | 0.93 |
-| zero offset | 0.25 / 6.5 | 0.34 / 6.0 | 0.24 / 9.0 | 0.26 / 5.5 | 0.75 | 1.00 |
-| Debye–Waller | 0.38 / 4.0 | 0.35 / 3.0 | 0.28 / 6.5 | 0.07 / 45.5 | 1.00 | 1.00 |
-| first six together | 0.22 / 11.5 | 0.25 / 11.0 | 0.20 / 18.0 | 0.15 / 57.5 | 0.88 | 0.94 |
-| six + Debye–Waller | 0.23 / 8.0 | 0.28 / 8.5 | 0.23 / 17.5 | 0.05 / 298.0 | 0.87 | 0.93 |
-| six + jitter σ = 0.3 | 0.18 / 13.5 | 0.24 / 14.5 | 0.21 / 18.0 | 0.17 / 76.5 | 0.85 | 0.94 |
-| six + jitter σ = 0.5 | 0.19 / 17.0 | 0.23 / 19.5 | 0.17 / 28.0 | 0.12 / 82.0 | 0.82 | 0.89 |
-| six + Debye–Waller + jitter σ = 0.3 | 0.22 / 12.5 | 0.25 / 10.5 | 0.24 / 19.0 | 0.04 / 368.0 | 0.85 | 0.92 |
-| measured patterns | 0.02 / 5,573.5 | 0.03 / 3,344.0 | 0.03 / 4,062.5 | 0.02 / 5,989.0 | 0.85 | 0.17 |
+| clean | 0.23 / 5.5 | 0.33 / 5.0 | 0.25 / 8.0 | 0.28 / 8.0 | 1.00 | 1.00 |
+| coverage | 0.24 / 6.5 | 0.33 / 5.0 | 0.23 / 9.0 | 0.27 / 9.5 | 1.00 | 0.99 |
+| peak width | 0.26 / 7.0 | 0.35 / 6.0 | 0.26 / 9.5 | 0.29 / 7.5 | 0.99 | 0.99 |
+| noise | 0.22 / 9.0 | 0.24 / 10.0 | 0.17 / 14.0 | 0.21 / 15.0 | 1.00 | 0.94 |
+| Kα2 | 0.23 / 7.0 | 0.35 / 4.0 | 0.24 / 8.0 | 0.18 / 32.5 | 1.00 | 0.99 |
+| background + subtraction | 0.19 / 14.0 | 0.27 / 11.0 | 0.26 / 55.0 | 0.25 / 109.5 | 1.00 | 0.92 |
+| zero offset | 0.23 / 6.0 | 0.35 / 5.5 | 0.24 / 8.5 | 0.26 / 9.0 | 0.78 | 1.00 |
+| Debye–Waller | 0.36 / 5.0 | 0.34 / 3.0 | 0.27 / 8.0 | 0.08 / 47.5 | 1.00 | 1.00 |
+| first six together | 0.20 / 12.5 | 0.25 / 17.0 | 0.20 / 25.5 | 0.14 / 59.5 | 0.89 | 0.93 |
+| six + Debye–Waller | 0.21 / 8.5 | 0.27 / 9.5 | 0.21 / 18.5 | 0.05 / 349.5 | 0.88 | 0.93 |
+| six + jitter σ = 0.3 | 0.14 / 13.5 | 0.22 / 15.0 | 0.17 / 20.0 | 0.15 / 73.5 | 0.86 | 0.93 |
+| six + jitter σ = 0.5 | 0.12 / 19.5 | 0.21 / 23.5 | 0.11 / 27.0 | 0.12 / 107.0 | 0.84 | 0.92 |
+| six + Debye–Waller + jitter σ = 0.3 | 0.20 / 10.0 | 0.21 / 13.0 | 0.19 / 20.5 | 0.05 / 403.0 | 0.88 | 0.91 |
+| measured patterns | 0.02 / 5,573.5 | 0.03 / 3,344.0 | 0.03 / 4,062.5 | 0.02 / 5,989.0 | 0.84 | 0.18 |
 
 **Table S30** Effect ladder, single-crystal answer set: compound-weighted top-1 / median rank.
 
 | rendering | symmetry-aware, seed 0 (the model) | symmetry-aware, seed 1 | without operator tokens | earlier model [ref. 18] | Pearson | pattern to pattern, seed 0 |
 |---|---|---|---|---|---|---|
-| clean | 0.40 / 7.5 | 0.30 / 3.0 | 0.21 / 10.5 | 0.14 / 5.5 | 0.46 | 0.74 |
-| coverage | 0.40 / 7.5 | 0.30 / 3.0 | 0.21 / 11.0 | 0.14 / 6.0 | 0.46 | 0.74 |
-| peak width | 0.36 / 4.0 | 0.31 / 2.5 | 0.26 / 6.0 | 0.19 / 7.0 | 0.50 | 0.72 |
-| noise | 0.26 / 7.5 | 0.17 / 9.0 | 0.15 / 13.5 | 0.17 / 10.5 | 0.46 | 0.71 |
-| Kα2 | 0.36 / 7.0 | 0.31 / 3.0 | 0.23 / 9.0 | 0.07 / 68.5 | 0.51 | 0.72 |
-| background + subtraction | 0.22 / 23.5 | 0.21 / 8.0 | 0.16 / 238.0 | 0.12 / 733.5 | 0.46 | 0.67 |
-| zero offset | 0.37 / 9.5 | 0.31 / 6.0 | 0.20 / 11.5 | 0.20 / 6.0 | 0.28 | 0.68 |
-| Debye–Waller | 0.41 / 4.0 | 0.31 / 3.0 | 0.31 / 7.5 | 0.07 / 20.0 | 0.46 | 0.72 |
-| first six together | 0.29 / 12.5 | 0.29 / 7.0 | 0.18 / 27.0 | 0.10 / 554.0 | 0.45 | 0.68 |
-| six + Debye–Waller | 0.34 / 6.5 | 0.35 / 5.5 | 0.35 / 26.5 | 0.00 / 938.0 | 0.42 | 0.68 |
-| six + jitter σ = 0.3 | 0.25 / 11.0 | 0.24 / 7.0 | 0.27 / 22.5 | 0.17 / 678.0 | 0.45 | 0.66 |
-| six + jitter σ = 0.5 | 0.31 / 14.5 | 0.27 / 7.0 | 0.21 / 56.5 | 0.09 / 725.5 | 0.41 | 0.62 |
-| six + Debye–Waller + jitter σ = 0.3 | 0.27 / 14.0 | 0.29 / 5.5 | 0.26 / 30.0 | 0.02 / 984.5 | 0.45 | 0.68 |
-| measured patterns | 0.00 / 13,995.0 | 0.03 / 7,774.0 | 0.00 / 12,697.5 | 0.00 / 17,650.5 | 0.37 | 0.16 |
+| clean | 0.34 / 9.0 | 0.33 / 5.0 | 0.19 / 14.0 | 0.11 / 12.0 | 0.32 | 0.69 |
+| coverage | 0.30 / 9.0 | 0.33 / 5.0 | 0.19 / 14.0 | 0.11 / 12.0 | 0.32 | 0.69 |
+| peak width | 0.28 / 5.0 | 0.28 / 3.0 | 0.21 / 9.0 | 0.24 / 18.0 | 0.38 | 0.67 |
+| noise | 0.24 / 11.0 | 0.11 / 9.0 | 0.12 / 19.0 | 0.11 / 23.0 | 0.32 | 0.64 |
+| Kα2 | 0.28 / 8.0 | 0.29 / 3.0 | 0.20 / 10.0 | 0.07 / 55.0 | 0.35 | 0.66 |
+| background + subtraction | 0.24 / 36.0 | 0.23 / 9.0 | 0.13 / 182.0 | 0.13 / 850.0 | 0.32 | 0.63 |
+| zero offset | 0.30 / 9.0 | 0.34 / 5.0 | 0.17 / 13.0 | 0.13 / 11.0 | 0.25 | 0.67 |
+| Debye–Waller | 0.34 / 5.0 | 0.26 / 3.0 | 0.25 / 13.0 | 0.07 / 27.0 | 0.32 | 0.65 |
+| first six together | 0.19 / 15.0 | 0.26 / 8.0 | 0.20 / 38.0 | 0.11 / 921.0 | 0.39 | 0.63 |
+| six + Debye–Waller | 0.30 / 18.0 | 0.32 / 10.0 | 0.28 / 62.0 | 0.00 / 1,217.0 | 0.35 | 0.58 |
+| six + jitter σ = 0.3 | 0.20 / 12.0 | 0.22 / 8.0 | 0.13 / 34.0 | 0.15 / 878.0 | 0.37 | 0.58 |
+| six + jitter σ = 0.5 | 0.13 / 15.0 | 0.27 / 10.0 | 0.11 / 133.0 | 0.09 / 1,021.0 | 0.33 | 0.54 |
+| six + Debye–Waller + jitter σ = 0.3 | 0.22 / 12.0 | 0.26 / 12.0 | 0.17 / 30.0 | 0.00 / 1,243.0 | 0.37 | 0.60 |
+| measured patterns | 0.00 / 13,930.0 | 0.04 / 5,549.0 | 0.00 / 12,210.0 | 0.00 / 18,853.0 | 0.32 | 0.15 |
 
 ## S12 Robustness of the benchmark
 
