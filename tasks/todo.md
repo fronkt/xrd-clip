@@ -773,3 +773,17 @@ F7 Package paper/dd/submissions/RSOS/ (manuscript, ESI, cover letter stating the
   - verify_claims_rsos: 162/162 on provisional numbers.
   - Running: c2_chain4 (ba42ijs80): X2 pattern_100/887 (~71 comparisons left at 23:30, ~3.5 h), then control 914/1008,
     eval, inject, evals. THEN: 48 -> 49 -> 50 -> --fill (real manuscript) -> build.sh -> paper-claim-audit -> report.
+
+### 2026-11-20 D-rest final numbers + claim audit
+- c2_chain4 killed by the 04:01 Windows reboot during X2 (pattern_100 already 50/50); c2_chain5 resumed X2 (1 left),
+  control, inject, evals: all rc=0 (12:09). Critic2 headline unchanged: ambient 0.69 [0.50, 0.83], paired +0.10
+  [-0.04, 0.27]; control 30/37; injection 5/9; recall 0.633. 48 -> 49 -> 50 -> --fill -> build.sh --draft OK (696a04d).
+- paper-claim-audit (Codex gpt-6.1-sol, fresh thread 01a1f9f1): FAIL, 4 MAJOR + 4 MINOR, headline numbers all reproduced.
+  Fixed (5befe21): 29 eval read the 10-12 pre-correction ln q ranks (S10 now ln q 0.49, paired +0.08); "every
+  measurement effect" -> listed effects, anisotropic strain not in training; ambient pressure verified on the answer
+  side (scripts/54: 0 of 49 ambient answers carry a CSD pressure; 34 rerun adds pattern_100); disordered SELF-entries
+  25/6 (was any anchor 28/9); exclusions 134 pairs / 44 entries, 26 / 16 / 15 in library; random median 75,586
+  (pooled, multiplicities) not 155,000; Conclusions "unchanged" -> the classical-vs-model comparison.
+- [FRANK] grid-step averaging crosses the 10-14 rule for WCC 2 deg only (+0.06 ambient, +0.05 [0.00, 0.14] sc; CI
+  reaches 0): text keeps interpolation and says so; rule said PROPOSE -> Frank decides (promote = GPU rescore ~$0.5).
+- Re-audit (fresh thread) running.
