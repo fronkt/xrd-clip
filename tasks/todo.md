@@ -724,3 +724,25 @@ F7 Package paper/dd/submissions/RSOS/ (manuscript, ESI, cover letter stating the
   - F3: Fig. 2 model schematic DONE (paper/rsos/figs/gen_fig_model.py, verify PASS). 50_rsos_figs.py written.
   - F4: paper/rsos/manuscript.md drafted (efb5590), {{placeholders}} remain; 49_rsos_esi.py written; 48 numbers script
     written (needs every input; run when the jobs finish).
+- 11-19 night progress (D-rest, 44ad047):
+  - DONE: variants r2/ablations/binavg/dT + hub v1 for s0 (8/8 rc 0); probe check 26 (sim median rank 2, aug 3, measured
+    5,573.5); COD embeddings + eval for s0 (classical identical to before, model 0.019 std).
+  - 48/49/50 dry-run end to end with stand-ins (scratch dry48.py): fixed the 28-vs-21 model-rank assertion (float ties,
+    at most one place, same top-1); added Table 2 block (ambient + std for main/conv/known-lambda/strict/every-anchor/r2/
+    dT(vs conv)/binavg, cross-checked against 43), symops sweep effect, ambient pairwise among shift-tolerant scores,
+    model ambient top-10; CPU time per query = median over sweep conditions (clean carried warm-up: Pearson 0.7 -> 0.4 s).
+  - scripts/verify_claims_rsos.py: 143 verbatim claims + --fill for the {{placeholders}} + Tables 1/2; 143/143 on the dry
+    numbers. It caught: headline 0.46-0.62 -> 0.45-0.62 (cos_zs ambient 0.4545, double rounding), 0.72-0.88 -> 0.71-0.88
+    (wcc_2 std 0.7148), 4.1 "texture the one degradation..." (false: the model is flat, every degradation costs the
+    classical scores more) -> rewritten; "among shift-tolerant scores not distinguishable" false on the ambient set
+    (WCC 1 vs cosine+zs 0.16 [0.05, 0.30]) -> rewritten; "space-group info improves the sweep" -> +0.02 over the ablation
+    (42/42 conditions s0, 41/42 s1, no condition's CIs separate).
+  - COD parser bug: parse_symops read an operator loop quoted inside a ;-text field (COD 2004836: 1 op for Pbca). Fixed
+    (text fields skipped) + test (47 pass). Scan of all 108,902 COD twins vs gemmi group order: 11 mismatches, 3 from the
+    bug (2000503, 2001223, 2004836; none an answer; all shard_000), 8 genuine CIF loops (pymatgen used the same loops for
+    the sticks, so consistent). Anvil twins3.sh rebuilds (v2 kept as sticks_symops_v2, per-entry diff expects exactly 3);
+    then pull + md5, re-embed shard_000 only (44 skips existing shards), rerun COD eval.
+  - Poly sweep 22319852 widened to Partition=gpu,gpu-debug (gpu-debug had 0 running for 3 h).
+  - paper/rsos/build.sh (pandoc + citeproc RSOS CSL; refuses placeholders; --draft allows only {{zenodo_doi}}).
+  - Left: critic2 pattern_100 (24/50 at 19:33) -> c2_chain; poly sweep; COD v3 -> then 48 -> 49 -> 50 -> --fill -> verify
+    N/N -> build -> F6 gates -> F7 package. Frank's OK: Zenodo version, push, submission; [FRANK] markers in manuscript.
