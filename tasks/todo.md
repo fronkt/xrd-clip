@@ -746,3 +746,15 @@ F7 Package paper/dd/submissions/RSOS/ (manuscript, ESI, cover letter stating the
   - paper/rsos/build.sh (pandoc + citeproc RSOS CSL; refuses placeholders; --draft allows only {{zenodo_doi}}).
   - Left: critic2 pattern_100 (24/50 at 19:33) -> c2_chain; poly sweep; COD v3 -> then 48 -> 49 -> 50 -> --fill -> verify
     N/N -> build -> F6 gates -> F7 package. Frank's OK: Zenodo version, push, submission; [FRANK] markers in manuscript.
+- 11-19 late (ff3dee7, bb811c6):
+  - F6 kill-argument (gpt-6.1-sol ultra, fresh threads, clean folder; report D:\xrd-clip\rsos_private\gates\kill-argument_2026-11-19_run01):
+    attack = source dependence (Kaduk external set: model median rank 4 vs ~5,600 on opXRD) + cohort-specific "bar".
+    Verified: opXRD lab Cu 120 median 4,980; ambient sync 39 median 2,133; pressure 22 median 21,482; Kaduk sync 16
+    median 2 (5 first; 13/16 anchors in train, the 3 not in train rank 1/38/111); Kaduk lab Cu 3 beyond 8,900. Added as
+    an EXPLORATORY split (48 instrument_split + kaduk_by_instrument; 4.6 paragraph; ESI S7/S14 tables; 4.8 Kaduk as
+    counts, "too small to test the separation"). Adjudication: 5 points all partially answered (major), 0 unresolved ->
+    WARN; writing fixes applied (Discussion confined to the opXRD cohort / 26 compounds; conclusions: discrepancy not
+    cause; abstract "so on these patterns it fails ..."). Research-level leftovers (new independent sources) = limitations.
+  - COD v3 twins DONE: exactly 3 entries changed (2000503, 2001223, 2004836); shard_000 re-embedded (other entries
+    identical to 3e-8); COD eval: classical unchanged, model top-1 unchanged, 40 std / 10 sc ranks moved by one place.
+  - Citation audit of the 6 unaudited keys running (Codex); contexts in D:\xrd-clip\rsos_private\gates\citation-audit_2026-11-19.
