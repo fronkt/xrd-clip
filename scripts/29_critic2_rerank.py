@@ -324,7 +324,7 @@ def cmd_eval(args) -> int:
         rank_c2[qi] = int((dv[~is_t] < dv[is_t].min()).sum())
         sl = np.array(p["lnq_scores"][:args.k])
         rank_lnq_short[qi] = int((sl[~is_t] > sl[is_t].max()).sum())
-    stems = np.array([q["stem"] for q in qinfo])
+    stems = np.array([q["compound"] for q in qinfo])
     r1 = np.load("cache/real_bench/rescore_r1/ranks.npz")["sc|lnq_bkg"]
     sel = rank_c2 >= 0
     cpu = np.array([cpu_seconds(r["cpu"]) for r in used if r["cpu"] is not None])

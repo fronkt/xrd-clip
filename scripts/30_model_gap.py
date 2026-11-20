@@ -257,7 +257,7 @@ def cmd_eval(args) -> int:
     lib = np.load(LIB, mmap_mode="r") if os.path.exists(LIB) else None
     sets = {td: [(np.array([gidx[rc] for rc in q["sets"][td][0]], dtype=np.int64),
                   np.array([gidx[rc] for rc in q["sets"][td][1]], dtype=np.int64)) for q in qinfo] for td in ("std", "sc")}
-    stems = np.array([q["stem"] for q in qinfo])
+    stems = np.array([q["compound"] for q in qinfo])
     cboot = np.random.default_rng(0).integers(0, len(np.unique(stems)), (2000, len(np.unique(stems))))
     boot = bench.compound_bootstrap(stems)
 

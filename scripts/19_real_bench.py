@@ -157,11 +157,47 @@ def build_queries(truth_path: str, patterns_path: str, gidx: dict) -> "tuple[lis
         qinfo.append({"id": t["id"], "stem": t["true_stems"][0], "sets": sets, "own_powder": own_powder,
                       "other": [x["refcode"] for x in t["other_form"] if x["refcode"] in gidx],
                       "wavelength": t["wavelength"], "n_same_total": len(t["same_form"])})
+    for q, c in zip(qinfo, compound_ids(truth)):
+        q["compound"] = c
     Q = {}
     for v in ("raw", "bkg"):
         Q[f"raw_{v}"] = np.stack([query_patterns(pats[q["id"]], q["wavelength"], v) for q in qinfo])
         Q[f"std_{v}"] = np.stack([A.standardize(y) for y in Q[f"raw_{v}"]])
     return qinfo, excluded, Q
+
+
+def compound_ids(truth: list) -> "list[str]":
+    """The compound each pattern belongs to, for compound weighting and the compound bootstrap (resubmission D-rest,
+    board review 11-19). A pattern's refcode family (its stem) is not enough: the CSD files some compounds under two
+    families (QQQAUJ04 is the same form as GOFWUV; QIQVAQ01 as IYESEO's), so two benchmark stems linked by a shared
+    same-form entry are one compound. Union-find over the benchmark stems; the representative is the alphabetically
+    first stem. The stem itself stays the family for everything else (probe exclusion, the case compound)."""
+    stems = [t["true_stems"][0] for t in truth]
+    par = {s: s for s in stems}
+    # links found on the CSD benchmark, applied to every truth (the COD replica's same-form ids are COD numbers)
+    alias_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "refcodes", "compound_aliases.json")
+    aliases = {k: v for k, v in json.load(open(alias_path)).items() if not k.startswith("_")} if os.path.exists(alias_path) else {}
+    for a, b in aliases.items():
+        par.setdefault(a, a)
+        par.setdefault(b, b)
+
+    def find(x):
+        while par[x] != x:
+            par[x] = par[par[x]]
+            x = par[x]
+        return x
+    def union(x, y):
+        a, b = find(x), find(y)
+        if a != b:
+            par[max(a, b)] = min(a, b)
+    for a, b in aliases.items():
+        union(a, b)
+    for s, t in zip(stems, truth):
+        for y in t["same_form"]:
+            f = y["refcode"][:6]
+            if f in stems and f != s:
+                union(s, f)
+    return [find(s) for s in stems]
 
 
 def compound_bootstrap(stems, n: int = 2000, seed: int = 0) -> "list[np.ndarray]":
@@ -533,14 +569,14 @@ def main() -> int:
               f"({len(S_full)} keys x 2 truth defs x {nq} queries)", flush=True)
 
     # ---- summaries + bootstrap CIs ----------------------------------------------------------------
-    boot = compound_bootstrap([q["stem"] for q in qinfo])
+    boot = compound_bootstrap([q["compound"] for q in qinfo])
     split_of = {"all": np.ones(nq, bool),
                 "powder_study": np.array([q["own_powder"] for q in qinfo]),
                 "independent": np.array([not q["own_powder"] for q in qinfo])}
 
     res = {"n_library": N, "n_queries": nq, "excluded": excluded, "keys": list(ranks["std"]), "summary": {},
            "within_family": {},
-           "library_curve": {}, "meta": [{"id": q["id"], "stem": q["stem"], "own_powder": q["own_powder"],
+           "library_curve": {}, "meta": [{"id": q["id"], "stem": q["stem"], "compound": q["compound"], "own_powder": q["own_powder"],
                                           "n_same_in_lib": len(q["sets"]["std"][0]),
                                           "n_sc_in_lib": len(q["sets"]["sc"][0]), "n_other": len(q["other"])}
                                          for q in qinfo]}

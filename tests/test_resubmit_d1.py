@@ -174,3 +174,16 @@ def test_original_checkpoint_still_loads():
     from xrdclip.models.clip import load_checkpoint
     m = load_checkpoint("runs/xrdclip_poly/best.pt")
     assert not m.symops
+
+
+def test_compound_ids_merges_families_that_share_a_same_form_entry():
+    """Two benchmark refcode families linked by a shared same-form entry are one compound (GOFWUV / QQQAUJ04);
+    an unlinked family stays its own compound, and a link to a non-benchmark family changes nothing."""
+    import importlib, sys
+    sys.path.insert(0, "scripts")
+    bench = importlib.import_module("19_real_bench")
+    truth = [{"true_stems": ["QQQAUJ"], "same_form": [{"refcode": "QQQAUJ04"}, {"refcode": "GOFWUV01"}]},
+             {"true_stems": ["GOFWUV"], "same_form": [{"refcode": "GOFWUV"}, {"refcode": "QQQAUJ04"}]},
+             {"true_stems": ["NAPHTA"], "same_form": [{"refcode": "NAPHTA10"}, {"refcode": "ZZZZZZ01"}]},
+             {"true_stems": ["QQQAUJ"], "same_form": [{"refcode": "QQQAUJ04"}]}]
+    assert bench.compound_ids(truth) == ["GOFWUV", "GOFWUV", "NAPHTA", "GOFWUV"]

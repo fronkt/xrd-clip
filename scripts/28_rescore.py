@@ -473,7 +473,7 @@ def cmd_eval(args) -> int:
     out = os.path.join(args.work, f"rescore_{args.tag}")
     sets = {td: [(np.array([gidx[rc] for rc in q["sets"][td][0]], dtype=np.int64),
                   np.array([gidx[rc] for rc in q["sets"][td][1]], dtype=np.int64)) for q in qinfo] for td in ("std", "sc")}
-    stems = np.array([q["stem"] for q in qinfo])
+    stems = np.array([q["compound"] for q in qinfo])
     ranks = {}
     S_cls = {}
     for key in cfg["keys"]:

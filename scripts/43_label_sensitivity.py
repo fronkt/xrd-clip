@@ -42,7 +42,7 @@ def main() -> int:
     sc_cond = json.load(open("results/sc_conditions.json"))
     z = np.load(args.ranks)
     ids = np.array([q["id"] for q in qinfo])
-    stems = np.array([q["stem"] for q in qinfo])
+    stems = np.array([q["compound"] for q in qinfo])
     lenient = np.array([truth[i].get("anchor_tier") == "lenient" for i in ids])
     pressure = np.array([bool(sc_cond.get(i.replace(".json", ""), {}).get("pressure_series")) for i in ids])
     subsets = {"all": np.ones(len(ids), bool), "strict_only": ~lenient,

@@ -94,7 +94,7 @@ def sweep(m: str) -> dict:
 
 
 def main_ranks(m: str, tag: str = "main") -> dict:
-    p = f"cache/real_bench/rescore_{tag}/ranks.npz" if m == ORIGINAL else f"cache/real_bench/rescore_{tag}/ranks_{m}.npz"
+    p = f"cache/real_bench/rescore_{tag}/ranks_{m}.npz"   # the earlier model re-evaluated as ranks_poly (compounds, 11-19)
     z = npz(p)
     return {k: z[k] for k in z.files}
 
@@ -118,7 +118,7 @@ def main() -> int:
     lib_rc = hubm.library_refcodes(shards)
     gidx = {rc: i for i, rc in enumerate(lib_rc)}
     qinfo, excluded, _ = bench.build_queries(args.truth, args.patterns, gidx)
-    meta = [{"id": q["id"], "stem": q["stem"], "own_powder": q["own_powder"], "n_other": len(q["other"]),
+    meta = [{"id": q["id"], "stem": q["compound"], "family": q["stem"], "own_powder": q["own_powder"], "n_other": len(q["other"]),
              "n_same_in_lib": len(q["sets"]["std"][0])} for q in qinfo]
     stems = np.array([x["stem"] for x in meta])
     nq = len(meta)
@@ -291,9 +291,9 @@ def main() -> int:
     # ---- the four checkpoints side by side ----------------------------------------------------------------------
     models = {}
     for x in (m, SEED2, ABLATION, ORIGINAL):
-        rm = load("results/rescore_main.json" if x == ORIGINAL else f"results/d3/rescore_main_{x}.json")
+        rm = load(f"results/d3/rescore_main_{x}.json")
         gap = load(f"results/d3/model_gap_{x}.json")["results"]
-        ls = load("results/label_sensitivity.json" if x == ORIGINAL else f"results/d3/label_sensitivity_{x}.json")
+        ls = load(f"results/d3/label_sensitivity_{x}.json")
         rk = main_ranks(x)
         row = {"std_macro_top1": rnd(rm["macro"]["std|model_bkg"]["top1"]), "sc_macro_top1": rnd(rm["macro"]["sc|model_bkg"]["top1"]),
                "std_median_rank": rm["per_pattern"]["std|model_bkg"]["median_rank"],

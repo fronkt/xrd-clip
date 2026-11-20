@@ -438,7 +438,7 @@ def cmd_eval(args) -> int:
                 c["full"] = [float((r["std"][ok] < 1).mean()), 0.0]
                 curve[f"{corr}|{key}"] = c
                 # compound-weighted version of the same subsets (one compound has 20 of the 188 patterns)
-                sq = np.array([q["stem"] for q in qinfo])
+                sq = np.array([q["compound"] for q in qinfo])
                 mac = lambda rk: float(np.nanmean(_hits_by_compound(np.where(ok, rk, -1), sq, np.unique(sq))))
                 cm = {str(size): [float(np.mean([mac(cu[size][rep]) for rep in range(5)])),
                                   float(np.std([mac(cu[size][rep]) for rep in range(5)]))] for size in subsets}
@@ -455,7 +455,7 @@ def cmd_eval(args) -> int:
               f"check {rank_check.get(key)}", flush=True)
 
     # ---- summaries ---------------------------------------------------------------------------------
-    boot = bench.compound_bootstrap([q["stem"] for q in qinfo])
+    boot = bench.compound_bootstrap([q["compound"] for q in qinfo])
     split_of = {"all": np.ones(nq, bool),
                 "powder_study": np.array([q["own_powder"] for q in qinfo]),
                 "independent": np.array([not q["own_powder"] for q in qinfo])}
@@ -475,7 +475,7 @@ def cmd_eval(args) -> int:
 
     # ---- compound-weighted view: a few compounds contribute many patterns (ZZZUWK 20 of 188), so the
     # per-pattern numbers mostly measure those compounds. Macro = mean over compounds of per-compound top-1.
-    stems_q = np.array([q["stem"] for q in qinfo])
+    stems_q = np.array([q["compound"] for q in qinfo])
     res["patterns_per_compound"] = Counter(stems_q.tolist()).most_common(10)
     res["macro"], res["paired"] = {}, {}
     cboot = np.random.default_rng(0).integers(0, len(np.unique(stems_q)), (2000, len(np.unique(stems_q))))
