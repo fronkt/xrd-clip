@@ -492,7 +492,8 @@ the classical scores reach a compound-weighted top-1 of {{sc_all_range}} and the
 With every same-form entry correct, the classical scores reach a compound-weighted top-1 of 0.71–0.88 (table 1): the
 ln q scan 0.88, cosine + zero scan 0.85, fixed-grid Pearson 0.84, WCC with l = 1° 0.84 and with l = 2° 0.71. Paired
 over compounds, only WCC with l = 2° differs from Pearson ({{std_paired_wcc2_pearson}}). The model reaches 0.02, with
-a median rank of about 5,600, and its second seed reaches {{s1_std}}. Within families, with only the compound's own
+a median rank of about 5,600, far from the median of about {{random_med}} that a random ordering would give, and its
+second seed reaches {{s1_std}}. Within families, with only the compound's own
 forms as candidates (chance 0.40), the classical scores reach 0.94–0.98 top-1 and the model 0.69 (51 patterns).
 
 Background subtraction matters for the classical scores. Without it, compound-weighted top-1 drops to
@@ -512,7 +513,7 @@ hub. The tetragonal salt has 24 reflections between 5° and 50° 2θ, where the 
 has about 130, and its measured relative intensities differ strongly from those simulated for its self-entry (figure
 5a). A March–Dollase texture fitted along each of 49 low-index axes, with r from 0.25 to 4, raises the median Pearson
 correlation of the 20 patterns with their self-entries only from 0.72 to 0.79, and the (101) and (202) reflections,
-which share a plane normal and so must be scaled alike by any texture, have measured-to-simulated ratios of 0.32 and
+which share a plane normal and so must be scaled alike by any texture, have measured-to-simulated peak-height ratios of 0.32 and
 2.49. Preferred orientation therefore cannot explain the mismatch. All 20 self-entries are disordered and omit H
 atoms, so our simulation of them is the more likely cause. Unrelated entries with strong reflections near ZZZUWK's two
 strongest measured peaks, such as GUSRIV and ZZZLWW01, then outscore the self-entry, and the more peak-tolerant the
@@ -678,7 +679,11 @@ benchmark has 123 compounds, all organic, from one contributor to opXRD, and mos
 entry was refined against. The ambient single-crystal set has 26 compounds, so its intervals are wide, and the open
 replica's single-crystal set has only 9. The main library is simulated with one peak profile and without
 Debye–Waller factors or Kα2; a package of such changes moved little but does not exhaust them, uses one
-Debye–Waller factor for every temperature, and disordered entries are simulated only approximately. The measured
+Debye–Waller factor for every temperature, and disordered entries are simulated from the CSD's site occupancies, of
+which one entry (an other-form decoy) lists only one disorder component. The entries added to the library are
+answers and other forms of the benchmark compounds that the corpus filter had removed; entries of other compounds
+that the filter removes are not added, so the library holds some disordered or poorly refined answers without decoys
+of the same kind. The measured
 patterns have a simple background removal and are interpolated onto the Cu grid, and the zero scans use fixed offset
 grids (0.02°, and 0.04° for the ln q scan). The effect ladder adds Kα2 to every laboratory Cu pattern and does not
 estimate the intensity jitter. The only practitioner baseline beyond the classical scores is the isotropic rescaling

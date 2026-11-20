@@ -235,6 +235,7 @@ PH = {
     "kad_sync_train": str(KK["sync_self_entry_split"].get("train", 0)),
     "kad_sync_nontrain_n": words(len(KK["sync_not_train_ranks"])), "kad_sync_nontrain": seq(KK["sync_not_train_ranks"]),
     "c2_cpu_min": f"{C2['cpu_min_median']:.1f}",
+    "random_med": f"{round(D['n_library'] / 2, -3):,.0f}",
     "len_stoich_ok": str(ROB["label_sensitivity"]["n_lenient_patterns"] - len(AC.get("lenient_stoich_mismatch", []))),
     "gpu_s_per_pattern": f"{RF['hub_wall_s'] / (D['n_queries'] + 2 * D['n_probe_per_set']):.2f}",
     "x3_inj_rank1": str(X3["injected_rank1"]), "x3_inj_n": str(len(X3["injected"])),
@@ -483,7 +484,7 @@ CLAIMS = [
     need(EX["paired_methods"]["std|wcc_2_bkg-pearson_bkg"]["ci"][1] < 0 and all(incl0(v["ci"]) for v in other_tol),
          f"only WCC with l = 2° differs from Pearson ({PH['std_paired_wcc2_pearson']})"),
     f"The model reaches {f2(b('model_bkg')['macro_top1'])}, with a median rank of about {about(b('model_bkg')['median_rank'])}, "
-    f"and its second seed reaches {PH['s1_std']}",
+    f"far from the median of about {PH['random_med']} that a random ordering would give, and its second seed reaches {PH['s1_std']}",
     f"(chance {f2(EX['within_family_chance'])}), the classical scores reach {rng([wf[k]['top1'] for k in CLS])} top-1 and "
     f"the model {f2(wf['model_bkg']['top1'])} ({wf['model_bkg']['n']} patterns)",
     f"drops to {PH['raw_pearson']} for Pearson, {PH['raw_coszs']} for cosine + zero scan, {PH['raw_wcc1']} for WCC with l = 1° "
