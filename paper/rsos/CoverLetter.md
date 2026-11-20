@@ -1,6 +1,3 @@
-<!-- [DRAFTED - REVIEW] RSOS cover letter, 2026-11-19. No referee text here (confidential; the response to the
-previous reviews is kept outside the public repo). [FRANK] check the subject area and the suggested reviewers line. -->
-
 Dear Editor,
 
 Please consider the enclosed manuscript, "Retrieving organic crystal structures from measured powder diffraction
@@ -26,7 +23,7 @@ and added checks of the labels, of the intensity convention and of the anchor pr
 with a point-by-point response and a table of every change from the earlier version.
 
 All code, the benchmark definition, an open replica built from the Crystallography Open Database and every
-per-pattern rank are available at https://github.com/fronkt/xrd-clip and archived at Zenodo. Structures from the
+per-pattern rank are available at https://github.com/fronkt/xrd-clip and archived at Zenodo (https://doi.org/10.5281/zenodo.24407260). Structures from the
 Cambridge Structural Database cannot be redistributed; the deposit contains the refcode lists from which licence holders
 regenerate them. The manuscript has not been published and is not under consideration elsewhere. The author declares no
 competing interests.
