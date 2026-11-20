@@ -22,11 +22,12 @@ built a benchmark of 188 measured patterns of 123 organic compounds, identified 
 Cambridge Structural Database by packing similarity, and ranked every pattern against 309,080 simulated database
 entries. When the correct answer must be an independent single-crystal structure determined at ambient pressure (38
 patterns of 26 compounds), classical profile-matching scores that tolerate peak shifts rank it first for a
-compound-weighted fraction of 0.46–0.62. A contrastive model with a space-group-aware structure encoder, trained on
+compound-weighted fraction of 0.45–0.62. A contrastive model with a space-group-aware structure encoder, trained on
 simulated patterns that include the measurement effects we could model, ranks it first for none of these compounds.
 When the database entry refined against the pattern itself also counts as correct, the classical scores reach
-0.72–0.88 and the model reaches 0.02. Simulated versions of the same patterns, rendered with every modelled effect,
-are retrieved by the model at a median rank of 8, whereas the measured patterns sit at a median rank of about 5,600,
+0.71–0.88 and the model reaches 0.02. Simulated versions of the same patterns, rendered with the effects of each
+pattern's own measurement, are retrieved by the model at a median rank of 8, whereas the measured patterns sit at a
+median rank of about 5,600,
 so the model's failure lies in differences that our simulation does not reproduce. We release the benchmark, an
 open replica built from the Crystallography Open Database, and every per-pattern rank.
 
@@ -392,16 +393,17 @@ classical score 0.64–1.00 (figure 3). The best classical score leads in every 
 does not depend on picking the best score per condition, because WCC with l = 0.5° or 1° and the ln q scan beat the
 model with non-overlapping 95 % intervals in all 42 conditions, WCC with l = 2° in 41 and Pearson + zero scan in 40.
 
-The fixed-grid Pearson baseline of our earlier work falls to chance by a 0.15° zero offset or a 0.8 % strain while the
-model's curves are flat, but they are flat at about 0.55, and the model's clean within-family top-1 is 0.59. A zero
-scan removes Pearson's weakness: Pearson + zero scan scores 1.00 at every offset that is a multiple of its 0.02° step,
-and the dips at 0.05° and 0.15° are offsets that fall between grid points. The ln q scan, whose offsets are 0.04°
-apart, dips to 0.88 at 0.1° and 0.3° and holds 0.89 at 1.2 % isotropic strain. Texture is the one degradation that
-costs the peak-tolerant scores more than it costs the model. Along each structure's Bravais–Friedel–Donnay–Harker axis,
-WCC with l = 1° falls from 1.00 to 0.75 for plates with r = 0.5 and to 0.82 for needles with r = 2, much as it does
-along (001), while the model stays at 0.57–0.59 throughout; even at r = 0.5 every classical score remains above it,
-the lowest being WCC with l = 2° at 0.66. The smallest gap, 0.10, comes from the largest anisotropic thermal strain
-(ΔT = 200 K), where WCC with l = 2° reaches 0.67 and the model 0.57.
+The fixed-grid Pearson baseline of our earlier work falls to chance by a 0.15° zero offset or a 0.8 % strain, while the
+model's curves stay between 0.53 and 0.59, and the model's clean within-family top-1 is 0.59. A zero scan removes
+Pearson's weakness: Pearson + zero scan scores 1.00 at every offset that is a multiple of its 0.02° step, and the dips
+at 0.05° and 0.15° are offsets that fall between grid points. The ln q scan, whose offsets are 0.04° apart, dips to
+0.87–0.88 at every offset off that grid (0.05°, 0.1°, 0.15° and 0.3°) and holds 0.89 at 1.2 % isotropic strain.
+Texture lowers the scores that compare peaks over a window rather than point by point. Along each structure's
+Bravais–Friedel–Donnay–Harker axis, WCC with l = 1° falls from 1.00 to 0.75 for plates with r = 0.5 and to 0.82 for
+needles with r = 2, much as it does along (001) (0.73 at r = 0.5), while fixed-grid Pearson stays at 1.00 and
+Pearson + zero scan at 0.98; the model stays at 0.57–0.59 throughout. Even at r = 0.5 every classical score remains
+above the model, the lowest being WCC with l = 2° at 0.66. The smallest gap, 0.10, comes from the largest anisotropic
+thermal strain (ΔT = 200 K), where WCC with l = 2° reaches 0.67 and the model 0.57.
 
 ![](figs/fig3_simulated_sweep.pdf)
 
@@ -415,17 +417,19 @@ offsets between the points of their 0.02° grid (0.05° and 0.15°), and the ln 
 ### 4.2 Independent single-crystal references at ambient pressure
 
 When the self-entry is excluded and only independent single-crystal determinations at ambient pressure count, the
-shift-tolerant classical scores reach a compound-weighted top-1 of 0.46–0.62 and fixed-grid Pearson 0.33 (table 1,
+shift-tolerant classical scores reach a compound-weighted top-1 of 0.45–0.62 and fixed-grid Pearson 0.33 (table 1,
 figure 4a). The model reaches 0.00, and its second seed {{amb_s1}}. The first correct entry lies beyond rank 1,000 for
 {{amb_frac_gt1000_range}} of these patterns under the classical scores and for {{amb_model_frac_gt1000}} under the
-model. Paired over compounds, WCC with l = 1° beats fixed-grid Pearson by {{amb_paired_wcc1_pearson}} and the ln q scan
-by {{amb_paired_lnq_pearson}}; among the shift-tolerant scores the differences are not statistically distinguishable.
+model. Paired over compounds, WCC with l = 1° beats fixed-grid Pearson by {{amb_paired_wcc1_pearson}}, and the ln q
+scan beats it by {{amb_paired_lnq_pearson}}; cosine + zero scan and WCC with l = 2° are not statistically
+distinguishable from it. Among the shift-tolerant scores, only WCC with l = 1° and cosine + zero scan differ
+({{amb_paired_wcc1_coszs}}).
 
 Re-ranking the ln q top 50 with VC-GPWDF gives {{c2_amb}}, against {{c2_amb_lnq}} for the ln q scan on the same
 patterns, and the paired difference, {{c2_amb_paired}}, does not distinguish them. The re-rank's reach is limited by
 its shortlist, which holds the answer for {{c2_amb_in_list}} of the 38 patterns. Compared with its own self-entry, the
 structure refined against the same data, the pipeline ranks that entry above every wrong entry of the shortlist for
-{{c2_ctl_amb}} ambient patterns.
+{{c2_ctl_amb}} ambient patterns that have one.
 
 What separates success from failure is how well the cells agree. We compared the primitive Niggli-reduced cells of
 each pattern's self-entry and of its closest single-crystal same-form entry over the whole single-crystal set
@@ -469,8 +473,8 @@ place, because only one of those ten shortlists holds the answer (Supplementary 
 
 ### 4.4 When the self-entry counts
 
-With every same-form entry correct, the classical scores reach a compound-weighted top-1 of 0.72–0.88 (table 1): the
-ln q scan 0.88, cosine + zero scan 0.85, fixed-grid Pearson 0.84, WCC with l = 1° 0.84 and with l = 2° 0.72. Paired
+With every same-form entry correct, the classical scores reach a compound-weighted top-1 of 0.71–0.88 (table 1): the
+ln q scan 0.88, cosine + zero scan 0.85, fixed-grid Pearson 0.84, WCC with l = 1° 0.84 and with l = 2° 0.71. Paired
 over compounds, only WCC with l = 2° differs from Pearson ({{std_paired_wcc2_pearson}}). The model reaches 0.02, with
 a median rank of about 5,600, and its second seed reaches {{s1_std}}. Within families, with only the compound's own
 forms as candidates (chance 0.40), the classical scores reach 0.94–0.98 top-1 and the model 0.69 (51 patterns).
@@ -529,7 +533,7 @@ its measurement, the self-entries stay near the clean result: with Kα2 the mode
 the Debye–Waller factor 0.39 (median rank 4), and with the first six effects together 0.22 (median rank 12). With
 those six plus the Debye–Waller factor it reaches 0.23 at a median rank of 8, and with intensity jitter added 0.21 at
 a median rank of 12. The earlier model of ref. [@cai2026urtc], trained without these effects and without the
-operator tokens, falls to a median rank of 744 on the same rendering. Yet on the measured patterns the retrained model
+operator tokens, falls to a median rank of 744 on the rendering with the six effects and the Debye–Waller factor. Yet on the measured patterns the retrained model
 stays at 0.02 with a median rank of about 5,600. Fixed-grid Pearson, by contrast, reaches 0.84 on the measured
 patterns, close to its value on the fully rendered self-entries. The measured patterns therefore differ from our
 simulations in a way that barely affects fixed-grid correlation but moves this model's embeddings far. We have not
@@ -544,8 +548,9 @@ alignment search, reaches 0.84. The encoder places measured patterns away from s
 before the structure side is involved. The seeds and the ablation agree with this reading. The second seed reaches
 {{s1_std}} on the measured patterns with a median rank of about 3,300, the model without operator tokens 0.03 with a
 median rank of about 4,100, and none of the three is statistically distinguishable from the earlier model (paired
-differences {{paired_vs_orig_range}}). The space-group information improves the simulated sweep (Section 4.1) but not
-the measured benchmark. As a shortlist for a classical re-rank the model also fails: its top 1,000 holds a correct
+differences {{paired_vs_orig_range}}). The operator tokens raise the model's within-family top-1 in the simulated
+sweep by about 0.02 over the ablation (in all 42 conditions for seed 0 and 41 for seed 1, although in no single
+condition do the intervals separate), but they leave the measured benchmark unchanged. As a shortlist for a classical re-rank the model also fails: its top 1,000 holds a correct
 entry for {{model_recall_1000}} of the patterns, and re-ranking that list with the ln q scan gives a compound-weighted
 top-1 of {{hybrid_lnq}}, against 0.88 for the ln q scan on the whole library.
 
@@ -563,17 +568,19 @@ None of the choices we tested changes the comparison (table 2; Supplementary Sec
 with the Lorentz–polarisation factor and the area-conserving Jacobian of the conversion to Cu changes the classical
 compound-weighted top-1 by {{conv_range}} and the ln q scan not at all, and leaves the model unchanged. Removing the
 3 patterns without a recorded wavelength changes no classical score by more than {{nolam_range}}. Removing the 35
-lenient-anchor patterns changes the classical scores by {{strict_range}} and leaves the model at {{strict_model}}.
+lenient-anchor patterns changes the classical scores by {{strict_range}}, and the model scores {{strict_model}}.
 Counting EPIVEF as a correct answer for its pattern, as the every-anchor comparison would, moves that pattern into the
 single-crystal set and changes no compound-weighted top-1 of the ambient set by more than {{ea_change}}. The library
-package of Section 3.8 changes the classical scores by {{r2_range}}, paired against the main benchmark; {{r2_nexcl}} of
-the {{r2_n}} paired intervals of the package and its ablations exclude zero, about as many as chance would give, and
-the model's library embeddings are unchanged, so it scores {{r2_model}}. Rescaling the library to 295 K changes the
-classical scores by {{dT_range}}, and averaging over each grid step instead of interpolating by {{binavg_range}}.
+package of Section 3.8 changes the classical scores by {{r2_range}}; {{r2_nexcl}} of the {{r2_n}} paired intervals of
+the package and its ablations, over the single-crystal and any-same-form sets, exclude zero, about as many as chance
+would give, and the model, whose library embeddings are unchanged, keeps its scores. Rescaling the library to 295 K,
+which we scored with the converted intensities, changes the classical scores by {{dT_range}} against the converted
+intensities alone, and averaging over each grid step instead of interpolating by {{binavg_range}}.
 
 **Table 2.** Compound-weighted top-1 of each score under the main benchmark and the robustness variants of Section
-4.7: ambient single-crystal set (26 compounds) / any same-form entry (123 compounds). Intervals and paired differences
-are in Supplementary Section S12.
+4.7: ambient single-crystal set / any same-form entry. The recorded-wavelength and strict-anchor rows drop 3 and 35
+patterns, and counting EPIVEF moves one pattern into the ambient set. Intervals and paired differences are in
+Supplementary Sections S2 and S12.
 
 {{table2}}
 
@@ -602,7 +609,7 @@ and the classical scores place it first for {{kaduk_sc_range}} of them and the m
 
 On measured organic patterns searched against the CSD, the bar for a learned retrieval method is set by simple
 classical scores on background-subtracted patterns. When the reference is an independent single-crystal structure
-determined at ambient pressure, the shift-tolerant scores reach a compound-weighted top-1 of 0.46–0.62, and when the
+determined at ambient pressure, the shift-tolerant scores reach a compound-weighted top-1 of 0.45–0.62, and when the
 pattern's self-entry is in the library they reach up to 0.88, with even fixed-grid Pearson correlation at 0.84. We
 suggest that learned PXRD retrieval be reported on measured patterns, against a library of realistic size, against
 shift- and strain-tolerant correlation scores with background subtraction, with compound-weighted metrics and a
@@ -650,9 +657,9 @@ forms only; crystal structure prediction combined with pattern matching can iden
 
 We searched 188 measured organic powder patterns against 309,080 simulated CSD entries. When the answer is an
 independent single-crystal structure determined at ambient pressure, shift-tolerant classical profile scores rank it
-first for a compound-weighted 0.46–0.62 of the compounds. A contrastive model with a space-group-aware structure
+first for a compound-weighted 0.45–0.62 of the compounds. A contrastive model with a space-group-aware structure
 encoder ranks it first for none of them. When the pattern's self-entry also counts, the classical scores reach
-0.72–0.88 and the model reaches 0.02. The model retrieves simulated patterns of the same targets, including patterns
+0.71–0.88 and the model reaches 0.02. The model retrieves simulated patterns of the same targets, including patterns
 rendered with every measurement effect we could model, so its failure lies in differences between measured and
 simulated patterns that our simulation does not reproduce, and its pattern encoder already places measured patterns
 away from their simulations. A more realistic library, a different intensity convention and the label checks leave

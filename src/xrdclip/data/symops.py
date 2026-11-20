@@ -49,8 +49,12 @@ def parse_symops(cif: str) -> np.ndarray:
     """All operators of the first symop loop in `cif`; without a loop, the operators of its space-group symbol
     (ops_from_symbol); identity only if the CIF has neither."""
     lines = cif.splitlines()
+    in_text = False                    # inside a ;-delimited text field (e.g. COD depositor comments quoting old loops)
     for i, line in enumerate(lines):
-        if line.strip() != "loop_":
+        if line.startswith(";"):
+            in_text = not in_text
+            continue
+        if in_text or line.strip() != "loop_":
             continue
         heads, j = [], i + 1
         while j < len(lines) and lines[j].strip().startswith("_"):

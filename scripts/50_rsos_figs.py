@@ -168,6 +168,17 @@ def fig_real(rn: dict) -> None:
 LADDER = f23.LADDER
 
 
+def ref_number(key: str, md: str = "paper/rsos/manuscript.md") -> int:
+    """The Vancouver number citeproc gives `key`: its place in the order of first citation in the manuscript."""
+    import re
+    order: list[str] = []
+    for grp in re.findall(r"\[(?:[^\]]*?)@[^\]]+\]", open(md, encoding="utf-8").read()):
+        for k in re.findall(r"@([A-Za-z0-9_:-]+)", grp):
+            if k not in order and not k.startswith(("fig:", "tbl:", "sec:", "eq:")):
+                order.append(k)
+    return order.index(key) + 1
+
+
 def fig_ladder(lad: dict) -> None:
     fig, (a, b) = plt.subplots(1, 2, figsize=(DOUBLE, 0.40 * DOUBLE))
     xs = np.arange(len(LADDER))
@@ -175,7 +186,7 @@ def fig_ladder(lad: dict) -> None:
     series = (("pearson", lad[nums.MODEL]["results"], "Pearson, fixed grid", STYLE["pearson"]["color"], ":", "o", True),
               ("model", lad[nums.MODEL]["results"], "Learned model, seed 0", mc, "-", "o", True),
               ("model", lad[nums.SEED2]["results"], "Learned model, seed 1", mc, "--", "s", False),
-              ("model", lad[nums.ORIGINAL]["results"], "Earlier model (ref. 26)", "0.45", "-.", "^", False))
+              ("model", lad[nums.ORIGINAL]["results"], f"Earlier model (ref. {ref_number('cai2026urtc')})", "0.45", "-.", "^", False))
     for meth, res, lab, c, ls, mk, filled in series:
         top1 = [res[f"{k}|{meth}|std"]["macro_top1"]["value"] for k, _ in LADDER]
         med = [res[f"{k}|{meth}|std"]["per_pattern"]["median_rank"] for k, _ in LADDER]

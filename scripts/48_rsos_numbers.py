@@ -318,6 +318,18 @@ def main() -> int:
         models[x] = row
     out["models"] = models
     out["sweep_rows_other"] = {x: g0(sweeps[x])["rows"] for x in (SEED2, ABLATION, ORIGINAL)}
+    # what the operator tokens do in the sweep: each seed against the ablation, condition by condition
+    dist_c = [c for c in sb["conditions"] if c != "zero_offset=0.0"]
+    out["symops_sweep_effect"] = {}
+    for x in (m, SEED2):
+        d_ = np.array([sweeps[x]["conditions"][c]["model"]["top1"] - sweeps[ABLATION]["conditions"][c]["model"]["top1"] for c in dist_c])
+        out["symops_sweep_effect"][x] = {
+            "mean_diff": rd(d_.mean()), "min_diff": rd(d_.min()), "max_diff": rd(d_.max()), "n_positive": int((d_ > 0).sum()),
+            "n_conditions": len(dist_c),
+            "n_ci_separated": int(sum(sweeps[x]["conditions"][c]["model"]["ci95"][0] > sweeps[ABLATION]["conditions"][c]["model"]["ci95"][1]
+                                      for c in dist_c))}
+    d_ = np.array([sweeps[m]["conditions"][c]["model"]["top1"] - sweeps[SEED2]["conditions"][c]["model"]["top1"] for c in dist_c])
+    out["symops_sweep_effect"]["seed_mean_abs_diff"] = rd(np.abs(d_).mean())
     out["seed_spread"] = {"std_macro_top1": rd(abs(models[m]["std_macro_top1"]["value"] - models[SEED2]["std_macro_top1"]["value"])),
                           "paired_s1_minus_s0": paired_macro(main_ranks(SEED2)["std|model_bkg"], main_ranks(m)["std|model_bkg"], stems)}
 
@@ -355,8 +367,9 @@ def main() -> int:
     ex["own_powder_rmsd_lt_0p05"] = {t_: int(sum(x["own_powder"] for x, tt in zip(meta, tier) if tt == t_)) for t_ in ("strict", "lenient")}
     rmod = R["none|std|model_bkg"]
     ex["model_recall"] = {str(k): rd((rmod < k).mean()) for k in (100, 1000)}
-    us = sb["conditions"]["clean"]
-    ex["cpu_s_per_query_full_library"] = {k: rd(us[k]["us_per_pair"] * 1e-6 * len(lib_rc))
+    # per-pair CPU time: the median over the sweep's conditions (the first condition timed, clean, carries warm-up)
+    ex["cpu_s_per_query_full_library"] = {k: rd(float(np.median([c[k]["us_per_pair"] for c in sb["conditions"].values()]))
+                                             * 1e-6 * len(lib_rc))
                                           for k in ("pearson", "pearson_zs", "wcc_1", "wcc_2", "lnq", "model")}
 
     def tK(s):
@@ -497,12 +510,20 @@ def main() -> int:
     for x in (m, SEED2, ABLATION, ORIGINAL):
         rr = main_ranks(x)["sc|model_bkg"]
         spl[f"model_{x}"] = {"macro_top1": macro(np.where(amb, rr, -1), 1, stems, cboot), "hits": int((rr[amb] == 0).sum()),
+                             "macro_top10": macro(np.where(amb, rr, -1), 10, stems, cboot),
                              "median_rank": float(np.median(rr[amb]) + 1), "frac_rank_gt_1000": rd((rr[amb] >= 1000).mean()),
                              "pressure_series_macro_top1": macro(np.where(hpsel, rr, -1), 1, stems, cboot)}
-    assert (main_ranks(m)["sc|model_bkg"] == R["none|sc|model_bkg"]).all()
+    for td in ("std", "sc"):   # 28 (CPU) and 21 (GPU) break float ties differently: at most one place apart
+        a_, b_ = main_ranks(m)[f"{td}|model_bkg"], R[f"none|{td}|model_bkg"]
+        assert np.abs(a_ - b_).max() <= 1 and ((a_ == 0) == (b_ == 0)).all(), td
     spl["model"] = spl[f"model_{m}"]
     for a, b_ in (("lnq", "pearson"), ("wcc_1", "pearson"), ("critic2", "lnq")):
         spl[f"paired_{a}_minus_{b_}"] = paired_macro(np.where(amb, split_ranks[a], -1), np.where(amb, split_ranks[b_], -1), stems)
+    tol_ = ["cos_zs", "wcc_1", "wcc_2", "lnq"]
+    spl["paired_among_tolerant"] = {f"{a}-{b_}": paired_macro(np.where(amb, split_ranks[a], -1), np.where(amb, split_ranks[b_], -1), stems)
+                                    for i, a in enumerate(tol_) for b_ in tol_[i + 1:]}
+    spl["paired_vs_pearson"] = {a: paired_macro(np.where(amb, split_ranks[a], -1), np.where(amb, split_ranks["pearson"], -1), stems)
+                                for a in tol_}
     sup = np.zeros(nq, bool)
     sup[[qpos[s["id"]] for s in ex["sc_cell_mismatch"]["supercell"]]] = True
     hot_ = ~np.isnan(dT) & (dT > 50)
@@ -635,6 +656,29 @@ def main() -> int:
     n_int += sum(1 for k, v in rob["r2"]["paired_vs_main"].items() if v["top1"]["ci"][0] > 0 or v["top1"]["ci"][1] < 0)
     rob["r2_n_intervals_excluding_zero"] = n_int
     rob["r2_n_intervals"] = sum(len(v["paired_vs_r2"]) for v in rob["r2_ablations"].values()) + len(rob["r2"]["paired_vs_main"])
+    # Table 2: compound-weighted top-1 on the ambient single-crystal set and the any-same-form set under every variant
+    known_wl = np.array([truth[x["id"]]["wavelength"] not in (None, "None", "") for x in meta])
+    ea_r = main_ranks(f"every_anchor_{m}")
+    amb_ea = (ea_r["sc|lnq_bkg"] >= 0) & ~hp
+    variants = {"main": (base, amb, None), "conv": (main_ranks(m, "conv"), amb, None), "r2": (f2, amb, None),
+                "dT": (main_ranks(m, "dT"), amb, None), "binavg": (main_ranks(m, "binavg"), amb, None),
+                "strict": (base, amb, tier == "strict"), "known_wavelength": (base, amb, known_wl),
+                "every_anchor": (ea_r, amb_ea, None)}
+    t2 = {}
+    for vname, (rk_, amb_, sel_) in variants.items():
+        keep = np.ones(nq, bool) if sel_ is None else sel_
+        t2[vname] = {k: {"ambient": macro(np.where(amb_ & keep, rk_[f"sc|{k}"], -1), 1, stems, cboot)["value"],
+                         "std": macro(np.where(keep, rk_[f"std|{k}"], -1), 1, stems, cboot)["value"]} for k in KEYS}
+    lsub = rob["label_sensitivity"]["subsets"]
+    for vname, sub in (("main", "all"), ("strict", "strict_only"), ("known_wavelength", "known_wavelength")):
+        for k in KEYS:   # 43 computes the same subsets independently
+            assert abs(t2[vname][k]["std"] - lsub[sub][f"std|{k}"]["top1"]) < 6e-4, (vname, k)
+    for k in KEYS:
+        assert abs(t2["main"][k]["ambient"] - lsub["ambient"][f"sc|{k}"]["top1"]) < 6e-4, k
+    rob["table2"] = t2
+    rob["table2_n"] = {"ambient_patterns": int(amb.sum()), "every_anchor_ambient_patterns": int(amb_ea.sum()),
+                       "strict_ambient_patterns": int((amb & (tier == "strict")).sum()),
+                       "known_wavelength_ambient_patterns": int((amb & known_wl).sum())}
     # Kaduk external set: classical rows are model-independent; the model rows are this model's
     kd = load(f"results/d3/kaduk_main_{m}.json")
     ks = load("results/kaduk_summary.json")

@@ -125,6 +125,18 @@ def test_parse_symops_from_symbol_without_loop():
     assert parse_symops(hm_only).shape == (4, 3, 4)
 
 
+def test_parse_symops_skips_loops_quoted_in_text_fields():
+    """COD 2004836 quotes an old, incomplete operator loop inside its depositor comments; that loop must be ignored and
+    the operators taken from the Hall symbol (Pbca, 8 operators)."""
+    cif = ("data_q\n_symmetry_space_group_name_Hall  '-P 2ac 2ab'\n_symmetry_space_group_name_H-M   'P b c a'\n"
+           "_cod_depositor_comments\n;\n Commenting out the incomplete symmetry operator list:\n\n loop_\n"
+           " _symmetry_equiv_pos_as_xyz\n '1/2 + x, y, 1/2 - z'\n\n The spacegroup symbols seem to be correct.\n;\n"
+           "loop_\n_atom_site_label\n_atom_site_fract_x\nC1 0.1\n")
+    assert parse_symops(cif).shape == (8, 3, 4)
+    real = cif + "loop_\n_symmetry_equiv_pos_as_xyz\nx,y,z\n-x,-y,-z\n"   # a real loop after the text field still wins
+    assert parse_symops(real).shape == (2, 3, 4)
+
+
 def test_symops_encoder_forward_and_operator_order_invariance():
     from xrdclip.data.dataset import structure_tensors
     from xrdclip.models.clip import XRDClip

@@ -22,8 +22,19 @@ NAMES = {"lnq_bkg": "ln q lag + zero scan", "cos_zs_bkg": "Cosine + zero scan", 
          "wcc_2_raw": "WCC, l = 2° + zero scan", "model_raw": "Learned model"}
 CLS = ["lnq_bkg", "cos_zs_bkg", "pearson_bkg", "wcc_1_bkg", "wcc_2_bkg"]
 SETS = (("std", "any same-form"), ("sc", "single-crystal"))
+def ref_number(key: str, md: str = "paper/rsos/manuscript.md") -> int:
+    """The Vancouver number citeproc gives `key` in the article: its place in the order of first citation."""
+    order: list[str] = []
+    for grp in re.findall(r"\[(?:[^\]]*?)@[^\]]+\]", open(md, encoding="utf-8").read()):
+        for k in re.findall(r"@([A-Za-z0-9_:-]+)", grp):
+            if k not in order and not k.startswith(("fig:", "tbl:", "sec:", "eq:")):
+                order.append(k)
+    return order.index(key) + 1
+
+
+REFN = ref_number("cai2026urtc")
 CKPTS = (("d3_sym_s0", "symmetry-aware, seed 0 (the model)"), ("d3_sym_s1", "symmetry-aware, seed 1"),
-         ("d3_fix", "without operator tokens"), ("poly", "earlier model [ref. 26]"))
+         ("d3_fix", "without operator tokens"), ("poly", f"earlier model [ref. {REFN}]"))
 CORR = {"none": "none", "csls_aug_k10": "CSLS, k = 10, degraded probes (primary)",
         "csls_sim_k10": "CSLS, k = 10, clean probes", "znorm_sim": "z-norm, clean probes", "znorm_aug": "z-norm, degraded probes",
         "mp_sim": "mutual proximity, clean probes", "mp_aug": "mutual proximity, degraded probes"}
@@ -190,8 +201,12 @@ def s4_results() -> list:
              for x, lab in CKPTS]
     L += table(["score", "ambient macro top-1", "ambient first places", "ambient median rank", "pressure-series macro top-1",
                 "pressure-series first places"], rows)
+    tn = {"cos_zs": "cosine + zero scan", "wcc_1": "WCC 1°", "wcc_2": "WCC 2°", "lnq": "ln q"}
     L += ["", f"Paired over ambient compounds: ln q − Pearson {dci(sp['paired_lnq_minus_pearson'])}; WCC 1° − Pearson "
-          f"{dci(sp['paired_wcc_1_minus_pearson'])}; re-rank − ln q {dci(sp['paired_critic2_minus_lnq'])}.", "",
+          f"{dci(sp['paired_wcc_1_minus_pearson'])}; cosine + zero scan − Pearson {dci(sp['paired_vs_pearson']['cos_zs'])}; "
+          f"WCC 2° − Pearson {dci(sp['paired_vs_pearson']['wcc_2'])}; re-rank − ln q {dci(sp['paired_critic2_minus_lnq'])}. "
+          "Among the shift-tolerant scores: " + "; ".join(f"{tn[k.split('-')[0]]} − {tn[k.split('-')[1]]} {dci(v)}"
+                                                          for k, v in sp["paired_among_tolerant"].items()) + ".", "",
           f"{T()} Within-family top-1 (rank among the compound's own forms in the library).", ""]
     L += table(["score", "query", "patterns", "top-1"],
                [[NAMES[k], "bkg" if k.endswith("bkg") else "raw", v["n"], f2(v["top1"])] for k, v in P["within_family"].items()])
@@ -301,7 +316,7 @@ def s7_model() -> list:
     L += table(["checkpoint", "degraded validation top-1", "single-crystal, macro top-1", "ambient single-crystal",
                 "any same-form, macro top-1", "median rank", "− earlier model (any same-form)", "ladder: six + B",
                 "pattern to pattern", "sweep"], rows)
-    L += ["", f"{T()} The model ({MODEL}) on simulated and measured queries against all {mp['n_library']:,} entries. Probes: "
+    L += ["", f"{T()} The model (symmetry-aware, seed 0) on simulated and measured queries against all {mp['n_library']:,} entries. Probes: "
           "library entries outside the benchmark compounds, their own refcode family excluded. Self-entries: the clean "
           "simulated pattern of each benchmark pattern's self-entry, scored with the measured pattern's answer sets.", ""]
     rows = [["clean simulated probes", mp["sim"]["n"], f2(mp["sim"]["top1"]), f2(mp["sim"]["top10"]), mp["sim"]["median_rank"]],
@@ -311,8 +326,18 @@ def s7_model() -> list:
             v = mp[f"{k}|{td}"]
             rows.append([f"{nm_} ({tl})", v["n"], f2(v["top1"]), f2(v["top10"]), v["median_rank"]])
     L += table(["query", "n", "top-1", "top-10", "median rank"], rows)
-    L += ["", f"Training-split control (crystal form of the pattern in the split): {ov['patterns_with_same_form_entry_in']} "
-          f"patterns. Model top-1 / median rank for patterns whose form is in the training split "
+    ns = ov["patterns_with_same_form_entry_in"]
+    se = P["symops_sweep_effect"]
+    L += ["", f"Operator tokens in the simulated sweep (each seed minus the ablation, within-family top-1 over the "
+          f"{se[MODEL]['n_conditions']} distinct conditions): seed 0 mean {sg(se[MODEL]['mean_diff'])} (range "
+          f"{sg(se[MODEL]['min_diff'])} to {sg(se[MODEL]['max_diff'])}, higher in {se[MODEL]['n_positive']} conditions), seed 1 mean "
+          f"{sg(se['d3_sym_s1']['mean_diff'])} (range {sg(se['d3_sym_s1']['min_diff'])} to {sg(se['d3_sym_s1']['max_diff'])}, higher in "
+          f"{se['d3_sym_s1']['n_positive']}); the 95 % family-bootstrap intervals separate in {se[MODEL]['n_ci_separated']} and "
+          f"{se['d3_sym_s1']['n_ci_separated']} conditions; mean absolute difference between the two seeds "
+          f"{se['seed_mean_abs_diff']:.3f}.", ""]
+    L += [f"Training-split control: the crystal form of {ns.get('train', 0)} patterns has an entry in the training split, "
+          f"{ns.get('val', 0)} in the validation split, {ns.get('test', 0)} in the test split and {ns.get('none', 0)} in no split. "
+          f"Model top-1 / median rank for patterns whose form is in the training split "
           f"{f2(ov['model_bkg_train']['top1'])} / {ov['model_bkg_train']['median_rank']:,.0f} (n = {ov['model_bkg_train']['n']}) and "
           f"in no split {f2(ov['model_bkg_none']['top1'])} / {ov['model_bkg_none']['median_rank']:,.0f} (n = {ov['model_bkg_none']['n']}). "
           "Memorised training structures would show up as better retrieval of the first group; the control finds none. "
@@ -323,18 +348,21 @@ def s7_model() -> list:
     L += ["", f"{T()} Search cost per query over the full library. CPU: per-pair wall time of the simulated sweep (one core) "
           f"times {D['n_library']:,}; with precomputed embeddings the model searches the library in about "
           f"{P['run_facts']['model_query_ms_cpu']} ms per query.", ""]
+    cpu_names = {"pearson": "Pearson, fixed grid", "pearson_zs": "Pearson + zero scan", "wcc_1": "WCC, l = 1° + zero scan",
+                 "wcc_2": "WCC, l = 2° + zero scan", "lnq": "ln q lag + zero scan"}
     L += table(["score", "CPU s per query (estimate)"],
-               [[k, f"{v:,.1f}"] for k, v in EX["cpu_s_per_query_full_library"].items() if k != "model"])
+               [[cpu_names[k], f"{v:,.1f}"] for k, v in EX["cpu_s_per_query_full_library"].items() if k != "model"])
     return L
 
 
+CONV_MAX = max(abs(ROB["conv"]["paired_vs_main"][f"{td}|{k}"]["top1"]["diff"]) for td in ("std", "sc") for k in CLS)
 DEVIATIONS = [
-    ["learned model", "earlier model [ref. 26]: no symmetry information, one seed, checkpoint on clean validation",
+    ["learned model", f"earlier model [ref. {REFN}]: no symmetry information, one seed, checkpoint on clean validation",
      "operator tokens for the space group; two seeds; checkpoint on degraded validation; ablation without the tokens",
      "the encoder could not know absences, multiplicities or Z; a clean criterion selects against robustness"],
     ["Kα2 in the training simulation", "a realism retrain whose Kα2 copies collapsed back onto Kα1 whenever strain was "
      "applied (every draw)", "each Kα2 copy keeps its own wavelength under strain (unit test through the training path)",
-     "code defect found in review"],
+     "code defect found while re-checking the training simulation"],
     ["March–Dollase texture", "applied to the stored representative reflection of each merged peak; (001) axis for every "
      "structure, r ≤ 1", "averaged over the symmetry-equivalent reflections of each peak; (001) and each structure's BFDH axis; "
      "plates and needles (r 0.5–2)", "the single-reflection factor is wrong for higher symmetry (cubic {100}, r = 0.5: "
@@ -344,11 +372,13 @@ DEVIATIONS = [
     ["headline answer set", "all 59 single-crystal patterns", "ambient single-crystal patterns (38); pressure series "
      "reported separately", "the pressure series are not the routine case of a new measurement checked against a database"],
     ["intensity convention", "positions converted to Cu, intensities not", "unchanged; the Lorentz–polarisation and "
-     "Jacobian conversion is reported as a sensitivity", "changes no classical score by more than 0.012"],
+     "Jacobian conversion is reported as a sensitivity", f"changes no classical score by more than {CONV_MAX:.3f}"],
     ["variable-cell re-rank", "59 shortlists", "60 (the label correction added one single-crystal pattern)", "label correction"],
-    ["practitioner baseline", "none", "library rescaled to 295 K by its recorded temperatures", "board request"],
+    ["practitioner baseline", "none", "library rescaled to 295 K by its recorded temperatures",
+     "references determined at other temperatures are commonly rescaled to room temperature"],
     ["open replica", "model embeddings of the earlier model", "COD symmetry operators from each CIF (from the space-group "
-     "symbol for CIFs without an operator list)", "the model needs the operators"],
+     "symbol for CIFs without an operator list; operator lists quoted inside comment fields are ignored)",
+     "the model needs the operators; a quoted list had been read for 3 library entries, none of them an answer"],
 ]
 
 
@@ -356,7 +386,7 @@ def s8_sweep() -> list:
     g = P["g0"]
     L = ["", "## S8 Simulated sweep, all conditions", "",
          f"{T()} Within-family top-1 over {g['n_families']:,} families ({g['n_queries']:,} queries); 95 % family-bootstrap "
-         f"CIs; composition-only chance {g['chance']:.2f}; the model is {MODEL}. Other checkpoints: model top-1 only. The last "
+         f"CIs; composition-only chance {g['chance']:.2f}; the model is the symmetry-aware encoder, seed 0. Other checkpoints: model top-1 only. The last "
          "column is the first version of the ln q scan on the same draws.", ""]
     oth = {x: {r["condition"]: r for r in P["sweep_rows_other"][x]} for x, _ in CKPTS[1:]} if "sweep_rows_other" in P else {}
     rows = []
@@ -488,22 +518,38 @@ def s11_ladder() -> list:
             k = f"{rung}|p2p|{td}"
             row.append(f2(lad[MODEL]["results"][k]["macro_top1"]["value"]) if k in lad[MODEL]["results"] else "n/a")
             rows.append(row)
-        L += table(["rendering"] + [lab for _, lab in CKPTS] + ["Pearson", f"p2p, {MODEL}"], rows) + [""]
+        L += table(["rendering"] + [lab for _, lab in CKPTS] + ["Pearson", "pattern to pattern, seed 0"], rows) + [""]
     return L
 
 
 def s12_robustness() -> list:
+    n_nc = D["n_queries"] - D["n_lab_cu"]
     L = ["## S12 Robustness of the benchmark", "",
-         "Compound-weighted top-1 [95 % CI] and the difference from the reference, paired over compounds. conv: the "
-         "Lorentz–polarisation factor and the area-conserving Jacobian of the conversion to Cu applied to the 68 non-Cu "
-         "patterns. binavg: measured patterns put on the Cu grid by averaging over each grid step (a decision rule fixed before "
-         "the run: a change above 0.05 would have made it the primary). dT: the library re-rendered at 295 K (isotropic "
-         "strain from each entry's recorded temperature), queries as conv. r2: the package of Section 3.8 of the article; its "
-         "one-off ablations are paired against the full package.", ""]
-    for tag, ref, lab in (("conv", "main", "conv"), ("binavg", "main", "binavg"), ("dT", "conv", "dT"), ("r2", "main", "package")):
+         "Compound-weighted top-1 [95 % CI] and the difference from the reference, paired over compounds. Lorentz–polarisation "
+         f"and Jacobian: the Lorentz–polarisation factor and the area-conserving Jacobian of the conversion to Cu applied to the "
+         f"{n_nc} non-Cu patterns. Grid-step averaging: measured patterns put on the Cu grid by averaging over each grid step "
+         "(a decision rule fixed before the run: a change above 0.05 would have made it the primary). Library at 295 K: every "
+         "library entry re-rendered with an isotropic strain from its recorded temperature to 295 K, scored with the "
+         "Lorentz–polarisation and Jacobian queries. Library package: the changes of Section 3.8 of the article; its one-off "
+         "ablations are paired against the full package. The label variants (strict anchors, recorded wavelengths, every-anchor "
+         "comparison) are in Section S2.", ""]
+    amb_t = ROB["table2"]
+    t2_lab = {"main": "main benchmark", "conv": "Lorentz–polarisation and Jacobian", "known_wavelength": "recorded wavelength only",
+              "strict": "strict anchors only", "every_anchor": "EPIVEF counted (every-anchor comparison)",
+              "r2": "library package", "dT": "library at 295 K (with Lorentz–polarisation and Jacobian)",
+              "binavg": "grid-step averaging"}
+    L += [f"{T()} The ambient single-crystal set under every variant (table 2 of the article): compound-weighted top-1. "
+          f"Patterns: {ROB['table2_n']['ambient_patterns']} ({ROB['table2_n']['strict_ambient_patterns']} with strict anchors, "
+          f"{ROB['table2_n']['known_wavelength_ambient_patterns']} with a recorded wavelength, "
+          f"{ROB['table2_n']['every_anchor_ambient_patterns']} with EPIVEF counted).", ""]
+    L += table(["variant"] + [NAMES[k] for k in CLS + ["model_bkg"]],
+               [[t2_lab[v]] + [f2(amb_t[v][k]["ambient"]) for k in CLS + ["model_bkg"]] for v in t2_lab]) + [""]
+    labs = {"conv": "Lorentz–polarisation and Jacobian", "binavg": "grid-step averaging", "dT": "library at 295 K",
+            "r2": "library package", "main": "main benchmark"}
+    for tag, ref in (("conv", "main"), ("binavg", "main"), ("dT", "conv"), ("r2", "main")):
         v = ROB[tag]
-        L += [f"{T()} {lab} (reference: {ref}).", ""]
-        L += table(["score", "answer set", "top-1", f"− {ref}", "first places changed"],
+        L += [f"{T()} {labs[tag].capitalize()} (reference: {labs[ref]}).", ""]
+        L += table(["score", "answer set", "top-1", "− reference", "first places changed"],
                    [[NAMES[k], nm_, mci(v["macro"][f"{td}|{k}"]["top1"]), dci(v[f"paired_vs_{ref}"][f"{td}|{k}"]["top1"]),
                      v[f"paired_vs_{ref}"][f"{td}|{k}"]["n_top1_changed"]] for k in CLS + ["model_bkg"] for td, nm_ in SETS]) + [""]
     L += [f"{T()} One-off ablations of the package: compound-weighted top-1 difference from the full package.", ""]
@@ -574,7 +620,7 @@ def s13_s14() -> list:
 def main() -> int:
     L = ["# Supplementary material", "", f"{TITLE}. F. Cai.", "",
          "All tables are generated by `scripts/49_rsos_esi.py` from `results/rsos_numbers.json`. Corrected labels throughout "
-         f"(Section S2). 'The model' is {MODEL}.", ""]
+         f"(Section S2). 'The model' is the symmetry-aware encoder, seed 0 ({MODEL} in the code and data).", ""]
     for part in (s1_benchmark, s2_labels, s3_hubness, s4_results, s5_s6, s7_model, s8_sweep, s9_s10, s11_ladder,
                  s12_robustness, s13_s14):
         L += part()
