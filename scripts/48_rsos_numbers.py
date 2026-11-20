@@ -236,6 +236,16 @@ def main() -> int:
                           "n_miss_none": hub["hubness"][k]["query_top1_wrong|none"]["n_miss"]} for k in KEYS}
     rows = stems == CASE
     cz = load("results/d3/case_zzzuwk.json")
+    # independent check of the library simulation against the CCDC powder simulation (scripts/51) and the re-simulated
+    # disordered added entries (scripts/52, 53; board review 11-19)
+    sx = load("results/sim_crosscheck.json")
+    rs = load("cache/real_extra/occ/resim.json")
+    pat = {k: v for k, v in rs.items() if v.get("status") == "patched"}
+    best = {k: max(x for kk, x in v.items() if kk.startswith("r_vs_ccdc_")) for k, v in pat.items()}
+    out["simulation_check"] = {"groups": sx["groups"], "n_resimulated": len(pat),
+                               "n_major_component": sum(v["variant"] == "B_major_component" for v in pat.values()),
+                               "worst": sorted(best.items(), key=lambda kv: kv[1])[:3],
+                               "min_except_worst": rd(sorted(best.values())[1])}
     out["case"] = {"stem": CASE, "n_patterns": int(rows.sum()),
                    "formula": truth[meta[int(np.nonzero(rows)[0][0])]["id"]]["same_form"][0]["formula"],
                    "top1_of_20": {f"{c}|{k}": int(((R[f"{c}|std|{k}"] == 0) & rows).sum()) for c in CORRS for k in KEYS},

@@ -236,6 +236,10 @@ PH = {
     "kad_sync_nontrain_n": words(len(KK["sync_not_train_ranks"])), "kad_sync_nontrain": seq(KK["sync_not_train_ranks"]),
     "c2_cpu_min": f"{C2['cpu_min_median']:.1f}",
     "random_med": f"{round(D['n_library'] / 2, -3):,.0f}",
+    "n_resim": str(P["simulation_check"]["n_resimulated"]), "n_major": str(P["simulation_check"]["n_major_component"]),
+    "sim_rand_med": f"{P['simulation_check']['groups']['random']['median']:.3f}",
+    "sim_zzz_med": f"{P['simulation_check']['groups']['zzzuwk']['median']:.3f}",
+    "sim_min": f2(P["simulation_check"]["min_except_worst"]),
     "len_stoich_ok": str(ROB["label_sensitivity"]["n_lenient_patterns"] - len(AC.get("lenient_stoich_mismatch", []))),
     "gpu_s_per_pattern": f"{RF['hub_wall_s'] / (D['n_queries'] + 2 * D['n_probe_per_set']):.2f}",
     "x3_inj_rank1": str(X3["injected_rank1"]), "x3_inj_n": str(len(X3["injected"])),
@@ -366,7 +370,12 @@ CLAIMS = [
     f"and {D['n_extra']} same-form or polymorph entries",
     f"recomputing {RF['pymatgen_recheck_n']} randomly drawn entries with pymatgen {RF['pymatgen_recheck_version']} "
     f"reproduces the stored sticks exactly",
-    f"the self-entry of {EX['own_entry_disordered']['n_patterns']} patterns ({EX['own_entry_disordered']['n_compounds']} "
+    need(P["simulation_check"]["worst"][0][0] == "QQQAUJ07",
+         f"our simulation agrees with the CCDC's with a median correlation of {PH['sim_rand_med']} for 100 randomly drawn "
+         f"library entries, {PH['sim_zzz_med']} for the 20 ZZZUWK self-entries and at least {PH['sim_min']} for every "
+         f"re-simulated entry but one, an other-form decoy"),
+    f"({PH['n_resim']} entries, {PH['n_major']} as the major component)",
+    f"The self-entry of {EX['own_entry_disordered']['n_patterns']} patterns ({EX['own_entry_disordered']['n_compounds']} "
     f"compounds) is disordered",
     # ---- 2.6
     f"which keeps {CODX['n_selected']:,} entries, and adds {CODX['n_added_candidates']} candidate entries",
@@ -504,7 +513,7 @@ CLAIMS = [
     f"A March–Dollase texture fitted along each of {TF['axes_tested']} low-index axes, with r from {TF['r_grid'][0]:g} to "
     f"{TF['r_grid'][1]:g}, raises the median Pearson correlation of the {TF['n_patterns']} patterns with their self-entries only "
     f"from {f2(TF['median_pearson_no_texture'])} to {f2(TF['median_pearson_best_texture'])}",
-    f"have measured-to-simulated ratios of {f2(RFL['(1, 0, 1)'])} and {f2(RFL['(2, 0, 2)'])}",
+    f"have measured-to-simulated peak-height ratios of {f2(RFL['(1, 0, 1)'])} and {f2(RFL['(2, 0, 2)'])}",
     f"ranks the self-entry first for {CASE['top1_of_20']['none|pearson_bkg']} of the 20 patterns (figure 5b)",
     f"The skewness of N₁₀ over the degraded probes is {hub['cos_zs_bkg']['N10_skew_aug']:.1f} for cosine + zero scan, "
     f"{hub['lnq_bkg']['N10_skew_aug']:.1f} for the ln q scan, {hub['pearson_bkg']['N10_skew_aug']:.1f} for Pearson, "

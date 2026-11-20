@@ -179,8 +179,13 @@ search. Stick patterns (Cu Kα1) were computed with the XRDCalculator module of 
 recomputing 296 randomly drawn entries with pymatgen 2026.4.16 reproduces the stored sticks exactly. The sticks were
 rendered with one pseudo-Voigt profile (Caglioti-type width, U = 0.002, V = −0.001, W = 0.004 deg², η = 0.5)
 [@caglioti1958], without Debye–Waller factors, texture, background or noise; a library closer to the measurements is
-tested in Section 4.7. Disordered entries whose CIF fails a strict parse have coincident sites merged by rescaling
-occupancies, and the self-entry of 28 patterns (9 compounds) is disordered.
+tested in Section 4.7. Disordered entries, which occur only among the added entries, are simulated from their CSD
+site occupancies or, where the CSD gives coordinates for the major disorder component only, as that component at full
+occupancy, whichever agrees better with the CCDC's own powder simulation of the entry ({{n_resim}} entries,
+{{n_major}} as the major component). After both patterns are smoothed to a common peak width, our simulation agrees
+with the CCDC's with a median correlation of {{sim_rand_med}} for 100 randomly drawn library entries, {{sim_zzz_med}}
+for the 20 ZZZUWK self-entries and at least {{sim_min}} for every re-simulated entry but one, an other-form decoy
+(Supplementary Section S1). The self-entry of 28 patterns (9 compounds) is disordered.
 
 ### 2.5 Metrics
 
