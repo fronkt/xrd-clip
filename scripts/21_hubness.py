@@ -319,8 +319,8 @@ def cmd_patch(args) -> int:
     st_path = os.path.join(out, "hub_stats.npz")
     if not os.path.exists(os.path.join(out, "hub_stats.pre_patch.npz")):
         shutil.copy2(st_path, os.path.join(out, "hub_stats.pre_patch.npz"))
-    old = np.load(st_path)
-    arrays = {k: old[k].copy() for k in old.files}
+    with np.load(st_path) as old:                    # closed before the save: Windows cannot replace an open file
+        arrays = {k: old[k].copy() for k in old.files}
     ks = [int(k) for k in arrays["ks"]]
     rows = {"pearson": torch.from_numpy(np.concatenate([Q["std_raw"], Q["std_bkg"], WT.standardize_rows(probes)])).to(dev)}
     layout = {"pearson": {"pearson_raw": slice(0, nq), "pearson_bkg": slice(nq, 2 * nq)}}
