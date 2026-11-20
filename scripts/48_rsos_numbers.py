@@ -645,6 +645,26 @@ def main() -> int:
         return {frozenset(e for e in re.findall(r"([A-Z][a-z]?)\d*", c) if e != "H") for c in comps} - {frozenset()}
     rob["anchor_checks"]["lenient_component_mismatches"] = sum(
         esets(r_["opxrd_components"]) != esets(a["csd_components"]) for r_ in ac["lenient"]["rows"] for a in r_["anchors"])
+
+    def stoich(comps):   # normalised non-H stoichiometry of each component (board review 11-19: element sets are weaker)
+        from math import gcd
+        from functools import reduce
+        out = set()
+        for c in comps:
+            mm = re.match(r"\((.*)\)n$", c.strip())
+            c = mm.group(1) if mm else c
+            cnt = Counter()
+            for el, n in re.findall(r"([A-Z][a-z]?)(\d*)", c):
+                if el != "H":
+                    cnt[el] += int(n or 1)
+            if cnt:
+                g_ = reduce(gcd, cnt.values())
+                out.add(tuple(sorted((e, v // g_) for e, v in cnt.items())))
+        return out
+    rob["anchor_checks"]["lenient_stoich_mismatch"] = [
+        {"id": r_["id"], "anchor": r_["anchors"][0]["refcode"], "opxrd": sorted(stoich(r_["opxrd_components"])),
+         "csd": sorted(stoich(r_["anchors"][0]["csd_components"]))}
+        for r_ in ac["lenient"]["rows"] if stoich(r_["opxrd_components"]) != stoich(r_["anchors"][0]["csd_components"])]
     ea = load(f"results/d3/rescore_main_every_anchor_{m}.json")
     rob["every_anchor_variant"] = {"n_queries": ea["meta"]["n_queries"],
                                    "macro": {k: rnd(ea["macro"][k]["top1"]) for k in ea["macro"] if "@" not in k}}
@@ -686,9 +706,9 @@ def main() -> int:
     lsub = rob["label_sensitivity"]["subsets"]
     for vname, sub in (("main", "all"), ("strict", "strict_only"), ("known_wavelength", "known_wavelength")):
         for k in KEYS:   # 43 computes the same subsets independently
-            assert abs(t2[vname][k]["std"] - lsub[sub][f"std|{k}"]["top1"]) < 6e-4, (vname, k)
+            assert abs(t2[vname][k]["std"] - lsub[sub][f"std|{k}"]["top1"]) < 1.1e-4, (vname, k)
     for k in KEYS:
-        assert abs(t2["main"][k]["ambient"] - lsub["ambient"][f"sc|{k}"]["top1"]) < 6e-4, k
+        assert abs(t2["main"][k]["ambient"] - lsub["ambient"][f"sc|{k}"]["top1"]) < 1.1e-4, k
     rob["table2"] = t2
     rob["table2_n"] = {"ambient_patterns": int(amb.sum()), "every_anchor_ambient_patterns": int(amb_ea.sum()),
                        "strict_ambient_patterns": int((amb & (tier == "strict")).sum()),

@@ -98,7 +98,7 @@ def fig_sweep(sb: dict) -> None:
             ax.set_xticks([0.5, 0.7, 1.0, 1.5, 2.0], ["0.5", "0.7", "1", "1.5", "2"])
             ax.minorticks_off()
             ax.text(0.03, 0.04, "plates", transform=ax.transAxes, fontsize=5.6, color="0.3")
-            ax.text(0.97, 0.04, "needles", transform=ax.transAxes, fontsize=5.6, color="0.3", ha="right")
+            ax.text(0.97, 0.04, "r > 1", transform=ax.transAxes, fontsize=5.6, color="0.3", ha="right")
         ax.set_xlabel(xl)
         ax.set_ylim(0.25, 1.03)
         ax.grid(alpha=0.25, lw=0.4)

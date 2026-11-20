@@ -57,7 +57,7 @@ def main() -> int:
             for k in KEYS:
                 r = z[f"{td}|{k}"][sel]
                 m = pn.macro(r, 1, st, cboot)
-                res[f"{td}|{k}"] = {"top1": round(m["value"], 3), "ci": [round(c, 3) for c in m["ci"]],
+                res[f"{td}|{k}"] = {"top1": round(m["value"], 4), "ci": [round(c, 4) for c in m["ci"]],
                                     "n_compounds": m["n_compounds"], "n_patterns": int((r >= 0).sum())}
         out["subsets"][name] = res
         print(name, {k: (v["top1"], v["n_compounds"]) for k, v in res.items()}, flush=True)

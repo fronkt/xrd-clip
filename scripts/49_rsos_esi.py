@@ -9,6 +9,7 @@ are numbered in order of appearance by one counter. Prose is short on purpose; t
 from __future__ import annotations
 
 import json
+import os
 import re
 
 P = json.load(open("results/rsos_numbers.json"))
@@ -107,7 +108,7 @@ def s2_labels() -> list:
          "; ".join(sorted({f"{c['wrong']} for {c['id']} ({c['stem']})" for c in au["same_form_cases"]})) + ". The label "
          "correction applied throughout the article: " + "; ".join(f"{k}: {v}" for k, v in D["label_corrections"].items()) + ".",
          "",
-         f"Every anchor: scripts/18 compares each family member with the two anchors closest to the deposited structure. "
+         f"Every anchor: the same-form step compares each family member with the two anchors closest to the deposited structure. "
          f"Comparing every non-same-form member with every remaining anchor ({ac['every_anchor']['comparisons']:,} comparisons "
          f"over the {ac['every_anchor']['patterns_checked']} patterns with more than two anchors) adds "
          + "; ".join(f"{x['refcode']} for {x['id']} (15/15 against {x['anchor']}, RMSD {x['rmsd']:.2f} Å; previously "
@@ -332,8 +333,10 @@ def s7_model() -> list:
           f"{se[MODEL]['n_conditions']} distinct conditions): seed 0 mean {sg(se[MODEL]['mean_diff'])} (range "
           f"{sg(se[MODEL]['min_diff'])} to {sg(se[MODEL]['max_diff'])}, higher in {se[MODEL]['n_positive']} conditions), seed 1 mean "
           f"{sg(se['d3_sym_s1']['mean_diff'])} (range {sg(se['d3_sym_s1']['min_diff'])} to {sg(se['d3_sym_s1']['max_diff'])}, higher in "
-          f"{se['d3_sym_s1']['n_positive']}); the 95 % family-bootstrap intervals separate in {se[MODEL]['n_ci_separated']} and "
-          f"{se['d3_sym_s1']['n_ci_separated']} conditions; mean absolute difference between the two seeds "
+          f"{se['d3_sym_s1']['n_positive']}); " + ("in no condition do the 95 % family-bootstrap intervals separate"
+          if se[MODEL]['n_ci_separated'] == se['d3_sym_s1']['n_ci_separated'] == 0 else
+          f"the 95 % family-bootstrap intervals separate in {se[MODEL]['n_ci_separated']} and {se['d3_sym_s1']['n_ci_separated']} "
+          "conditions") + "; mean absolute difference between the two seeds "
           f"{se['seed_mean_abs_diff']:.3f}.", ""]
     isp = EX["instrument_split"]
     gl = {"lab_cu": "laboratory Cu", "sync_ambient": "synchrotron, ambient", "sync_pressure": "synchrotron, pressure series",
@@ -352,10 +355,7 @@ def s7_model() -> list:
           f"{f2(ov['model_bkg_train']['top1'])} / {ov['model_bkg_train']['median_rank']:,.0f} (n = {ov['model_bkg_train']['n']}) and "
           f"in no split {f2(ov['model_bkg_none']['top1'])} / {ov['model_bkg_none']['median_rank']:,.0f} (n = {ov['model_bkg_none']['n']}). "
           "Memorised training structures would show up as better retrieval of the first group; the control finds none. "
-          f"Recall of the model's top 100 / 1,000: {f2(EX['model_recall']['100'])} / {f2(EX['model_recall']['1000'])}.", "",
-          f"{T()} How this version differs from the version submitted to RSC Advances (manuscript RA-ART-10-2026-010272), and "
-          "why.", ""]
-    L += table(["item", "submitted version", "this version", "reason"], DEVIATIONS)
+          f"Recall of the model's top 100 / 1,000: {f2(EX['model_recall']['100'])} / {f2(EX['model_recall']['1000'])}.", ""]
     L += ["", f"{T()} Search cost per query over the full library. CPU: per-pair wall time of the simulated sweep (one core) "
           f"times {D['n_library']:,}; with precomputed embeddings the model searches the library in about "
           f"{P['run_facts']['model_query_ms_cpu']} ms per query.", ""]
@@ -408,11 +408,14 @@ def s8_sweep() -> list:
                      f"{r['lnq']:.2f}", f"{r['lnq_v1']:.2f}"])
     L += table(["condition", "model", "seed 1", "no operator tokens", "earlier model", "best classical score", "best top-1",
                 "Δ", "Pearson, fixed grid", "ln q", "ln q, first version"], rows)
-    L += ["", "zero_offset=0.0 repeats the clean condition, so 42 conditions are distinct. march_bfdh = texture along each "
-          "structure's Bravais–Friedel–Donnay–Harker axis (r < 1 plates, r > 1 needles). Conditions in which each score beats "
-          "the model with non-overlapping CIs: " +
-          ", ".join(f"{k} {v}" for k, v in g["conditions_each_score_beats_model"].items()) + ". Each condition's random draws are "
-          "seeded from a CRC-32 checksum of its name; every checkpoint scores identical draws (asserted)."]
+    sn = {"pearson_zs": "Pearson + zero scan", "wcc_0.5": "WCC 0.5°", "wcc_1": "WCC 1°", "wcc_2": "WCC 2°", "lnq": "ln q",
+          "pearson": "Pearson, fixed grid"}
+    L += ["", "A zero offset of 0° repeats the clean condition, so 42 conditions are distinct. Texture along each structure's "
+          "Bravais–Friedel–Donnay–Harker axis: r < 1 plates, r > 1 the opposite sense along the same axis. Conditions in which "
+          "each score beats the model with non-overlapping intervals: " +
+          ", ".join(f"{sn[k]} {v}" for k, v in g["conditions_each_score_beats_model"].items()) + ". Each condition's random draws "
+          "are seeded from a CRC-32 checksum of its name, and every checkpoint scores identical draws (checked by the numbers "
+          "script)."]
     return L
 
 
@@ -436,7 +439,8 @@ def s9_s10() -> list:
           f"critic2 1.4.155 COMPAREVC GLOBAL QUICK, α = 1, measurement wavelength, on the ln q top {c2['k']} of each of the "
           f"{c2['n_patterns']} single-crystal patterns ({c2['n_comparisons']:,} comparisons, excluded entries left out). Median "
           f"{c2['cpu_min_median']:.1f} CPU-minutes per comparison, maximum {c2['cpu_h_max']:.2f} CPU-hours; "
-          f"{c2['n_failed']} comparison(s) reached the 4-hour wall-time limit and count as maximally dissimilar. The answer is "
+          f"{c2['n_failed']} {'comparison' if c2['n_failed'] == 1 else 'comparisons'} reached the 4-hour wall-time limit and "
+          "count as maximally dissimilar. The answer is "
           f"in the shortlist for {c2['n_answer_in_shortlist']} patterns ({c2['n_answer_in_lnq_top100']} in the ln q top 100). "
           "Entries with a disorder model are passed as their major component.", "",
           f"All single-crystal patterns: re-rank {mci(c2r['critic2_vcgpwdf']['top1'])}, ln q "
@@ -639,14 +643,22 @@ def s13_s14() -> list:
 
 def main() -> int:
     L = ["# Supplementary material", "", f"{TITLE}. F. Cai.", "",
-         "All tables are generated by `scripts/49_rsos_esi.py` from `results/rsos_numbers.json`. Corrected labels throughout "
-         f"(Section S2). 'The model' is the symmetry-aware encoder, seed 0 ({MODEL} in the code and data).", ""]
+         "All tables are generated from the deposited results file, so they cannot drift from the data. Corrected labels "
+         "throughout (Section S2). 'The model' is the symmetry-aware encoder, seed 0.", ""]
     for part in (s1_benchmark, s2_labels, s3_hubness, s4_results, s5_s6, s7_model, s8_sweep, s9_s10, s11_ladder,
                  s12_robustness, s13_s14):
         L += part()
     with open("paper/rsos/esi.md", "w", encoding="utf-8") as fh:
         fh.write(re.sub(r"(?<![\w.])-(?=\d)", "−", "\n".join(L)) + "\n")
     print(f"wrote paper/rsos/esi.md ({len(L)} lines, {_T[0]} tables)")
+    # the change list against the RSC Advances submission belongs with the response to the previous reviews, which is
+    # kept outside the public repo (board review 11-19: no submission history in the article or its supplement)
+    priv = os.environ.get("XRD_RSOS_PRIVATE", "D:/xrd-clip/rsos_private")
+    if os.path.isdir(priv):
+        with open(os.path.join(priv, "ChangesFromPreviousSubmission.md"), "w", encoding="utf-8") as fh:
+            fh.write("# How this version differs from the version submitted to RSC Advances (RA-ART-10-2026-010272)\n\n"
+                     + "\n".join(table(["item", "submitted version", "this version", "reason"], DEVIATIONS)) + "\n")
+        print(f"wrote {priv}/ChangesFromPreviousSubmission.md")
     return 0
 
 

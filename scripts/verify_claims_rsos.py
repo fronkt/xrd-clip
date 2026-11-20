@@ -235,6 +235,13 @@ PH = {
     "kad_sync_train": str(KK["sync_self_entry_split"].get("train", 0)),
     "kad_sync_nontrain_n": words(len(KK["sync_not_train_ranks"])), "kad_sync_nontrain": seq(KK["sync_not_train_ranks"]),
     "c2_cpu_min": f"{C2['cpu_min_median']:.1f}",
+    "len_stoich_ok": str(ROB["label_sensitivity"]["n_lenient_patterns"] - len(AC.get("lenient_stoich_mismatch", []))),
+    "gpu_s_per_pattern": f"{RF['hub_wall_s'] / (D['n_queries'] + 2 * D['n_probe_per_set']):.2f}",
+    "x3_inj_rank1": str(X3["injected_rank1"]), "x3_inj_n": str(len(X3["injected"])),
+    "lib2000_model": f2(lc["none|model_bkg"]["2000"][0]),
+    "amb_n_compounds": str(AS["n_ambient_compounds"]), "amb_cp_bound": f2(1 - 0.05 ** (1 / AS["n_ambient_compounds"])),
+    "sc_n": str(D["n_sc_patterns"]), "sc_nc": str(D["n_sc_compounds"]),
+    "sc_all_range": rng([b(k, "sc")["macro_top1"] for k in CLS]), "sc_all_model": f2(b("model_bkg", "sc")["macro_top1"]),
     "checkpoint_statement": "The trained model checkpoints are derived from CSD structures and are not distributed; the "
                             "learned models' results can be checked against the released ranks.",
 }
@@ -306,7 +313,10 @@ CLAIMS = [
     need(AS["model"]["macro_top1"]["value"] == 0, "ranks it first for none of these compounds"),
     f"the classical scores reach {rng(std_cls)} and the model reaches {f2(b('model_bkg')['macro_top1'])}",
     f"are retrieved by the model at a median rank of {mr(own_all_dw[1])}, whereas the measured patterns sit at a median "
-    f"rank of about {about(measured[1])}",
+    f"rank of about {about(measured[1])}, and the {KD['summary']['n_patterns']} profiles of a small external set at "
+    f"{PH['kaduk_model_med']}",
+    need(round(AS[f"model_{S1}"]["macro_top1"]["value"] * AS["n_ambient_compounds"]) == 1,
+         "ranks it first for none of these compounds, and a second training seed for one"),
     # ---- introduction (literature numbers)
     "82.8 % recall at 10 against 34.4 %", "a zero-shot test on 773 inorganic patterns",
     # ---- 2.1
@@ -332,7 +342,9 @@ CLAIMS = [
          f"adds one entry ({ea_new[0]['refcode']}, for one pattern), which matches the third anchor 15 of 15 at an RMSD of "
          f"{ea_new[0]['rmsd']:.2f} Å"),
     need(AC["lenient_component_mismatches"] == 0, f"in all {ROB['label_sensitivity']['n_lenient_patterns']} lenient patterns "
-         f"the deposited structure and its anchors contain the same molecular components"),
+         f"the components of the deposited structure and of its anchors contain the same non-H elements"),
+    need(sorted(r["id"] for r in AC.get("lenient_stoich_mismatch", [])) == ["pattern_1008.json", "pattern_158.json", "pattern_914.json"],
+         f"and in {PH['len_stoich_ok']} they also have the same non-H stoichiometry. In the other three"),
     need(all(r["anchor"].startswith("ZZZUWK") and r["h_omitted"] for r in AC["lenient_rows"]
              if r["single_flag_15"] == ["ignore_bond_counts"])
          and sum(r["single_flag_15"] == ["ignore_bond_counts"] for r in AC["lenient_rows"]) == AC["lenient_single_flag"]["ignore_bond_counts"],
@@ -340,11 +352,14 @@ CLAIMS = [
          f"all from the H-omitted ZZZUWK series, ignoring bond counts alone is enough"),
     # ---- 2.3
     f"For {D['n_own_powder_study']} of the {D['n_queries']} patterns the CSD contains a powder-study entry",
-    f"**Independent single-crystal entries at ambient pressure** ({AS['n_ambient_patterns']} patterns, {AS['n_ambient_compounds']} compounds)",
+    f"**Independent single-crystal entries at ambient pressure**, the ambient single-crystal set ({AS['n_ambient_patterns']} patterns, "
+    f"{AS['n_ambient_compounds']} compounds)",
     f"**Pressure series** ({AS['n_pressure_series_patterns']} patterns, {AS['n_pressure_series_compounds']} compounds)",
     f"form the single-crystal set ({D['n_sc_patterns']} patterns, {D['n_sc_compounds']} compounds)",
     f"**Any same-form entry** ({D['n_queries']} patterns, {D['n_compounds']} compounds)",
-    f"({D['n_within_family_patterns']} patterns of {D['n_within_family_compounds']} compounds; chance {f2(EX['within_family_chance'])})",
+    f"({D['n_within_family_patterns']} patterns of {D['n_within_family_compounds']} compounds; chance {f2(EX['within_family_chance'])}, the "
+    f"mean over patterns of the fraction of candidates that are correct)",
+    f"except that two families whose same-form sets share an entry are one compound (two such pairs)",
     # ---- 2.4
     f"The library holds {D['n_library']:,} simulated patterns: the {D['n_corpus']:,} molecular crystals",
     f"and {D['n_extra']} same-form or polymorph entries",
@@ -408,8 +423,7 @@ CLAIMS = [
     need(G0["zero_offset=0.2"]["lnq"] > 0.995,
          f"dips to {rng([G0[c]['lnq'] for c in zo_off])} at every offset off that grid (0.05°, 0.1°, 0.15° and 0.3°)"),
     f"holds {f2(G0['strain=0.012']['lnq'])} at 1.2 % isotropic strain",
-    f"WCC with l = 1° falls from 1.00 to {f2(bf05['wcc_1'])} for plates with r = 0.5 and to {f2(bf2['wcc_1'])} for needles "
-    f"with r = 2, much as it does along (001) ({f2(m05['wcc_1'])} at r = 0.5)",
+    f"WCC with l = 1° falls from 1.00 to {f2(bf05['wcc_1'])} for plates with r = 0.5 and to {f2(bf2['wcc_1'])} at r = 2, much as it does along (001) ({f2(m05['wcc_1'])} at r = 0.5)",
     f"while fixed-grid Pearson stays at {f2(bf05['pearson_fixed'])} and Pearson + zero scan at {f2(bf05['pearson_zs'])}",
     f"the model stays at {rng(bfdh_model)} throughout",
     need(min(bf05[s] for s in ("pearson_fixed", "pearson_zs", "wcc_0.5", "wcc_1", "wcc_2", "lnq")) == bf05["wcc_2"] > bf05["model"],
@@ -438,8 +452,16 @@ CLAIMS = [
     f"differ by more, it does so for {CM['lnq_hits_large']} of {CM['n_large']}",
     f"{CD['pressure_series']} of the {CD['n']} patterns with differing cells come from the pressure series, and in "
     f"{CD['dT_gt_50_not_pressure']} of the others",
-    need(AS["model"]["macro_top1"]["ci"] == [0.0, 0.0] and AS["n_ambient_compounds"] == 26
-         and f2(1 - 0.05 ** (1 / 26)) == "0.11", "for 26 compounds an exact one-sided 95 % upper bound is 0.11"),
+    need(AS["model"]["macro_top1"]["ci"] == [0.0, 0.0],
+         f"treating the {PH['amb_n_compounds']} compounds as independent trials, a one-sided 95 % Clopper–Pearson upper bound "
+         f"on the per-compound probability is {PH['amb_cp_bound']}"),
+    f"On the whole single-crystal set of {PH['sc_n']} patterns of {PH['sc_nc']} compounds, which joins the ambient and "
+    f"pressure-series patterns, the classical scores reach a compound-weighted top-1 of {PH['sc_all_range']} and the model "
+    f"{PH['sc_all_model']}",
+    need(X3["injected_rank1"] > X3["injected_rank1_old"],
+         f"refitted, the pressure-series patterns rank an injected answer first for {PH['x3_inj_rank1']} of {PH['x3_inj_n']}"),
+    need(lc["none|model_bkg"]["2000"][0] < 0.2,
+         f"it persists against a library of 2,000 entries (compound-weighted top-1 {PH['lib2000_model']})"),
     table1(),
     # ---- 4.3
     f"The {AS['n_pressure_series_patterns']} pressure-series patterns of {AS['n_pressure_series_compounds']} compounds are hard",
@@ -498,7 +520,7 @@ CLAIMS = [
     f"the probes with the training degradations for {PH['probe_aug_top1']} (median rank {PH['probe_aug_med']})",
     f"it reaches a compound-weighted top-1 of {f2(gm(M, 'own_clean')[0])} and a median rank of {mr(gm(M, 'own_clean')[1])}, "
     f"against {f2(measured[0])} and about {about(measured[1])} on the measured patterns of the same targets",
-    f"have a median rank of {PH['ov_train_med']} and patterns whose form is in no split {PH['ov_none_med']}",
+    f"split have a median rank of {PH['ov_train_med']}, and patterns whose form is in no split {PH['ov_none_med']}",
     f"with Kα2 the model reaches {f2(gm(M, 'own_ka2')[0])} (median rank {mr(gm(M, 'own_ka2')[1])}), with the Debye–Waller "
     f"factor {f2(gm(M, 'own_dw')[0])} (median rank {mr(gm(M, 'own_dw')[1])}), and with the first six effects together "
     f"{f2(gm(M, 'own_all')[0])} (median rank {mr(gm(M, 'own_all')[1])})",
@@ -550,8 +572,7 @@ CLAIMS = [
     f"only {KD['summary']['n_sc_compounds']} compounds keep an independent single-crystal reference; the classical scores "
     f"place it first for {PH['kaduk_sc_range']} of them and the model for {PH['kaduk_sc_model']}",
     # exploratory instrument / source split (4.6, discussion, conclusions, abstract)
-    f"whereas the measured patterns sit at a median rank of about {about(measured[1])} ({PH['kaduk_model_med']} on an "
-    f"external set of {KD['summary']['n_patterns']} profiles)",
+
     f"On the opXRD patterns its median rank is {PH['inst_labcu_med']} for the {PH['inst_labcu_n']} laboratory Cu patterns, "
     f"{PH['inst_syncamb_med']} for the {PH['inst_syncamb_n']} ambient synchrotron patterns and {PH['inst_syncp_med']} for the "
     f"{PH['inst_syncp_n']} pressure-series patterns, whereas fixed-grid Pearson ranks the answer first for "
@@ -575,7 +596,8 @@ CLAIMS = [
     f"it searches {D['n_library']:,} entries in about {RF['model_query_ms_cpu']} ms per query on a CPU",
     f"about {cpu['pearson']:.1f} s per query for fixed-grid Pearson, about {round(cpu['wcc_1'], -1):.0f} s for a zero scan and "
     f"about {round(cpu['lnq'] / 60):.0f} min for the ln q scan",
-    f"all five classical scores of 8,188 patterns against the full library took {RF['hub_wall_s']} s",
+    f"one GPU needs about {PH['gpu_s_per_pattern']} s per pattern for all five classical scores together "
+    f"({D['n_queries'] + 2 * D['n_probe_per_set']:,} patterns against the full library in {RF['hub_wall_s']} s)",
     f"at a median of {PH['c2_cpu_min']} CPU-minutes per comparison",
     f"We searched {D['n_queries']} measured organic powder patterns against {D['n_library']:,} simulated CSD entries",
     f"first for a compound-weighted {rng(amb_tol)} of the {AS['n_ambient_compounds']} compounds",
