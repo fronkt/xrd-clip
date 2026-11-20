@@ -26,8 +26,8 @@ contrastive model with a space-group-aware structure encoder, trained with every
 simulate, ranks it first for none of these compounds. When the entry refined against the pattern itself also
 counts, the classical scores reach 0.71–0.88 and the model reaches 0.02.
 Simulations of these patterns with their own measurement effects are retrieved by the model at a median rank of 8,
-whereas the measured patterns sit at a median rank of about 5,600 (4 on an external set of 19 profiles), so the
-model fails on differences our simulation does not reproduce. We release the benchmark, an open replica and every
+whereas the measured patterns sit at a median rank of about 5,600 (4 on an external set of 19 profiles), so on these
+patterns it fails on differences our simulation does not reproduce. We release the benchmark, an open replica and every
 per-pattern rank.
 
 **Keywords:** powder X-ray diffraction; crystal structure retrieval; search–match; contrastive learning;
@@ -620,14 +620,16 @@ patterns. The model's much better ranks on these profiles than on the opXRD patt
 
 ## 5. Discussion
 
-On measured organic patterns searched against the CSD, the bar for a learned retrieval method is set by simple
-classical scores on background-subtracted patterns. When the reference is an independent single-crystal structure
-determined at ambient pressure, the shift-tolerant scores reach a compound-weighted top-1 of 0.45–0.62, and when the
-pattern's self-entry is in the library they reach up to 0.88, with even fixed-grid Pearson correlation at 0.84. We
-suggest that learned PXRD retrieval be reported on measured patterns, against a library of realistic size, against
-shift- and strain-tolerant correlation scores with background subtraction, with compound-weighted metrics and a
-compound-level bootstrap whenever compounds repeat, and separately for queries whose reference is an independent
-determination, with the measurement conditions recorded. The benchmark released with this paper supports each of
+On these measured organic patterns, all from one contributor to opXRD and searched against the CSD, simple classical
+scores on background-subtracted patterns set the level that a learned retrieval method would have to reach. When the
+reference is an independent single-crystal structure determined at ambient pressure, the shift-tolerant scores reach
+a compound-weighted top-1 of 0.45–0.62 over 26 compounds, and when the pattern's self-entry is in the library they
+reach up to 0.88, with even fixed-grid Pearson correlation at 0.84. Whether the same ordering holds for other sources
+of measured patterns is untested beyond the small external set of Section 4.8. We suggest that learned PXRD retrieval
+be reported on measured patterns, against a library of realistic size, against shift- and strain-tolerant correlation
+scores with background subtraction, with compound-weighted metrics and a compound-level bootstrap whenever compounds
+repeat, and separately for queries whose reference is an independent determination, with the measurement conditions
+and the source of the patterns recorded. The benchmark released with this paper supports each of
 these, and its open replica lets the any-same-form results be checked without a CSD licence.
 
 The model's one advantage is speed. With precomputed library embeddings it searches 309,080 entries in about 5 ms per
@@ -643,8 +645,8 @@ distinguish here, is bounded by the shortlist it re-ranks, and in its automated 
 high-pressure patterns that make up most of the mismatched cells. This case remains open for classical methods too,
 and it is where a learned method could show its value. For the learned model, the failure is the transfer from
 simulated to measured patterns, not the size of the library or the absence of symmetry information, and it survives
-a training simulation that reproduces every effect we could model. How far the model falls depends on the source of the
-measurements: on high-resolution synchrotron profiles from one external source it ranks the self-entry at a median of
+a training simulation that reproduces every effect we could model. How far the model falls differs between sources of
+measured patterns: on high-resolution synchrotron profiles from one external source it ranks the self-entry at a median of
 {{kad_sync_med}}, against thousands on the opXRD patterns, and which property of those profiles matters is open.
 Full-profile generative models have shown the same
 sensitivity to how realistic the training patterns are [@segal2026xrdiff]. A learned method aimed at that transfer,
@@ -673,14 +675,14 @@ forms only; crystal structure prediction combined with pattern matching can iden
 
 We searched 188 measured organic powder patterns against 309,080 simulated CSD entries. When the answer is an
 independent single-crystal structure determined at ambient pressure, shift-tolerant classical profile scores rank it
-first for a compound-weighted 0.45–0.62 of the compounds. A contrastive model with a space-group-aware structure
+first for a compound-weighted 0.45–0.62 of the 26 compounds. A contrastive model with a space-group-aware structure
 encoder ranks it first for none of them. When the pattern's self-entry also counts, the classical scores reach
 0.71–0.88 and the model reaches 0.02. The model retrieves simulated patterns of the same targets, including patterns
 rendered with every measurement effect we could model, so its failure lies in differences between measured and
 simulated patterns that our simulation does not reproduce, and its pattern encoder already places measured patterns
-away from their simulations. These differences depend on the source of the data, because on high-resolution
-synchrotron profiles from one external source the model does far better than on the opXRD patterns. A more realistic
-library, a different intensity convention and the label checks leave
+away from their simulations. These controls establish the discrepancy for this model on the opXRD patterns, not its
+cause or how common it is elsewhere: on high-resolution synchrotron profiles from one external source the model does
+far better, for reasons we have not identified. A more realistic library, a different intensity convention and the label checks leave
 the classical results unchanged, and an open replica built from the COD reproduces the any-same-form result. The hard
 open case is a measured pattern whose only reference was determined at another temperature or pressure, so that the
 cells differ anisotropically by more than about 1 %. We release the benchmark so that learned methods can be compared

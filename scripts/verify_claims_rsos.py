@@ -566,18 +566,19 @@ CLAIMS = [
     need(min(ISP[M][g]["median_rank"] for g in INST_G) >= 1000,
          f"it ranks the self-entry at a median of {PH['kad_sync_med']}, against thousands on the opXRD patterns"),
     need(KK[M]["synchrotron"]["median_rank"] < 0.01 * min(ISP[M][g]["median_rank"] for g in INST_G),
-         "These differences depend on the source of the data, because on high-resolution synchrotron profiles from one "
-         "external source the model does far better than on the opXRD patterns"),
+         "on high-resolution synchrotron profiles from one external source the model does far better, for reasons we have "
+         "not identified"),
     # ---- discussion, conclusions
-    f"the shift-tolerant scores reach a compound-weighted top-1 of {rng(amb_tol)}, and when the pattern's self-entry is in the "
-    f"library they reach up to {f2(max(std_cls))}, with even fixed-grid Pearson correlation at {f2(b('pearson_bkg')['macro_top1'])}",
+    f"the shift-tolerant scores reach a compound-weighted top-1 of {rng(amb_tol)} over {AS['n_ambient_compounds']} compounds, and "
+    f"when the pattern's self-entry is in the library they reach up to {f2(max(std_cls))}, with even fixed-grid Pearson "
+    f"correlation at {f2(b('pearson_bkg')['macro_top1'])}",
     f"it searches {D['n_library']:,} entries in about {RF['model_query_ms_cpu']} ms per query on a CPU",
     f"about {cpu['pearson']:.1f} s per query for fixed-grid Pearson, about {round(cpu['wcc_1'], -1):.0f} s for a zero scan and "
     f"about {round(cpu['lnq'] / 60):.0f} min for the ln q scan",
     f"all five classical scores of 8,188 patterns against the full library took {RF['hub_wall_s']} s",
     f"at a median of {PH['c2_cpu_min']} CPU-minutes per comparison",
     f"We searched {D['n_queries']} measured organic powder patterns against {D['n_library']:,} simulated CSD entries",
-    f"first for a compound-weighted {rng(amb_tol)} of the compounds",
+    f"first for a compound-weighted {rng(amb_tol)} of the {AS['n_ambient_compounds']} compounds",
     f"the classical scores reach {rng(std_cls)} and the model reaches {f2(b('model_bkg')['macro_top1'])}. The model retrieves",
 ]
 
