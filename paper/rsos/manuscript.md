@@ -636,8 +636,8 @@ Only WCC with l = 2° moves by more than 0.01: by +0.06 on the ambient set and +
 single-crystal set. Before scoring this variant we had fixed that a change above 0.05 would lead us to consider it as
 the primary analysis; we keep interpolation, because the change concerns one score, its interval reaches zero and
 neither headline range moves by more than 0.01.
-<!-- [FRANK] The rule fixed on 10-14 says to PROPOSE promotion to you: keep interpolation (as written) or promote
-grid-step averaging to primary (GPU rescore of hubness/CSLS/library curves, about $0.5, then every number moves). -->
+<!-- 2026-11-20: decided to keep interpolation as the primary analysis (one score, interval reaches zero,
+headline ranges move by at most 0.01). -->
 
 **Table 2.** Compound-weighted top-1 of each score under the main benchmark and the robustness variants of Section
 4.7: ambient single-crystal set / any same-form entry. The recorded-wavelength and strict-anchor rows drop 3 and 35
@@ -761,7 +761,7 @@ This work did not involve human participants, animals or field work.
 ## Data accessibility
 
 The code, the benchmark definition and all results are available at https://github.com/fronkt/xrd-clip and archived
-at Zenodo ({{zenodo_doi}}). The deposit contains the opXRD pattern identifiers with their CSD refcodes, same-form sets,
+at Zenodo (https://doi.org/10.5281/zenodo.24407260). The deposit contains the opXRD pattern identifiers with their CSD refcodes, same-form sets,
 packing-similarity results and label corrections; the corpus refcode list and the training splits; the per-pattern
 ranks of every score, correction and variant on the measured patterns, including the learned models' and the
 variable-cell re-rank's; the simulated sweep and the effect ladder as summary results; the critic2 inputs derived
