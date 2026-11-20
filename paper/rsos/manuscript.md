@@ -22,8 +22,8 @@ measured patterns of 121 organic compounds, identified each pattern's crystal fo
 Database by packing similarity, and ranked every pattern against 309,080 simulated entries. When the
 correct answer must be an independent single-crystal structure determined at ambient pressure (38 patterns of 24
 compounds), shift-tolerant classical profile scores rank it first for a compound-weighted fraction of 0.53–0.69. A
-contrastive model with a space-group-aware structure encoder, trained with every measurement effect we could
-simulate, ranks it first for none of these compounds, and a second training seed for one. When the entry refined
+contrastive model with a space-group-aware structure encoder, trained on patterns degraded with simulated
+measurement effects, ranks it first for none of these compounds, and a second training seed for one. When the entry refined
 against the pattern itself also counts, the classical scores reach 0.72–0.90 and the model reaches 0.02.
 Simulations of these patterns with their own measurement effects are retrieved by the model at a median rank of 8,
 whereas the measured patterns sit at a median rank of about 5,600, and the 19 profiles of a small external set at
@@ -70,8 +70,8 @@ isotropic strain at little cost, and variable-cell methods also absorb anisotrop
 
 This paper asks whether such a model beats these methods, first on simulated and then on measured patterns. Because
 a weak model would settle little, we tested the strongest version of our model that we could build: a structure
-encoder that sees the space group through its symmetry operators, a training simulation that includes every
-measurement effect we could model, checkpoints chosen on degraded rather than clean validation patterns, and two
+encoder that sees the space group through its symmetry operators, a training simulation that adds Kα2,
+Debye–Waller damping, intensity jitter, truncated ranges and background subtraction to shifts, broadening, texture and noise, checkpoints chosen on degraded rather than clean validation patterns, and two
 training seeds. Our conclusions about learning are conclusions about this model. The main contribution is a
 benchmark for organic PXRD retrieval on measured patterns: 188 patterns from opXRD [@hollarek2025opxrd] whose
 correct answers in the CSD are fixed by packing similarity [@chisholm2005compack; @macrae2008mercury], scored against
@@ -111,7 +111,8 @@ counts, H counts and the smallest components; 154 patterns were anchored in the 
 pass. Third, the two anchors closest to the deposited structure are compared with every entry of their CSD refcode
 family, CSD against CSD with the strict settings, and an entry that matches 15 of 15
 molecules is the same solid form whatever its temperature or pressure. Entries that cannot be compared are excluded
-from ranking and are never scored as errors (134 entries, affecting 57 patterns).
+from ranking and are never scored as errors (134 pattern–entry pairs of 44 entries over 57 patterns; 26 pairs
+of 16 entries over 15 patterns concern library entries, the rest entries outside the library).
 
 ![](figs/fig1_benchmark.pdf)
 
@@ -152,7 +153,7 @@ self-retrieval, so we score three answer sets.
 - **Independent single-crystal entries at ambient pressure**, the ambient single-crystal set (38 patterns, 24
   compounds). Same-form entries that are powder studies are removed from the ranking, so they count neither as correct
   nor as errors, and the answer must be an independent single-crystal determination; patterns from variable-pressure
-  studies are reported separately. This is the realistic case of a new measurement checked against a database, and it
+  studies are reported separately, and none of the 49 answer entries of these patterns carries a CSD pressure. This is the realistic case of a new measurement checked against a database, and it
   is our primary set.
 - **Pressure series** (22 patterns, 5 compounds). Patterns from room-temperature compression studies whose
   single-crystal references were determined at other pressures, scored like the primary set. Together the two sets
@@ -185,7 +186,7 @@ occupancy, whichever agrees better with the CCDC's own powder simulation of the 
 8 as the major component). After both patterns are smoothed to a common peak width, our simulation agrees
 with the CCDC's with a median correlation of 0.995 for 100 randomly drawn library entries, 0.984
 for the 20 ZZZUWK self-entries and at least 0.93 for every re-simulated entry but one, an other-form decoy
-(Supplementary Section S1). The self-entry of 28 patterns (9 compounds) is disordered.
+(Supplementary Section S1). The self-entry of 25 patterns (6 compounds) is disordered.
 
 ### 2.5 Metrics
 
@@ -299,11 +300,12 @@ AdamW, learning rate 3 × 10⁻⁴, weight decay 0.05, 3 warm-up epochs), with t
 in the same batch as hard negatives, on 247,089 CSD structures of a scaffold- and polymorph-family split
 [@cai2026urtc]. Patterns were simulated on the fly with a random zero offset, isotropic strain, Caglioti and
 crystallite-size broadening, March–Dollase texture [@dollase1986] averaged over the symmetry-equivalent reflections of
-each peak, background and Poisson noise. The simulation also included the measurement effects of the benchmark
-patterns that we could model. A Kα2 copy of every reflection (probability 0.6, I₂/I₁ = 0.5) keeps its own wavelength
+each peak, background and Poisson noise. The simulation also included further effects seen in the benchmark
+patterns. A Kα2 copy of every reflection (probability 0.6, I₂/I₁ = 0.5) keeps its own wavelength
 under strain; an overall Debye–Waller factor has B drawn uniformly from 0–8 Å²; log-normal intensity jitter per
 reflection has σ drawn uniformly from 0–0.5; the 2θ range is cut with probability 0.25 (start 5–12°, end 30–50°); and
-the background subtraction of the measured patterns is applied to every training pattern. The checkpoint was chosen by in-batch top-1 on a
+the background subtraction of the measured patterns is applied to every training pattern. Anisotropic strain,
+which the simulated sweep tests (Section 3.7), was not part of training. The checkpoint was chosen by in-batch top-1 on a
 fixed draw of these degraded patterns for the validation structures, not on clean ones, because a clean criterion
 selects against robustness; the best epochs reach 0.864 (seed 0) and 0.862 (seed 1). We report seed 0 as the model
 and seed 1 beside it. As an ablation, the same training without the operator tokens reaches 0.842. The earlier model
@@ -506,7 +508,7 @@ the classical scores reach a compound-weighted top-1 of 0.37–0.57 and the mode
 With every same-form entry correct, the classical scores reach a compound-weighted top-1 of 0.72–0.90 (table 1): the
 ln q scan 0.90, cosine + zero scan 0.87, fixed-grid Pearson 0.85, WCC with l = 1° 0.85 and with l = 2° 0.72. Paired
 over compounds, only WCC with l = 2° differs from Pearson (−0.13 [−0.23, −0.04]). The model reaches 0.02, with
-a median rank of about 5,600, far from the median of about 155,000 that a random ordering would give, and its
+a median rank of about 5,600, far from the median of about 76,000 that a random ordering would give for these patterns' numbers of correct entries, and its
 second seed reaches 0.03. Within families, with only the compound's own
 forms as candidates (chance 0.40), the classical scores reach 0.94–0.98 top-1 and the model 0.69 (51 patterns).
 
@@ -625,6 +627,12 @@ the package and its ablations, over the single-crystal and any-same-form sets, e
 at the 5 % level, although these comparisons are not independent, and the model, whose library embeddings are unchanged, keeps its scores. Rescaling the library to 295 K,
 which we scored with the converted intensities, changes the classical scores by −0.05 to +0.04 against the converted
 intensities alone, and averaging over each grid step instead of interpolating by 0.00 to +0.06.
+Only WCC with l = 2° moves by more than 0.01: by +0.06 on the ambient set and +0.05 [0.00, 0.14] on the
+single-crystal set. Before scoring this variant we had fixed that a change above 0.05 would lead us to consider it as
+the primary analysis; we keep interpolation, because the change concerns one score, its interval reaches zero and
+neither headline range moves by more than 0.01.
+<!-- [FRANK] The rule fixed on 10-14 says to PROPOSE promotion to you: keep interpolation (as written) or promote
+grid-step averaging to primary (GPU rescore of hubness/CSLS/library curves, about $0.5, then every number moves). -->
 
 **Table 2.** Compound-weighted top-1 of each score under the main benchmark and the robustness variants of Section
 4.7: ambient single-crystal set / any same-form entry. The recorded-wavelength and strict-anchor rows drop 3 and 35
@@ -736,7 +744,7 @@ rendered with the effects of their own measurements, but not the measured patter
 places measured patterns away from their simulations. These controls establish the discrepancy for this model on the opXRD patterns, not its
 cause or how common it is elsewhere: on high-resolution synchrotron profiles from one external source the model does
 far better, for reasons we have not identified. A more realistic library, a different intensity convention and the label checks leave
-the classical results unchanged, and an open replica built from the COD reproduces the any-same-form result. The hard
+the comparison between the classical scores and the model unchanged, and an open replica built from the COD reproduces the any-same-form result. The hard
 open case is a measured pattern whose only reference was determined at another temperature or pressure, so that the
 cells differ anisotropically by more than about 1 %. We release the benchmark so that learned methods can be compared
 with these numbers on measured data.

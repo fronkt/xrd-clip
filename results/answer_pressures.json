@@ -1,0 +1,2427 @@
+{
+ "pattern_16": {
+  "answers": [
+   {
+    "refcode": "NAPHTA",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA04",
+    "pressure": null,
+    "temperature": "123 K"
+   },
+   {
+    "refcode": "NAPHTA11",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA12",
+    "pressure": "0.51 GPa",
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA13",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA14",
+    "pressure": null,
+    "temperature": "at 12 K"
+   },
+   {
+    "refcode": "NAPHTA15",
+    "pressure": null,
+    "temperature": "at 100.0 K"
+   },
+   {
+    "refcode": "NAPHTA16",
+    "pressure": null,
+    "temperature": "at 135.0 K"
+   },
+   {
+    "refcode": "NAPHTA17",
+    "pressure": null,
+    "temperature": "at 170.0 K"
+   },
+   {
+    "refcode": "NAPHTA18",
+    "pressure": null,
+    "temperature": "at 205.0 K"
+   },
+   {
+    "refcode": "NAPHTA19",
+    "pressure": "0.4 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA20",
+    "pressure": "0.6 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA21",
+    "pressure": "1.0 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA22",
+    "pressure": "2.1 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA23",
+    "pressure": null,
+    "temperature": "at 10 K"
+   },
+   {
+    "refcode": "NAPHTA24",
+    "pressure": null,
+    "temperature": "at 30 K"
+   },
+   {
+    "refcode": "NAPHTA25",
+    "pressure": null,
+    "temperature": "at 60 K"
+   },
+   {
+    "refcode": "NAPHTA26",
+    "pressure": null,
+    "temperature": "at 90 K"
+   },
+   {
+    "refcode": "NAPHTA27",
+    "pressure": null,
+    "temperature": "at 120 K"
+   },
+   {
+    "refcode": "NAPHTA28",
+    "pressure": null,
+    "temperature": "at 150 K"
+   },
+   {
+    "refcode": "NAPHTA29",
+    "pressure": null,
+    "temperature": "at 180 K"
+   },
+   {
+    "refcode": "NAPHTA30",
+    "pressure": null,
+    "temperature": "at 220 K"
+   },
+   {
+    "refcode": "NAPHTA31",
+    "pressure": null,
+    "temperature": "at 5 K"
+   },
+   {
+    "refcode": "NAPHTA32",
+    "pressure": null,
+    "temperature": "at 30 K"
+   },
+   {
+    "refcode": "NAPHTA33",
+    "pressure": null,
+    "temperature": "at 80 K"
+   },
+   {
+    "refcode": "NAPHTA34",
+    "pressure": null,
+    "temperature": "at 150 K"
+   },
+   {
+    "refcode": "NAPHTA35",
+    "pressure": null,
+    "temperature": "at 220 K"
+   },
+   {
+    "refcode": "NAPHTA36",
+    "pressure": null,
+    "temperature": "at 295 K"
+   },
+   {
+    "refcode": "NAPHTA49",
+    "pressure": null,
+    "temperature": "90 K"
+   },
+   {
+    "refcode": "NAPHTA50",
+    "pressure": null,
+    "temperature": "143 K"
+   },
+   {
+    "refcode": "NAPHTA51",
+    "pressure": null,
+    "temperature": "184 K"
+   },
+   {
+    "refcode": "NAPHTA52",
+    "pressure": null,
+    "temperature": "239 K"
+   },
+   {
+    "refcode": "NAPHTA53",
+    "pressure": null,
+    "temperature": "92 K"
+   },
+   {
+    "refcode": "NAPHTA54",
+    "pressure": null,
+    "temperature": "109 K"
+   },
+   {
+    "refcode": "NAPHTA55",
+    "pressure": null,
+    "temperature": "85 K"
+   }
+  ],
+  "n": 35,
+  "n_with_pressure": 5
+ },
+ "pattern_77": {
+  "answers": [
+   {
+    "refcode": "TAQBIY01",
+    "pressure": null,
+    "temperature": "163 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_82": {
+  "answers": [
+   {
+    "refcode": "NAPHTA",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA04",
+    "pressure": null,
+    "temperature": "123 K"
+   },
+   {
+    "refcode": "NAPHTA11",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA12",
+    "pressure": "0.51 GPa",
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA13",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA14",
+    "pressure": null,
+    "temperature": "at 12 K"
+   },
+   {
+    "refcode": "NAPHTA15",
+    "pressure": null,
+    "temperature": "at 100.0 K"
+   },
+   {
+    "refcode": "NAPHTA16",
+    "pressure": null,
+    "temperature": "at 135.0 K"
+   },
+   {
+    "refcode": "NAPHTA17",
+    "pressure": null,
+    "temperature": "at 170.0 K"
+   },
+   {
+    "refcode": "NAPHTA18",
+    "pressure": null,
+    "temperature": "at 205.0 K"
+   },
+   {
+    "refcode": "NAPHTA19",
+    "pressure": "0.4 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA20",
+    "pressure": "0.6 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA21",
+    "pressure": "1.0 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA22",
+    "pressure": "2.1 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA23",
+    "pressure": null,
+    "temperature": "at 10 K"
+   },
+   {
+    "refcode": "NAPHTA24",
+    "pressure": null,
+    "temperature": "at 30 K"
+   },
+   {
+    "refcode": "NAPHTA25",
+    "pressure": null,
+    "temperature": "at 60 K"
+   },
+   {
+    "refcode": "NAPHTA26",
+    "pressure": null,
+    "temperature": "at 90 K"
+   },
+   {
+    "refcode": "NAPHTA27",
+    "pressure": null,
+    "temperature": "at 120 K"
+   },
+   {
+    "refcode": "NAPHTA28",
+    "pressure": null,
+    "temperature": "at 150 K"
+   },
+   {
+    "refcode": "NAPHTA29",
+    "pressure": null,
+    "temperature": "at 180 K"
+   },
+   {
+    "refcode": "NAPHTA30",
+    "pressure": null,
+    "temperature": "at 220 K"
+   },
+   {
+    "refcode": "NAPHTA31",
+    "pressure": null,
+    "temperature": "at 5 K"
+   },
+   {
+    "refcode": "NAPHTA32",
+    "pressure": null,
+    "temperature": "at 30 K"
+   },
+   {
+    "refcode": "NAPHTA33",
+    "pressure": null,
+    "temperature": "at 80 K"
+   },
+   {
+    "refcode": "NAPHTA34",
+    "pressure": null,
+    "temperature": "at 150 K"
+   },
+   {
+    "refcode": "NAPHTA35",
+    "pressure": null,
+    "temperature": "at 220 K"
+   },
+   {
+    "refcode": "NAPHTA36",
+    "pressure": null,
+    "temperature": "at 295 K"
+   },
+   {
+    "refcode": "NAPHTA49",
+    "pressure": null,
+    "temperature": "90 K"
+   },
+   {
+    "refcode": "NAPHTA50",
+    "pressure": null,
+    "temperature": "143 K"
+   },
+   {
+    "refcode": "NAPHTA51",
+    "pressure": null,
+    "temperature": "184 K"
+   },
+   {
+    "refcode": "NAPHTA52",
+    "pressure": null,
+    "temperature": "239 K"
+   },
+   {
+    "refcode": "NAPHTA53",
+    "pressure": null,
+    "temperature": "92 K"
+   },
+   {
+    "refcode": "NAPHTA54",
+    "pressure": null,
+    "temperature": "109 K"
+   },
+   {
+    "refcode": "NAPHTA55",
+    "pressure": null,
+    "temperature": "85 K"
+   }
+  ],
+  "n": 35,
+  "n_with_pressure": 5
+ },
+ "pattern_91": {
+  "answers": [
+   {
+    "refcode": "NAPHTA",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA04",
+    "pressure": null,
+    "temperature": "123 K"
+   },
+   {
+    "refcode": "NAPHTA11",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA12",
+    "pressure": "0.51 GPa",
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA13",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA14",
+    "pressure": null,
+    "temperature": "at 12 K"
+   },
+   {
+    "refcode": "NAPHTA15",
+    "pressure": null,
+    "temperature": "at 100.0 K"
+   },
+   {
+    "refcode": "NAPHTA16",
+    "pressure": null,
+    "temperature": "at 135.0 K"
+   },
+   {
+    "refcode": "NAPHTA17",
+    "pressure": null,
+    "temperature": "at 170.0 K"
+   },
+   {
+    "refcode": "NAPHTA18",
+    "pressure": null,
+    "temperature": "at 205.0 K"
+   },
+   {
+    "refcode": "NAPHTA19",
+    "pressure": "0.4 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA20",
+    "pressure": "0.6 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA21",
+    "pressure": "1.0 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA22",
+    "pressure": "2.1 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA23",
+    "pressure": null,
+    "temperature": "at 10 K"
+   },
+   {
+    "refcode": "NAPHTA24",
+    "pressure": null,
+    "temperature": "at 30 K"
+   },
+   {
+    "refcode": "NAPHTA25",
+    "pressure": null,
+    "temperature": "at 60 K"
+   },
+   {
+    "refcode": "NAPHTA26",
+    "pressure": null,
+    "temperature": "at 90 K"
+   },
+   {
+    "refcode": "NAPHTA27",
+    "pressure": null,
+    "temperature": "at 120 K"
+   },
+   {
+    "refcode": "NAPHTA28",
+    "pressure": null,
+    "temperature": "at 150 K"
+   },
+   {
+    "refcode": "NAPHTA29",
+    "pressure": null,
+    "temperature": "at 180 K"
+   },
+   {
+    "refcode": "NAPHTA30",
+    "pressure": null,
+    "temperature": "at 220 K"
+   },
+   {
+    "refcode": "NAPHTA31",
+    "pressure": null,
+    "temperature": "at 5 K"
+   },
+   {
+    "refcode": "NAPHTA32",
+    "pressure": null,
+    "temperature": "at 30 K"
+   },
+   {
+    "refcode": "NAPHTA33",
+    "pressure": null,
+    "temperature": "at 80 K"
+   },
+   {
+    "refcode": "NAPHTA34",
+    "pressure": null,
+    "temperature": "at 150 K"
+   },
+   {
+    "refcode": "NAPHTA35",
+    "pressure": null,
+    "temperature": "at 220 K"
+   },
+   {
+    "refcode": "NAPHTA36",
+    "pressure": null,
+    "temperature": "at 295 K"
+   },
+   {
+    "refcode": "NAPHTA49",
+    "pressure": null,
+    "temperature": "90 K"
+   },
+   {
+    "refcode": "NAPHTA50",
+    "pressure": null,
+    "temperature": "143 K"
+   },
+   {
+    "refcode": "NAPHTA51",
+    "pressure": null,
+    "temperature": "184 K"
+   },
+   {
+    "refcode": "NAPHTA52",
+    "pressure": null,
+    "temperature": "239 K"
+   },
+   {
+    "refcode": "NAPHTA53",
+    "pressure": null,
+    "temperature": "92 K"
+   },
+   {
+    "refcode": "NAPHTA54",
+    "pressure": null,
+    "temperature": "109 K"
+   },
+   {
+    "refcode": "NAPHTA55",
+    "pressure": null,
+    "temperature": "85 K"
+   }
+  ],
+  "n": 35,
+  "n_with_pressure": 5
+ },
+ "pattern_96": {
+  "answers": [
+   {
+    "refcode": "NAPHTA",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA04",
+    "pressure": null,
+    "temperature": "123 K"
+   },
+   {
+    "refcode": "NAPHTA11",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA12",
+    "pressure": "0.51 GPa",
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA13",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA14",
+    "pressure": null,
+    "temperature": "at 12 K"
+   },
+   {
+    "refcode": "NAPHTA15",
+    "pressure": null,
+    "temperature": "at 100.0 K"
+   },
+   {
+    "refcode": "NAPHTA16",
+    "pressure": null,
+    "temperature": "at 135.0 K"
+   },
+   {
+    "refcode": "NAPHTA17",
+    "pressure": null,
+    "temperature": "at 170.0 K"
+   },
+   {
+    "refcode": "NAPHTA18",
+    "pressure": null,
+    "temperature": "at 205.0 K"
+   },
+   {
+    "refcode": "NAPHTA19",
+    "pressure": "0.4 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA20",
+    "pressure": "0.6 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA21",
+    "pressure": "1.0 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA22",
+    "pressure": "2.1 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA23",
+    "pressure": null,
+    "temperature": "at 10 K"
+   },
+   {
+    "refcode": "NAPHTA24",
+    "pressure": null,
+    "temperature": "at 30 K"
+   },
+   {
+    "refcode": "NAPHTA25",
+    "pressure": null,
+    "temperature": "at 60 K"
+   },
+   {
+    "refcode": "NAPHTA26",
+    "pressure": null,
+    "temperature": "at 90 K"
+   },
+   {
+    "refcode": "NAPHTA27",
+    "pressure": null,
+    "temperature": "at 120 K"
+   },
+   {
+    "refcode": "NAPHTA28",
+    "pressure": null,
+    "temperature": "at 150 K"
+   },
+   {
+    "refcode": "NAPHTA29",
+    "pressure": null,
+    "temperature": "at 180 K"
+   },
+   {
+    "refcode": "NAPHTA30",
+    "pressure": null,
+    "temperature": "at 220 K"
+   },
+   {
+    "refcode": "NAPHTA31",
+    "pressure": null,
+    "temperature": "at 5 K"
+   },
+   {
+    "refcode": "NAPHTA32",
+    "pressure": null,
+    "temperature": "at 30 K"
+   },
+   {
+    "refcode": "NAPHTA33",
+    "pressure": null,
+    "temperature": "at 80 K"
+   },
+   {
+    "refcode": "NAPHTA34",
+    "pressure": null,
+    "temperature": "at 150 K"
+   },
+   {
+    "refcode": "NAPHTA35",
+    "pressure": null,
+    "temperature": "at 220 K"
+   },
+   {
+    "refcode": "NAPHTA36",
+    "pressure": null,
+    "temperature": "at 295 K"
+   },
+   {
+    "refcode": "NAPHTA49",
+    "pressure": null,
+    "temperature": "90 K"
+   },
+   {
+    "refcode": "NAPHTA50",
+    "pressure": null,
+    "temperature": "143 K"
+   },
+   {
+    "refcode": "NAPHTA51",
+    "pressure": null,
+    "temperature": "184 K"
+   },
+   {
+    "refcode": "NAPHTA52",
+    "pressure": null,
+    "temperature": "239 K"
+   },
+   {
+    "refcode": "NAPHTA53",
+    "pressure": null,
+    "temperature": "92 K"
+   },
+   {
+    "refcode": "NAPHTA54",
+    "pressure": null,
+    "temperature": "109 K"
+   },
+   {
+    "refcode": "NAPHTA55",
+    "pressure": null,
+    "temperature": "85 K"
+   }
+  ],
+  "n": 35,
+  "n_with_pressure": 5
+ },
+ "pattern_100": {
+  "answers": [
+   {
+    "refcode": "GOFWUV01",
+    "pressure": null,
+    "temperature": "120 K"
+   },
+   {
+    "refcode": "GOFWUV02",
+    "pressure": null,
+    "temperature": "120.0 K"
+   }
+  ],
+  "n": 2,
+  "n_with_pressure": 0
+ },
+ "pattern_180": {
+  "answers": [
+   {
+    "refcode": "UPOJER",
+    "pressure": null,
+    "temperature": "293 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_205": {
+  "answers": [
+   {
+    "refcode": "ZZZIZM01",
+    "pressure": null,
+    "temperature": null
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_209": {
+  "answers": [
+   {
+    "refcode": "ZZZIZM01",
+    "pressure": null,
+    "temperature": null
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_213": {
+  "answers": [
+   {
+    "refcode": "MEHNIY",
+    "pressure": null,
+    "temperature": "at 293 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_247": {
+  "answers": [
+   {
+    "refcode": "QIQVAQ02",
+    "pressure": null,
+    "temperature": "300 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_252": {
+  "answers": [
+   {
+    "refcode": "FOPKOK",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "QIKZUH01",
+    "pressure": null,
+    "temperature": "173 K"
+   },
+   {
+    "refcode": "QIKZUH02",
+    "pressure": null,
+    "temperature": "295 K"
+   }
+  ],
+  "n": 3,
+  "n_with_pressure": 0
+ },
+ "pattern_297": {
+  "answers": [
+   {
+    "refcode": "DEHKUA04",
+    "pressure": null,
+    "temperature": "190 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_326": {
+  "answers": [
+   {
+    "refcode": "HOJQII",
+    "pressure": null,
+    "temperature": "100 K"
+   },
+   {
+    "refcode": "HOJQII03",
+    "pressure": null,
+    "temperature": "293 K"
+   }
+  ],
+  "n": 2,
+  "n_with_pressure": 0
+ },
+ "pattern_351": {
+  "answers": [
+   {
+    "refcode": "AKAGIG",
+    "pressure": null,
+    "temperature": "273.1 K"
+   },
+   {
+    "refcode": "KAWBER01",
+    "pressure": null,
+    "temperature": "273.1 K"
+   }
+  ],
+  "n": 2,
+  "n_with_pressure": 0
+ },
+ "pattern_359": {
+  "answers": [
+   {
+    "refcode": "ZZZIZM01",
+    "pressure": null,
+    "temperature": null
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_396": {
+  "answers": [
+   {
+    "refcode": "ZZZIZM01",
+    "pressure": null,
+    "temperature": null
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_484": {
+  "answers": [
+   {
+    "refcode": "BAPLOT08",
+    "pressure": null,
+    "temperature": "298 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_487": {
+  "answers": [
+   {
+    "refcode": "VELWIV",
+    "pressure": null,
+    "temperature": "295 K"
+   },
+   {
+    "refcode": "VELWIV02",
+    "pressure": null,
+    "temperature": "123 K"
+   }
+  ],
+  "n": 2,
+  "n_with_pressure": 0
+ },
+ "pattern_504": {
+  "answers": [
+   {
+    "refcode": "ZZZIZM01",
+    "pressure": null,
+    "temperature": null
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_511": {
+  "answers": [
+   {
+    "refcode": "NAPHTA",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA04",
+    "pressure": null,
+    "temperature": "123 K"
+   },
+   {
+    "refcode": "NAPHTA11",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA12",
+    "pressure": "0.51 GPa",
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA13",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA14",
+    "pressure": null,
+    "temperature": "at 12 K"
+   },
+   {
+    "refcode": "NAPHTA15",
+    "pressure": null,
+    "temperature": "at 100.0 K"
+   },
+   {
+    "refcode": "NAPHTA16",
+    "pressure": null,
+    "temperature": "at 135.0 K"
+   },
+   {
+    "refcode": "NAPHTA17",
+    "pressure": null,
+    "temperature": "at 170.0 K"
+   },
+   {
+    "refcode": "NAPHTA18",
+    "pressure": null,
+    "temperature": "at 205.0 K"
+   },
+   {
+    "refcode": "NAPHTA19",
+    "pressure": "0.4 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA20",
+    "pressure": "0.6 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA21",
+    "pressure": "1.0 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA22",
+    "pressure": "2.1 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA23",
+    "pressure": null,
+    "temperature": "at 10 K"
+   },
+   {
+    "refcode": "NAPHTA24",
+    "pressure": null,
+    "temperature": "at 30 K"
+   },
+   {
+    "refcode": "NAPHTA25",
+    "pressure": null,
+    "temperature": "at 60 K"
+   },
+   {
+    "refcode": "NAPHTA26",
+    "pressure": null,
+    "temperature": "at 90 K"
+   },
+   {
+    "refcode": "NAPHTA27",
+    "pressure": null,
+    "temperature": "at 120 K"
+   },
+   {
+    "refcode": "NAPHTA28",
+    "pressure": null,
+    "temperature": "at 150 K"
+   },
+   {
+    "refcode": "NAPHTA29",
+    "pressure": null,
+    "temperature": "at 180 K"
+   },
+   {
+    "refcode": "NAPHTA30",
+    "pressure": null,
+    "temperature": "at 220 K"
+   },
+   {
+    "refcode": "NAPHTA31",
+    "pressure": null,
+    "temperature": "at 5 K"
+   },
+   {
+    "refcode": "NAPHTA32",
+    "pressure": null,
+    "temperature": "at 30 K"
+   },
+   {
+    "refcode": "NAPHTA33",
+    "pressure": null,
+    "temperature": "at 80 K"
+   },
+   {
+    "refcode": "NAPHTA34",
+    "pressure": null,
+    "temperature": "at 150 K"
+   },
+   {
+    "refcode": "NAPHTA35",
+    "pressure": null,
+    "temperature": "at 220 K"
+   },
+   {
+    "refcode": "NAPHTA36",
+    "pressure": null,
+    "temperature": "at 295 K"
+   },
+   {
+    "refcode": "NAPHTA49",
+    "pressure": null,
+    "temperature": "90 K"
+   },
+   {
+    "refcode": "NAPHTA50",
+    "pressure": null,
+    "temperature": "143 K"
+   },
+   {
+    "refcode": "NAPHTA51",
+    "pressure": null,
+    "temperature": "184 K"
+   },
+   {
+    "refcode": "NAPHTA52",
+    "pressure": null,
+    "temperature": "239 K"
+   },
+   {
+    "refcode": "NAPHTA53",
+    "pressure": null,
+    "temperature": "92 K"
+   },
+   {
+    "refcode": "NAPHTA54",
+    "pressure": null,
+    "temperature": "109 K"
+   },
+   {
+    "refcode": "NAPHTA55",
+    "pressure": null,
+    "temperature": "85 K"
+   }
+  ],
+  "n": 35,
+  "n_with_pressure": 5
+ },
+ "pattern_519": {
+  "answers": [
+   {
+    "refcode": "ZIVVIL",
+    "pressure": null,
+    "temperature": "173 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_530": {
+  "answers": [
+   {
+    "refcode": "GOFWUV01",
+    "pressure": null,
+    "temperature": "120 K"
+   },
+   {
+    "refcode": "GOFWUV02",
+    "pressure": null,
+    "temperature": "120.0 K"
+   }
+  ],
+  "n": 2,
+  "n_with_pressure": 0
+ },
+ "pattern_539": {
+  "answers": [
+   {
+    "refcode": "HXACAN69",
+    "pressure": null,
+    "temperature": "293 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_574": {
+  "answers": [
+   {
+    "refcode": "ZZZIZM01",
+    "pressure": null,
+    "temperature": null
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_586": {
+  "answers": [
+   {
+    "refcode": "ZIZRUX01",
+    "pressure": null,
+    "temperature": "293 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_594": {
+  "answers": [
+   {
+    "refcode": "MEHNIY",
+    "pressure": null,
+    "temperature": "at 293 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_619": {
+  "answers": [
+   {
+    "refcode": "ZZZIZM01",
+    "pressure": null,
+    "temperature": null
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_623": {
+  "answers": [
+   {
+    "refcode": "MEHNIY",
+    "pressure": null,
+    "temperature": "at 293 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_647": {
+  "answers": [
+   {
+    "refcode": "NAPHTA",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA04",
+    "pressure": null,
+    "temperature": "123 K"
+   },
+   {
+    "refcode": "NAPHTA11",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA12",
+    "pressure": "0.51 GPa",
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA13",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA14",
+    "pressure": null,
+    "temperature": "at 12 K"
+   },
+   {
+    "refcode": "NAPHTA15",
+    "pressure": null,
+    "temperature": "at 100.0 K"
+   },
+   {
+    "refcode": "NAPHTA16",
+    "pressure": null,
+    "temperature": "at 135.0 K"
+   },
+   {
+    "refcode": "NAPHTA17",
+    "pressure": null,
+    "temperature": "at 170.0 K"
+   },
+   {
+    "refcode": "NAPHTA18",
+    "pressure": null,
+    "temperature": "at 205.0 K"
+   },
+   {
+    "refcode": "NAPHTA19",
+    "pressure": "0.4 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA20",
+    "pressure": "0.6 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA21",
+    "pressure": "1.0 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA22",
+    "pressure": "2.1 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA23",
+    "pressure": null,
+    "temperature": "at 10 K"
+   },
+   {
+    "refcode": "NAPHTA24",
+    "pressure": null,
+    "temperature": "at 30 K"
+   },
+   {
+    "refcode": "NAPHTA25",
+    "pressure": null,
+    "temperature": "at 60 K"
+   },
+   {
+    "refcode": "NAPHTA26",
+    "pressure": null,
+    "temperature": "at 90 K"
+   },
+   {
+    "refcode": "NAPHTA27",
+    "pressure": null,
+    "temperature": "at 120 K"
+   },
+   {
+    "refcode": "NAPHTA28",
+    "pressure": null,
+    "temperature": "at 150 K"
+   },
+   {
+    "refcode": "NAPHTA29",
+    "pressure": null,
+    "temperature": "at 180 K"
+   },
+   {
+    "refcode": "NAPHTA30",
+    "pressure": null,
+    "temperature": "at 220 K"
+   },
+   {
+    "refcode": "NAPHTA31",
+    "pressure": null,
+    "temperature": "at 5 K"
+   },
+   {
+    "refcode": "NAPHTA32",
+    "pressure": null,
+    "temperature": "at 30 K"
+   },
+   {
+    "refcode": "NAPHTA33",
+    "pressure": null,
+    "temperature": "at 80 K"
+   },
+   {
+    "refcode": "NAPHTA34",
+    "pressure": null,
+    "temperature": "at 150 K"
+   },
+   {
+    "refcode": "NAPHTA35",
+    "pressure": null,
+    "temperature": "at 220 K"
+   },
+   {
+    "refcode": "NAPHTA36",
+    "pressure": null,
+    "temperature": "at 295 K"
+   },
+   {
+    "refcode": "NAPHTA49",
+    "pressure": null,
+    "temperature": "90 K"
+   },
+   {
+    "refcode": "NAPHTA50",
+    "pressure": null,
+    "temperature": "143 K"
+   },
+   {
+    "refcode": "NAPHTA51",
+    "pressure": null,
+    "temperature": "184 K"
+   },
+   {
+    "refcode": "NAPHTA52",
+    "pressure": null,
+    "temperature": "239 K"
+   },
+   {
+    "refcode": "NAPHTA53",
+    "pressure": null,
+    "temperature": "92 K"
+   },
+   {
+    "refcode": "NAPHTA54",
+    "pressure": null,
+    "temperature": "109 K"
+   },
+   {
+    "refcode": "NAPHTA55",
+    "pressure": null,
+    "temperature": "85 K"
+   }
+  ],
+  "n": 35,
+  "n_with_pressure": 5
+ },
+ "pattern_655": {
+  "answers": [
+   {
+    "refcode": "DEHKUA03",
+    "pressure": null,
+    "temperature": "190 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_698": {
+  "answers": [
+   {
+    "refcode": "ZZZIZM01",
+    "pressure": null,
+    "temperature": null
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_710": {
+  "answers": [
+   {
+    "refcode": "IKIJER",
+    "pressure": null,
+    "temperature": "at 250 K"
+   },
+   {
+    "refcode": "IKIJER02",
+    "pressure": null,
+    "temperature": "296 K"
+   }
+  ],
+  "n": 2,
+  "n_with_pressure": 0
+ },
+ "pattern_726": {
+  "answers": [
+   {
+    "refcode": "NAPHTA",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA04",
+    "pressure": null,
+    "temperature": "123 K"
+   },
+   {
+    "refcode": "NAPHTA11",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA12",
+    "pressure": "0.51 GPa",
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA13",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA14",
+    "pressure": null,
+    "temperature": "at 12 K"
+   },
+   {
+    "refcode": "NAPHTA15",
+    "pressure": null,
+    "temperature": "at 100.0 K"
+   },
+   {
+    "refcode": "NAPHTA16",
+    "pressure": null,
+    "temperature": "at 135.0 K"
+   },
+   {
+    "refcode": "NAPHTA17",
+    "pressure": null,
+    "temperature": "at 170.0 K"
+   },
+   {
+    "refcode": "NAPHTA18",
+    "pressure": null,
+    "temperature": "at 205.0 K"
+   },
+   {
+    "refcode": "NAPHTA19",
+    "pressure": "0.4 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA20",
+    "pressure": "0.6 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA21",
+    "pressure": "1.0 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA22",
+    "pressure": "2.1 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA23",
+    "pressure": null,
+    "temperature": "at 10 K"
+   },
+   {
+    "refcode": "NAPHTA24",
+    "pressure": null,
+    "temperature": "at 30 K"
+   },
+   {
+    "refcode": "NAPHTA25",
+    "pressure": null,
+    "temperature": "at 60 K"
+   },
+   {
+    "refcode": "NAPHTA26",
+    "pressure": null,
+    "temperature": "at 90 K"
+   },
+   {
+    "refcode": "NAPHTA27",
+    "pressure": null,
+    "temperature": "at 120 K"
+   },
+   {
+    "refcode": "NAPHTA28",
+    "pressure": null,
+    "temperature": "at 150 K"
+   },
+   {
+    "refcode": "NAPHTA29",
+    "pressure": null,
+    "temperature": "at 180 K"
+   },
+   {
+    "refcode": "NAPHTA30",
+    "pressure": null,
+    "temperature": "at 220 K"
+   },
+   {
+    "refcode": "NAPHTA31",
+    "pressure": null,
+    "temperature": "at 5 K"
+   },
+   {
+    "refcode": "NAPHTA32",
+    "pressure": null,
+    "temperature": "at 30 K"
+   },
+   {
+    "refcode": "NAPHTA33",
+    "pressure": null,
+    "temperature": "at 80 K"
+   },
+   {
+    "refcode": "NAPHTA34",
+    "pressure": null,
+    "temperature": "at 150 K"
+   },
+   {
+    "refcode": "NAPHTA35",
+    "pressure": null,
+    "temperature": "at 220 K"
+   },
+   {
+    "refcode": "NAPHTA36",
+    "pressure": null,
+    "temperature": "at 295 K"
+   },
+   {
+    "refcode": "NAPHTA49",
+    "pressure": null,
+    "temperature": "90 K"
+   },
+   {
+    "refcode": "NAPHTA50",
+    "pressure": null,
+    "temperature": "143 K"
+   },
+   {
+    "refcode": "NAPHTA51",
+    "pressure": null,
+    "temperature": "184 K"
+   },
+   {
+    "refcode": "NAPHTA52",
+    "pressure": null,
+    "temperature": "239 K"
+   },
+   {
+    "refcode": "NAPHTA53",
+    "pressure": null,
+    "temperature": "92 K"
+   },
+   {
+    "refcode": "NAPHTA54",
+    "pressure": null,
+    "temperature": "109 K"
+   },
+   {
+    "refcode": "NAPHTA55",
+    "pressure": null,
+    "temperature": "85 K"
+   }
+  ],
+  "n": 35,
+  "n_with_pressure": 5
+ },
+ "pattern_730": {
+  "answers": [
+   {
+    "refcode": "EPIVEF",
+    "pressure": null,
+    "temperature": "at 296 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_750": {
+  "answers": [
+   {
+    "refcode": "HXACAN69",
+    "pressure": null,
+    "temperature": "293 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_760": {
+  "answers": [
+   {
+    "refcode": "LILRIJ",
+    "pressure": null,
+    "temperature": "296.1 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_775": {
+  "answers": [
+   {
+    "refcode": "ZZZIZM01",
+    "pressure": null,
+    "temperature": null
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_787": {
+  "answers": [
+   {
+    "refcode": "ZZZIZM01",
+    "pressure": null,
+    "temperature": null
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_805": {
+  "answers": [
+   {
+    "refcode": "QUWYIR01",
+    "pressure": null,
+    "temperature": "293 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_808": {
+  "answers": [
+   {
+    "refcode": "NAPHTA",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA04",
+    "pressure": null,
+    "temperature": "123 K"
+   },
+   {
+    "refcode": "NAPHTA11",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA12",
+    "pressure": "0.51 GPa",
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA13",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA14",
+    "pressure": null,
+    "temperature": "at 12 K"
+   },
+   {
+    "refcode": "NAPHTA15",
+    "pressure": null,
+    "temperature": "at 100.0 K"
+   },
+   {
+    "refcode": "NAPHTA16",
+    "pressure": null,
+    "temperature": "at 135.0 K"
+   },
+   {
+    "refcode": "NAPHTA17",
+    "pressure": null,
+    "temperature": "at 170.0 K"
+   },
+   {
+    "refcode": "NAPHTA18",
+    "pressure": null,
+    "temperature": "at 205.0 K"
+   },
+   {
+    "refcode": "NAPHTA19",
+    "pressure": "0.4 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA20",
+    "pressure": "0.6 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA21",
+    "pressure": "1.0 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA22",
+    "pressure": "2.1 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA23",
+    "pressure": null,
+    "temperature": "at 10 K"
+   },
+   {
+    "refcode": "NAPHTA24",
+    "pressure": null,
+    "temperature": "at 30 K"
+   },
+   {
+    "refcode": "NAPHTA25",
+    "pressure": null,
+    "temperature": "at 60 K"
+   },
+   {
+    "refcode": "NAPHTA26",
+    "pressure": null,
+    "temperature": "at 90 K"
+   },
+   {
+    "refcode": "NAPHTA27",
+    "pressure": null,
+    "temperature": "at 120 K"
+   },
+   {
+    "refcode": "NAPHTA28",
+    "pressure": null,
+    "temperature": "at 150 K"
+   },
+   {
+    "refcode": "NAPHTA29",
+    "pressure": null,
+    "temperature": "at 180 K"
+   },
+   {
+    "refcode": "NAPHTA30",
+    "pressure": null,
+    "temperature": "at 220 K"
+   },
+   {
+    "refcode": "NAPHTA31",
+    "pressure": null,
+    "temperature": "at 5 K"
+   },
+   {
+    "refcode": "NAPHTA32",
+    "pressure": null,
+    "temperature": "at 30 K"
+   },
+   {
+    "refcode": "NAPHTA33",
+    "pressure": null,
+    "temperature": "at 80 K"
+   },
+   {
+    "refcode": "NAPHTA34",
+    "pressure": null,
+    "temperature": "at 150 K"
+   },
+   {
+    "refcode": "NAPHTA35",
+    "pressure": null,
+    "temperature": "at 220 K"
+   },
+   {
+    "refcode": "NAPHTA36",
+    "pressure": null,
+    "temperature": "at 295 K"
+   },
+   {
+    "refcode": "NAPHTA49",
+    "pressure": null,
+    "temperature": "90 K"
+   },
+   {
+    "refcode": "NAPHTA50",
+    "pressure": null,
+    "temperature": "143 K"
+   },
+   {
+    "refcode": "NAPHTA51",
+    "pressure": null,
+    "temperature": "184 K"
+   },
+   {
+    "refcode": "NAPHTA52",
+    "pressure": null,
+    "temperature": "239 K"
+   },
+   {
+    "refcode": "NAPHTA53",
+    "pressure": null,
+    "temperature": "92 K"
+   },
+   {
+    "refcode": "NAPHTA54",
+    "pressure": null,
+    "temperature": "109 K"
+   },
+   {
+    "refcode": "NAPHTA55",
+    "pressure": null,
+    "temperature": "85 K"
+   }
+  ],
+  "n": 35,
+  "n_with_pressure": 5
+ },
+ "pattern_816": {
+  "answers": [
+   {
+    "refcode": "COUMAR20",
+    "pressure": null,
+    "temperature": "160 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_875": {
+  "answers": [
+   {
+    "refcode": "MEHNIY",
+    "pressure": null,
+    "temperature": "at 293 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_880": {
+  "answers": [
+   {
+    "refcode": "AZUDOP",
+    "pressure": null,
+    "temperature": "at 293 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_887": {
+  "answers": [
+   {
+    "refcode": "IYESEO",
+    "pressure": null,
+    "temperature": "100 K"
+   },
+   {
+    "refcode": "QIQTUI",
+    "pressure": null,
+    "temperature": "100 K"
+   }
+  ],
+  "n": 2,
+  "n_with_pressure": 0
+ },
+ "pattern_891": {
+  "answers": [
+   {
+    "refcode": "MEHNIY",
+    "pressure": null,
+    "temperature": "at 293 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_901": {
+  "answers": [
+   {
+    "refcode": "ZZZIZM01",
+    "pressure": null,
+    "temperature": null
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_914": {
+  "answers": [
+   {
+    "refcode": "RIXNES",
+    "pressure": null,
+    "temperature": "at 293 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_917": {
+  "answers": [
+   {
+    "refcode": "MIGQOJ",
+    "pressure": null,
+    "temperature": "at 263 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_921": {
+  "answers": [
+   {
+    "refcode": "EPIVEF",
+    "pressure": null,
+    "temperature": "at 296 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_949": {
+  "answers": [
+   {
+    "refcode": "AKAFUR",
+    "pressure": null,
+    "temperature": "273.1 K"
+   },
+   {
+    "refcode": "KAWBAN01",
+    "pressure": null,
+    "temperature": "273.1 K"
+   }
+  ],
+  "n": 2,
+  "n_with_pressure": 0
+ },
+ "pattern_978": {
+  "answers": [
+   {
+    "refcode": "MEHNIY",
+    "pressure": null,
+    "temperature": "at 293 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_1006": {
+  "answers": [
+   {
+    "refcode": "ROHWIX01",
+    "pressure": null,
+    "temperature": "150 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_1008": {
+  "answers": [
+   {
+    "refcode": "QILZIX",
+    "pressure": null,
+    "temperature": "295 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_1010": {
+  "answers": [
+   {
+    "refcode": "MEHNIY",
+    "pressure": null,
+    "temperature": "at 293 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_1021": {
+  "answers": [
+   {
+    "refcode": "NAPHTA",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA04",
+    "pressure": null,
+    "temperature": "123 K"
+   },
+   {
+    "refcode": "NAPHTA11",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA12",
+    "pressure": "0.51 GPa",
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA13",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA14",
+    "pressure": null,
+    "temperature": "at 12 K"
+   },
+   {
+    "refcode": "NAPHTA15",
+    "pressure": null,
+    "temperature": "at 100.0 K"
+   },
+   {
+    "refcode": "NAPHTA16",
+    "pressure": null,
+    "temperature": "at 135.0 K"
+   },
+   {
+    "refcode": "NAPHTA17",
+    "pressure": null,
+    "temperature": "at 170.0 K"
+   },
+   {
+    "refcode": "NAPHTA18",
+    "pressure": null,
+    "temperature": "at 205.0 K"
+   },
+   {
+    "refcode": "NAPHTA19",
+    "pressure": "0.4 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA20",
+    "pressure": "0.6 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA21",
+    "pressure": "1.0 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA22",
+    "pressure": "2.1 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA23",
+    "pressure": null,
+    "temperature": "at 10 K"
+   },
+   {
+    "refcode": "NAPHTA24",
+    "pressure": null,
+    "temperature": "at 30 K"
+   },
+   {
+    "refcode": "NAPHTA25",
+    "pressure": null,
+    "temperature": "at 60 K"
+   },
+   {
+    "refcode": "NAPHTA26",
+    "pressure": null,
+    "temperature": "at 90 K"
+   },
+   {
+    "refcode": "NAPHTA27",
+    "pressure": null,
+    "temperature": "at 120 K"
+   },
+   {
+    "refcode": "NAPHTA28",
+    "pressure": null,
+    "temperature": "at 150 K"
+   },
+   {
+    "refcode": "NAPHTA29",
+    "pressure": null,
+    "temperature": "at 180 K"
+   },
+   {
+    "refcode": "NAPHTA30",
+    "pressure": null,
+    "temperature": "at 220 K"
+   },
+   {
+    "refcode": "NAPHTA31",
+    "pressure": null,
+    "temperature": "at 5 K"
+   },
+   {
+    "refcode": "NAPHTA32",
+    "pressure": null,
+    "temperature": "at 30 K"
+   },
+   {
+    "refcode": "NAPHTA33",
+    "pressure": null,
+    "temperature": "at 80 K"
+   },
+   {
+    "refcode": "NAPHTA34",
+    "pressure": null,
+    "temperature": "at 150 K"
+   },
+   {
+    "refcode": "NAPHTA35",
+    "pressure": null,
+    "temperature": "at 220 K"
+   },
+   {
+    "refcode": "NAPHTA36",
+    "pressure": null,
+    "temperature": "at 295 K"
+   },
+   {
+    "refcode": "NAPHTA49",
+    "pressure": null,
+    "temperature": "90 K"
+   },
+   {
+    "refcode": "NAPHTA50",
+    "pressure": null,
+    "temperature": "143 K"
+   },
+   {
+    "refcode": "NAPHTA51",
+    "pressure": null,
+    "temperature": "184 K"
+   },
+   {
+    "refcode": "NAPHTA52",
+    "pressure": null,
+    "temperature": "239 K"
+   },
+   {
+    "refcode": "NAPHTA53",
+    "pressure": null,
+    "temperature": "92 K"
+   },
+   {
+    "refcode": "NAPHTA54",
+    "pressure": null,
+    "temperature": "109 K"
+   },
+   {
+    "refcode": "NAPHTA55",
+    "pressure": null,
+    "temperature": "85 K"
+   }
+  ],
+  "n": 35,
+  "n_with_pressure": 5
+ },
+ "pattern_1022": {
+  "answers": [
+   {
+    "refcode": "HOJQII",
+    "pressure": null,
+    "temperature": "100 K"
+   },
+   {
+    "refcode": "HOJQII03",
+    "pressure": null,
+    "temperature": "293 K"
+   }
+  ],
+  "n": 2,
+  "n_with_pressure": 0
+ },
+ "pattern_1029": {
+  "answers": [
+   {
+    "refcode": "CEHQEM01",
+    "pressure": null,
+    "temperature": "at 173 K"
+   }
+  ],
+  "n": 1,
+  "n_with_pressure": 0
+ },
+ "pattern_1041": {
+  "answers": [
+   {
+    "refcode": "GOFWOP01",
+    "pressure": null,
+    "temperature": "105 K"
+   },
+   {
+    "refcode": "GOFWOP02",
+    "pressure": null,
+    "temperature": "100 K"
+   },
+   {
+    "refcode": "GOFWOP03",
+    "pressure": null,
+    "temperature": "193 K"
+   }
+  ],
+  "n": 3,
+  "n_with_pressure": 0
+ },
+ "pattern_1046": {
+  "answers": [
+   {
+    "refcode": "NAPHTA",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA04",
+    "pressure": null,
+    "temperature": "123 K"
+   },
+   {
+    "refcode": "NAPHTA11",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA12",
+    "pressure": "0.51 GPa",
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA13",
+    "pressure": null,
+    "temperature": null
+   },
+   {
+    "refcode": "NAPHTA14",
+    "pressure": null,
+    "temperature": "at 12 K"
+   },
+   {
+    "refcode": "NAPHTA15",
+    "pressure": null,
+    "temperature": "at 100.0 K"
+   },
+   {
+    "refcode": "NAPHTA16",
+    "pressure": null,
+    "temperature": "at 135.0 K"
+   },
+   {
+    "refcode": "NAPHTA17",
+    "pressure": null,
+    "temperature": "at 170.0 K"
+   },
+   {
+    "refcode": "NAPHTA18",
+    "pressure": null,
+    "temperature": "at 205.0 K"
+   },
+   {
+    "refcode": "NAPHTA19",
+    "pressure": "0.4 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA20",
+    "pressure": "0.6 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA21",
+    "pressure": "1.0 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA22",
+    "pressure": "2.1 GPa",
+    "temperature": "at 298 K"
+   },
+   {
+    "refcode": "NAPHTA23",
+    "pressure": null,
+    "temperature": "at 10 K"
+   },
+   {
+    "refcode": "NAPHTA24",
+    "pressure": null,
+    "temperature": "at 30 K"
+   },
+   {
+    "refcode": "NAPHTA25",
+    "pressure": null,
+    "temperature": "at 60 K"
+   },
+   {
+    "refcode": "NAPHTA26",
+    "pressure": null,
+    "temperature": "at 90 K"
+   },
+   {
+    "refcode": "NAPHTA27",
+    "pressure": null,
+    "temperature": "at 120 K"
+   },
+   {
+    "refcode": "NAPHTA28",
+    "pressure": null,
+    "temperature": "at 150 K"
+   },
+   {
+    "refcode": "NAPHTA29",
+    "pressure": null,
+    "temperature": "at 180 K"
+   },
+   {
+    "refcode": "NAPHTA30",
+    "pressure": null,
+    "temperature": "at 220 K"
+   },
+   {
+    "refcode": "NAPHTA31",
+    "pressure": null,
+    "temperature": "at 5 K"
+   },
+   {
+    "refcode": "NAPHTA32",
+    "pressure": null,
+    "temperature": "at 30 K"
+   },
+   {
+    "refcode": "NAPHTA33",
+    "pressure": null,
+    "temperature": "at 80 K"
+   },
+   {
+    "refcode": "NAPHTA34",
+    "pressure": null,
+    "temperature": "at 150 K"
+   },
+   {
+    "refcode": "NAPHTA35",
+    "pressure": null,
+    "temperature": "at 220 K"
+   },
+   {
+    "refcode": "NAPHTA36",
+    "pressure": null,
+    "temperature": "at 295 K"
+   },
+   {
+    "refcode": "NAPHTA49",
+    "pressure": null,
+    "temperature": "90 K"
+   },
+   {
+    "refcode": "NAPHTA50",
+    "pressure": null,
+    "temperature": "143 K"
+   },
+   {
+    "refcode": "NAPHTA51",
+    "pressure": null,
+    "temperature": "184 K"
+   },
+   {
+    "refcode": "NAPHTA52",
+    "pressure": null,
+    "temperature": "239 K"
+   },
+   {
+    "refcode": "NAPHTA53",
+    "pressure": null,
+    "temperature": "92 K"
+   },
+   {
+    "refcode": "NAPHTA54",
+    "pressure": null,
+    "temperature": "109 K"
+   },
+   {
+    "refcode": "NAPHTA55",
+    "pressure": null,
+    "temperature": "85 K"
+   }
+  ],
+  "n": 35,
+  "n_with_pressure": 5
+ }
+}

@@ -247,7 +247,9 @@ PH = {
     "kad_sync_train": str(KK["sync_self_entry_split"].get("train", 0)),
     "kad_sync_nontrain_n": words(len(KK["sync_not_train_ranks"])), "kad_sync_nontrain": seq(KK["sync_not_train_ranks"]),
     "c2_cpu_min": f"{C2['cpu_min_median']:.1f}",
-    "random_med": f"{round(D['n_library'] / 2, -3):,.0f}",
+    # pooled random-ordering median given each pattern's number of correct entries (scripts/48)
+    "random_med": f"{round(EX['random_median_rank_std'], -3):,.0f}",
+    "binavg_wcc2_sc": (lambda d: f"{sgn(d['diff'])} {ci(d['ci'])}")(ROB["binavg"]["paired_vs_main"]["sc|wcc_2_bkg"]["top1"]),
     "n_resim": str(P["simulation_check"]["n_resimulated"]), "n_major": str(P["simulation_check"]["n_major_component"]),
     "sim_rand_med": f"{P['simulation_check']['groups']['random']['median']:.3f}",
     "sim_zzz_med": f"{P['simulation_check']['groups']['zzzuwk']['median']:.3f}",
@@ -345,7 +347,11 @@ CLAIMS = [
     f"In {D['n_h_omitted']} of the {D['n_queries']} refined structures the H atoms are omitted",
     # ---- 2.2
     f"{D['anchor_tiers']['strict']} patterns were anchored in the strict pass and {D['anchor_tiers']['lenient']} in the lenient pass",
-    f"({EX['unknown_entries']['total']} entries, affecting {EX['unknown_entries']['patterns_with_any']} patterns)",
+    f"({EX['unknown_entries']['total']} pattern–entry pairs of {EX['unknown_in_library']['distinct_all']} entries over "
+    f"{EX['unknown_entries']['patterns_with_any']} patterns; {EX['unknown_in_library']['pairs']} pairs\nof "
+    f"{EX['unknown_in_library']['distinct']} entries over {EX['unknown_in_library']['patterns']} patterns concern library entries",
+    need(AS['answer_pressure']['ambient_with_pressured_answer'] == 0,
+         f"none of the {AS['answer_pressure']['ambient_answers']} answer entries of these patterns carries a CSD pressure"),
     need(D["n_opxrd_organic"] - D["n_identified"] == 7, f"Of the {D['n_opxrd_organic']} patterns, {D['n_identified']} were "
          f"identified; the other seven"),
     need(D["n_identified"] - D["n_queries"] == 1, f"which leaves {D['n_queries']} patterns of {D['n_compounds']} compounds"),
@@ -506,7 +512,7 @@ CLAIMS = [
     need(EX["paired_methods"]["std|wcc_2_bkg-pearson_bkg"]["ci"][1] < 0 and all(incl0(v["ci"]) for v in other_tol),
          f"only WCC with l = 2° differs from Pearson ({PH['std_paired_wcc2_pearson']})"),
     f"The model reaches {f2(b('model_bkg')['macro_top1'])}, with a median rank of about {about(b('model_bkg')['median_rank'])}, "
-    f"far from the median of about {PH['random_med']} that a random ordering would give, and its second seed reaches {PH['s1_std']}",
+    f"far from the median of about {PH['random_med']} that a random ordering would give for these patterns' numbers of correct entries, and its second seed reaches {PH['s1_std']}",
     f"(chance {f2(EX['within_family_chance'])}), the classical scores reach {rng([wf[k]['top1'] for k in CLS])} top-1 and "
     f"the model {f2(wf['model_bkg']['top1'])} ({wf['model_bkg']['n']} patterns)",
     f"drops to {PH['raw_pearson']} for Pearson, {PH['raw_coszs']} for cosine + zero scan, {PH['raw_wcc1']} for WCC with l = 1° "
@@ -589,6 +595,12 @@ CLAIMS = [
          f"intervals of the package and its ablations"),
     f"changes the classical scores by {PH['dT_range']} against the converted intensities alone, and averaging over each grid "
     f"step instead of interpolating by {PH['binavg_range']}",
+    need(round(T2['binavg']['wcc_2_bkg']['ambient'] - T2['main']['wcc_2_bkg']['ambient'], 2) == 0.06
+         and max(abs(d) for k in CLS if k != 'wcc_2_bkg' for d in t2diff('binavg', keys=[k])) <= 0.01
+         and abs(T2['binavg']['wcc_2_bkg']['std'] - T2['main']['wcc_2_bkg']['std']) <= 0.01
+         and incl0(ROB['binavg']['paired_vs_main']['sc|wcc_2_bkg']['top1']['ci']),
+         f"Only WCC with l = 2° moves by more than 0.01: by +0.06 on the ambient set and {PH['binavg_wcc2_sc']} on the\n"
+         "single-crystal set"),
     table2(),
     # ---- 4.8
     f"Against the {CODR['meta']['n_library']:,} COD entries, the {CODR['meta']['n_queries']} patterns reproduce the main result",

@@ -119,7 +119,7 @@ Lenient anchors: for each of the 35 patterns anchored in the lenient pass, the m
 | WCC, l = 2° + zero scan | 0.50 [0.33, 0.67] | 0.72 [0.64, 0.80] |
 | Learned model | 0.00 [0.00, 0.00] | 0.02 [0.00, 0.04] |
 
-Entries excluded as not comparable: 134 over 57 patterns. Self-entry reproducing the deposited structure within 0.05 Å RMSD: 150 strict + 34 lenient anchors. Within-family chance: 0.40.
+Entries that cannot be compared: 134 pattern–entry pairs of 44 entries over 57 patterns; 26 pairs of 16 entries over 15 patterns concern library entries and are removed from those rankings, the rest concern entries outside the library. Self-entry reproducing the deposited structure within 0.05 Å RMSD: 150 strict + 34 lenient anchors. Within-family chance: 0.40.
 
 ## S3 Hubness and its correction
 
@@ -290,8 +290,8 @@ Paired over ambient compounds: ln q − Pearson +0.16 [0.00, +0.34]; WCC 1° −
 | correct entries only among the added entries | 101 / 53 | 0.85 / 0.89 | 0.82 / 0.81 | 0.88 / 0.84 | 0.80 / 0.81 | 0.59 / 0.71 | 0.00 / 0.00 |
 | Cu Kα | 120 / 82 | 0.92 / 0.89 | 0.88 / 0.85 | 0.88 / 0.86 | 0.87 / 0.82 | 0.68 / 0.67 | 0.00 / 0.00 |
 | other wavelengths | 68 / 40 | 0.72 / 0.93 | 0.76 / 0.90 | 0.84 / 0.83 | 0.68 / 0.90 | 0.56 / 0.82 | 0.03 / 0.05 |
-| self-entry ordered | 160 / 114 | 0.82 / 0.90 | 0.81 / 0.86 | 0.86 / 0.84 | 0.78 / 0.85 | 0.65 / 0.72 | 0.01 / 0.02 |
-| self-entry disordered | 28 / 9 | 1.00 / 1.00 | 1.00 / 1.00 | 0.93 / 0.99 | 0.93 / 0.78 | 0.54 / 0.61 | 0.00 / 0.00 |
+| self-entry ordered | 163 / 116 | 0.82 / 0.90 | 0.82 / 0.86 | 0.86 / 0.85 | 0.78 / 0.86 | 0.66 / 0.73 | 0.01 / 0.02 |
+| self-entry disordered | 25 / 6 | 1.00 / 1.00 | 1.00 / 1.00 | 0.92 / 0.98 | 0.92 / 0.67 | 0.48 / 0.42 | 0.00 / 0.00 |
 
 ## S5 GPU and CPU scores
 
@@ -468,7 +468,7 @@ The first version sampled the ln q axis at points and used 16 zero offsets that 
 
 critic2 1.4.155 COMPAREVC GLOBAL QUICK, α = 1, measurement wavelength, on the ln q top 50 of each of the 60 single-crystal patterns (3,000 comparisons, excluded entries left out). Median 2.3 CPU-minutes per comparison, maximum 2.96 CPU-hours; 2 comparisons reached the 4-hour wall-time limit and count as maximally dissimilar. The answer is in the shortlist for 38 patterns (38 in the ln q top 100). Entries with a disorder model are passed as their major component.
 
-All single-crystal patterns: re-rank 0.57 [0.40, 0.74], ln q 0.45 [0.29, 0.63], paired +0.10 [−0.01, +0.24].
+All single-crystal patterns: re-rank 0.57 [0.40, 0.74], ln q 0.49 [0.33, 0.66], paired +0.08 [−0.04, +0.22].
 
 Positive control: each pattern against its own self-entry; its DIFF is ranked among the wrong entries of the shortlist. Injection: each answer missing from a shortlist (the single-crystal same-form entry closest in cell) compared with its pattern and ranked the same way. Pressure series: the self-entry carries a CSD pressure, or another entry of its family from the same publication does, or it is flagged by hand with the evidence. Cell difference: the largest relative difference of the primitive Niggli-reduced cell lengths of the self-entry and the closest single-crystal entry; ΔT: the difference of their recorded temperatures.
 
@@ -612,7 +612,7 @@ Each pattern's self-entry, rendered with effects estimated from its measurement:
 
 ## S12 Robustness of the benchmark
 
-Compound-weighted top-1 [95 % CI] and the difference from the reference, paired over compounds. Lorentz–polarisation and Jacobian: the Lorentz–polarisation factor and the area-conserving Jacobian of the conversion to Cu applied to the 68 non-Cu patterns. Grid-step averaging: measured patterns put on the Cu grid by averaging over each grid step (a decision rule fixed before the run: a change above 0.05 would have made it the primary). Library at 295 K: every library entry re-rendered with an isotropic strain from its recorded temperature to 295 K, scored with the Lorentz–polarisation and Jacobian queries. Library package: the changes of Section 3.8 of the article; its one-off ablations are paired against the full package. The label variants (strict anchors, recorded wavelengths, every-anchor comparison) are in Section S2.
+Compound-weighted top-1 [95 % CI] and the difference from the reference, paired over compounds. Lorentz–polarisation and Jacobian: the Lorentz–polarisation factor and the area-conserving Jacobian of the conversion to Cu applied to the 68 non-Cu patterns. Grid-step averaging: measured patterns put on the Cu grid by averaging over each grid step (a rule fixed before the run: a change above 0.05 in any classical score would lead us to consider it as the primary analysis; only WCC with l = 2° crosses it, by +0.06 on the ambient set, with an interval that reaches zero, and interpolation was kept, Section 4.7 of the article). Library at 295 K: every library entry re-rendered with an isotropic strain from its recorded temperature to 295 K, scored with the Lorentz–polarisation and Jacobian queries. Library package: the changes of Section 3.8 of the article; its one-off ablations are paired against the full package. The label variants (strict anchors, recorded wavelengths, every-anchor comparison) are in Section S2.
 
 **Table S31** The ambient single-crystal set under every variant (table 2 of the article): compound-weighted top-1. Patterns: 38 (36 with strict anchors, 37 with a recorded wavelength, 39 with EPIVEF counted).
 

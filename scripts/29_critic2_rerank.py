@@ -325,7 +325,9 @@ def cmd_eval(args) -> int:
         sl = np.array(p["lnq_scores"][:args.k])
         rank_lnq_short[qi] = int((sl[~is_t] > sl[is_t].max()).sum())
     stems = np.array([q["compound"] for q in qinfo])
-    r1 = np.load("cache/real_bench/rescore_r1/ranks.npz")["sc|lnq_bkg"]
+    # the ln q ranks of the corrected rescore (28 writes them per model run; the ln q columns do not depend on the
+    # model). rescore_r1/ranks.npz is the pre-correction run of 2026-10-12 and must not be used here.
+    r1 = np.load("cache/real_bench/rescore_r1/ranks_d3_sym_s0.npz")["sc|lnq_bkg"]
     sel = rank_c2 >= 0
     cpu = np.array([cpu_seconds(r["cpu"]) for r in used if r["cpu"] is not None])
     res = {"meta": {"k": args.k, "n_queries": int(sel.sum()), "n_planned": len(plan), "n_comparisons": len(used),

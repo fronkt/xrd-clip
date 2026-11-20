@@ -1,4 +1,14 @@
 {
+ "pattern_100": {
+  "stem": "QQQAUJ",
+  "own": "QQQAUJ04",
+  "pressure": null,
+  "temperature": "295 K",
+  "doi": "10.1021/jp401547f",
+  "same_publication_with_pressure": [],
+  "manual_flag": null,
+  "pressure_series": false
+ },
  "pattern_1006": {
   "stem": "ROHWIX",
   "own": "ROHWIX",

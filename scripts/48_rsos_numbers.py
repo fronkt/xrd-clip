@@ -373,7 +373,12 @@ def main() -> int:
     wlc = np.array(["Cu" if 1.53 < w < 1.55 else "Mo" if 0.70 < w < 0.72 else "Co" if 1.78 < w < 1.80
                     else "synchrotron" if w < 1.3 else "other" for w in wl])
     ex["wavelength_classes"] = dict(Counter(wlc.tolist()))
-    dis = np.array([any(y["has_disorder"] for y in truth[x["id"]]["same_form"] if y["is_anchor"]) for x in meta])
+    # disordered SELF-entry: the powder-study anchor closest to the deposited structure (as scripts/34 and 29 pick
+    # it), not any disordered anchor (claim audit 2026-11-20: the any-anchor rule gave 28 / 9 instead of 25 / 6)
+    def self_disordered(t):
+        ps = [y for y in t["same_form"] if y["is_powder_study"] and y["is_anchor"]]
+        return bool(ps) and min(ps, key=lambda y: (t["anchors"][y["refcode"]]["rmsd"], y["refcode"]))["has_disorder"]
+    dis = np.array([self_disordered(truth[x["id"]]) for x in meta])
     ex["own_entry_disordered"] = {"n_patterns": int(dis.sum()), "n_compounds": int(len(set(stems[dis])))}
     groups = {"tier_strict": tier == "strict", "tier_lenient": tier == "lenient", "corpus_entry": in_corpus,
               "extra_only": ~in_corpus, "cu": wlc == "Cu", "non_cu": wlc != "Cu", "disordered": dis, "ordered": ~dis}
@@ -384,11 +389,30 @@ def main() -> int:
             r = np.where(sel, R[f"none|std|{k}"], -1)
             d[k] = {"top1": rd((r[sel] == 0).mean()), "macro_top1": macro(r, 1, stems, cboot)["value"]}
         ex["subgroups"][gname] = d
+    # pattern-entry pairs (an entry can be incomparable for several patterns), distinct entries, and the part of
+    # both that is in the library and therefore actually removed from a ranking (claim audit 2026-11-20)
+    unk = [(x["id"], y["refcode"]) for x in meta for y in truth[x["id"]]["unknown"]]
+    unk_lib = [(p, rc) for p, rc in unk if rc in gidx]
+    ex["unknown_in_library"] = {"pairs": len(unk_lib), "distinct": len({rc for _, rc in unk_lib}),
+                                "patterns": len({p for p, _ in unk_lib}), "distinct_all": len({rc for _, rc in unk})}
     ex["unknown_entries"] = {"patterns_with_any": int(sum(bool(truth[x["id"]]["unknown"]) for x in meta)),
                              "total": int(sum(len(truth[x["id"]]["unknown"]) for x in meta))}
     ex["own_powder_rmsd_lt_0p05"] = {t_: int(sum(x["own_powder"] for x, tt in zip(meta, tier) if tt == t_)) for t_ in ("strict", "lenient")}
     rmod = R["none|std|model_bkg"]
     ex["model_recall"] = {str(k): rd((rmod < k).mean()) for k in (100, 1000)}
+    # median first-correct rank (1-based) of a random ordering on the any-same-form set, pooled over patterns like
+    # the reported median ranks: pattern q with m correct entries among N rankable ones has P(rank > k) =
+    # C(N-k, m) / C(N, m); the pooled median solves mean_q P_q(rank > k) = 1/2. (Claim audit 2026-11-20: half the
+    # library assumed one correct entry per pattern.)
+    nm = [(len(lib_rc) - len(set(q["sets"]["std"][1])), len(set(q["sets"]["std"][0]))) for q in qinfo]
+
+    def p_gt(k):
+        return np.mean([np.exp(np.sum(np.log1p(-k / (N - np.arange(m))))) if k < N - m + 1 else 0.0 for N, m in nm])
+    lo, hi = 0, len(lib_rc)
+    while hi - lo > 1:
+        mid = (lo + hi) // 2
+        lo, hi = (mid, hi) if p_gt(mid) > 0.5 else (lo, mid)
+    ex["random_median_rank_std"] = hi
     # per-pair CPU time: the median over the sweep's conditions (the first condition timed, clean, carries warm-up)
     ex["cpu_s_per_query_full_library"] = {k: rd(float(np.median([c[k]["us_per_pair"] for c in sb["conditions"].values()]))
                                              * 1e-6 * len(lib_rc))
@@ -522,6 +546,15 @@ def main() -> int:
            "n_pressure_series_compounds": int(len(set(stems[hp & (R["none|sc|lnq_bkg"] >= 0)]))),
            "n_ambient_patterns": int(amb.sum()), "n_ambient_compounds": int(len(set(stems[amb])))}
     hpsel = hp & (R["none|sc|lnq_bkg"] >= 0)
+    # the answers' side of the split (scripts/54): CSD pressure of every single-crystal answer entry
+    apr = load("results/answer_pressures.json")
+    ids = np.array([x["id"].replace(".json", "") for x in meta])
+    assert set(ids[amb | hpsel]) == set(apr) and set(ids[hpsel]) == {p for p in scc if scc[p]["pressure_series"]}
+    spl["answer_pressure"] = {
+        "ambient_with_pressured_answer": int(sum(apr[p]["n_with_pressure"] > 0 for p in ids[amb])),
+        "ambient_answers": int(sum(apr[p]["n"] for p in ids[amb])),
+        "pressure_series_with_pressured_answer": int(sum(apr[p]["n_with_pressure"] > 0 for p in ids[hpsel])),
+        "only_pressured_answers": int(sum(apr[p]["n_with_pressure"] == apr[p]["n"] for p in apr))}
     for name, r in split_ranks.items():
         spl[name] = {"macro_top1": macro(np.where(amb, r, -1), 1, stems, cboot), "hits": int((r[amb] == 0).sum()),
                      "macro_top10": macro(np.where(amb, r, -1), 10, stems, cboot),

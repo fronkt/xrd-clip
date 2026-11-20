@@ -163,8 +163,11 @@ def s2_labels() -> list:
           "[95 % CI].", ""]
     L += table(["score", "single-crystal", "any same-form"],
                [[NAMES[k], mci(ea[f"sc|{k}"]), mci(ea[f"std|{k}"])] for k in CLS + ["model_bkg"]])
-    L += ["", f"Entries excluded as not comparable: {EX['unknown_entries']['total']} over "
-          f"{EX['unknown_entries']['patterns_with_any']} patterns. Self-entry reproducing the deposited structure within "
+    U = EX["unknown_in_library"]
+    L += ["", f"Entries that cannot be compared: {EX['unknown_entries']['total']} pattern–entry pairs of "
+          f"{U['distinct_all']} entries over {EX['unknown_entries']['patterns_with_any']} patterns; {U['pairs']} pairs of "
+          f"{U['distinct']} entries over {U['patterns']} patterns concern library entries and are removed from those rankings, "
+          f"the rest concern entries outside the library. Self-entry reproducing the deposited structure within "
           f"0.05 Å RMSD: {EX['own_powder_rmsd_lt_0p05']['strict']} strict + {EX['own_powder_rmsd_lt_0p05']['lenient']} "
           f"lenient anchors. Within-family chance: {f2(EX['within_family_chance'])}.", ""]
     return L
@@ -590,7 +593,9 @@ def s12_robustness() -> list:
          "Compound-weighted top-1 [95 % CI] and the difference from the reference, paired over compounds. Lorentz–polarisation "
          f"and Jacobian: the Lorentz–polarisation factor and the area-conserving Jacobian of the conversion to Cu applied to the "
          f"{n_nc} non-Cu patterns. Grid-step averaging: measured patterns put on the Cu grid by averaging over each grid step "
-         "(a decision rule fixed before the run: a change above 0.05 would have made it the primary). Library at 295 K: every "
+         "(a rule fixed before the run: a change above 0.05 in any classical score would lead us to consider it as the "
+         "primary analysis; only WCC with l = 2° crosses it, by +0.06 on the ambient set, with an interval that reaches zero, "
+         "and interpolation was kept, Section 4.7 of the article). Library at 295 K: every "
          "library entry re-rendered with an isotropic strain from its recorded temperature to 295 K, scored with the "
          "Lorentz–polarisation and Jacobian queries. Library package: the changes of Section 3.8 of the article; its one-off "
          "ablations are paired against the full package. The label variants (strict anchors, recorded wavelengths, every-anchor "
