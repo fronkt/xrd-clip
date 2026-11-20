@@ -16,23 +16,22 @@ Purdue University, West Lafayette, Indiana, USA. E-mail: cai485@purdue.edu. ORCI
 
 ## Abstract
 
-Contrastive models that place powder X-ray diffraction patterns and crystal structures in a shared embedding
-space have been proposed for crystal structure retrieval, but they are mostly evaluated on simulated patterns. We
-built a benchmark of 188 measured patterns of 123 organic compounds, identified each pattern's crystal form in the
-Cambridge Structural Database by packing similarity, and ranked every pattern against 309,080 simulated database
-entries. When the correct answer must be an independent single-crystal structure determined at ambient pressure (38
-patterns of 26 compounds), classical profile-matching scores that tolerate peak shifts rank it first for a
-compound-weighted fraction of 0.45–0.62. A contrastive model with a space-group-aware structure encoder, trained on
-simulated patterns that include the measurement effects we could model, ranks it first for none of these compounds.
-When the database entry refined against the pattern itself also counts as correct, the classical scores reach
-0.71–0.88 and the model reaches 0.02. Simulated versions of the same patterns, rendered with the effects of each
-pattern's own measurement, are retrieved by the model at a median rank of 8, whereas the measured patterns sit at a
-median rank of about 5,600,
-so the model's failure lies in differences that our simulation does not reproduce. We release the benchmark, an
-open replica built from the Crystallography Open Database, and every per-pattern rank.
+Contrastive models that embed powder X-ray diffraction patterns and crystal structures in a shared space have been
+proposed for structure retrieval but are mostly evaluated on simulated patterns. We built a benchmark of 188
+measured patterns of 123 organic compounds, identified each pattern's crystal form in the Cambridge Structural
+Database by packing similarity, and ranked every pattern against 309,080 simulated entries. When the
+correct answer must be an independent single-crystal structure determined at ambient pressure (38 patterns of 26
+compounds), shift-tolerant classical profile scores rank it first for a compound-weighted fraction of 0.45–0.62. A
+contrastive model with a space-group-aware structure encoder, trained with every measurement effect we could
+simulate, ranks it first for none of these compounds. When the entry refined against the pattern itself also
+counts, the classical scores reach 0.71–0.88 and the model reaches 0.02.
+Simulations of the same patterns with the effects of their own measurements are retrieved by the model at a median
+rank of 8, whereas the measured patterns sit at a median rank of about 5,600, so the model fails on differences our
+simulation does not reproduce. We release the benchmark, an open replica from the Crystallography Open Database
+and every per-pattern rank.
 
 **Keywords:** powder X-ray diffraction; crystal structure retrieval; search–match; contrastive learning;
-benchmark; Cambridge Structural Database; polymorphism
+Cambridge Structural Database; polymorphism
 
 ## 1. Introduction
 

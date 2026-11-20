@@ -271,7 +271,7 @@ lc_drop = [lc[f"none|{k}"]["2000"][0] - lc[f"none|{k}"]["full"][0] for k in CLS]
 CLAIMS = [
     # ---- abstract
     f"built a benchmark of {D['n_queries']} measured patterns of {D['n_compounds']} organic compounds",
-    f"ranked every pattern against {D['n_library']:,} simulated database entries",
+    f"ranked every pattern against {D['n_library']:,} simulated entries",
     f"determined at ambient pressure ({AS['n_ambient_patterns']} patterns of {AS['n_ambient_compounds']} compounds)",
     f"compound-weighted fraction of {rng(amb_tol)}",
     need(AS["model"]["macro_top1"]["value"] == 0, "ranks it first for none of these compounds"),
