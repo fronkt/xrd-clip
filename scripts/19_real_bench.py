@@ -116,6 +116,15 @@ def render(recs: "list[dict]") -> np.ndarray:
     return np.stack([A.render_sticks(r, A.CLEAN) for r in recs]).astype(np.float32)
 
 
+def self_entry(t: dict, gidx: dict):
+    """The pattern's self-entry: the powder-study anchor in the library that reproduces the deposited structure within
+    0.05 A RMSD, the closest one if several (Section 2.3 of the RSOS text); None if the pattern has none. scripts/26 and
+    30 used the alphabetically first library anchor until the claim audit of 2026-11-20."""
+    ps = [x for x in t["same_form"] if x["is_anchor"] and x["is_powder_study"] and x["rmsd"] < 0.05
+          and x["refcode"] in gidx]
+    return min(ps, key=lambda x: (x["rmsd"], x["refcode"]))["refcode"] if ps else None
+
+
 def build_queries(truth_path: str, patterns_path: str, gidx: dict) -> "tuple[list, dict, dict]":
     """Identified opXRD patterns -> (qinfo, excluded, Q). Truth sets keep only refcodes in `gidx`."""
     from xrdclip.data import augment as A

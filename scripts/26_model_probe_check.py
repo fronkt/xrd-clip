@@ -69,7 +69,13 @@ def main() -> int:
     qinfo, _, Q = bench.build_queries(f"{bench.DATA}/opxrd/opxrd_truth.json",
                                       f"{bench.DATA}/opxrd/opxrd_cnrs_organic.json", gidx)
     truth = {t["id"]: t for t in json.load(open(f"{bench.DATA}/opxrd/opxrd_truth.json"))}
-    anc = [next(a for a in sorted(truth[q["id"]]["anchors"]) if a in gidx) for q in qinfo]
+    # each pattern's self-entry (bench.self_entry; the alphabetically first library anchor until 2026-11-20); the
+    # patterns without one are left out of both rows so that the clean and measured rows compare the same patterns
+    selfs = [bench.self_entry(truth[q["id"]], gidx) for q in qinfo]
+    keep = np.array([x is not None for x in selfs])
+    qinfo = [q for q, k in zip(qinfo, keep) if k]
+    Q = {k: (v[keep] if isinstance(v, np.ndarray) and len(v) == len(keep) else v) for k, v in Q.items()}
+    anc = [x for x in selfs if x is not None]
     sim = bench.render(hubm.records_at(shards, [gidx[a] for a in anc], bench.RENDER_FIELDS))
     with torch.no_grad():
         enc = lambda x: torch.cat([model.encode_pattern(torch.from_numpy(x[i:i + 64]).unsqueeze(1))

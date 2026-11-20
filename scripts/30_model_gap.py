@@ -253,7 +253,13 @@ def cmd_eval(args) -> int:
     nq = len(qinfo)
     truth = {t["id"]: t for t in json.load(open(args.truth))}
     pats = {o["id"]: o for o in json.load(open(args.patterns))["organic"]}
-    anc = [next(a for a in sorted(truth[q["id"]]["anchors"]) if a in gidx) for q in qinfo]   # as in scripts/26
+    # each pattern's self-entry (bench.self_entry; until 2026-11-20 the alphabetically first library anchor, which
+    # for 64 patterns was another entry). The 4 patterns without one are rendered from that anchor only to keep the
+    # arrays aligned and are excluded from every summary below.
+    selfs = [bench.self_entry(truth[q["id"]], gidx) for q in qinfo]
+    has_self = np.array([x is not None for x in selfs])
+    anc = [x if x is not None else next(a for a in sorted(truth[q["id"]]["anchors"]) if a in gidx)
+           for x, q in zip(selfs, qinfo)]
     recs = hubm.records_at(shards, [gidx[a] for a in anc], bench.RENDER_FIELDS)
     own_clean = bench.render(recs)
     ests = []
@@ -301,7 +307,8 @@ def cmd_eval(args) -> int:
                          "noise_median": float(np.median([e["noise"] for e in ests])),
                          "zero_deg_abs_median": float(np.median([abs(e["zero"]) for e in ests])),
                          "n_partial_coverage": int(sum((~e["mask"]).any() for e in ests)),
-                         "n_cu_lab": int(sum(e["tube"] == "cu" for e in ests))},
+                         "n_cu_lab": int(sum(e["tube"] == "cu" for e in ests)),
+                         "n_with_self_entry": int(has_self.sum())},
            "results": json.load(open(args.out))["results"] if (args.variants and os.path.exists(args.out)) else {}}
     for name, x in X.items():
         e = encode(model, x)
@@ -314,9 +321,10 @@ def cmd_eval(args) -> int:
             r = rs.ranks_from_scores(S, sets, nq)
             for td in ("std", "sc"):
                 k = f"{name}|{sname}|{td}"
-                res["results"][k] = {"per_pattern": bench.summarise(r[td], np.ones(nq, bool), boot),
-                                     "macro_top1": pn.macro(r[td], 1, stems, cboot),
-                                     "macro_top10": pn.macro(r[td], 10, stems, cboot)}
+                rt = np.where(has_self, r[td], -1)            # every rung, measured included, on the same patterns
+                res["results"][k] = {"per_pattern": bench.summarise(rt, has_self, boot),
+                                     "macro_top1": pn.macro(rt, 1, stems, cboot),
+                                     "macro_top10": pn.macro(rt, 10, stems, cboot)}
                 pp = res["results"][k]["per_pattern"]
                 print(f"{k:28s} top-1 {pp['top1']:.3f} top-10 {pp['top10']:.3f} median {pp['median_rank']:.0f}  "
                       f"macro top-1 {res['results'][k]['macro_top1']['value']:.3f}", flush=True)
