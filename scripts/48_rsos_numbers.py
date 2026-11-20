@@ -235,7 +235,7 @@ def main() -> int:
                           "wrong_top1_csls": hub["hubness"][k]["query_top1_wrong|csls_aug_k10"]["most_common"][:3],
                           "n_miss_none": hub["hubness"][k]["query_top1_wrong|none"]["n_miss"]} for k in KEYS}
     rows = stems == CASE
-    cz = load("results/case_zzzuwk.json")
+    cz = load("results/d3/case_zzzuwk.json")
     out["case"] = {"stem": CASE, "n_patterns": int(rows.sum()),
                    "formula": truth[meta[int(np.nonzero(rows)[0][0])]["id"]]["same_form"][0]["formula"],
                    "top1_of_20": {f"{c}|{k}": int(((R[f"{c}|std|{k}"] == 0) & rows).sum()) for c in CORRS for k in KEYS},
@@ -244,7 +244,7 @@ def main() -> int:
                                                                       "beats_truth_pearson", "best_offset_deg_median")}
                                                 for rc, v in per.items() if v["role"] == "decoy"}
                                            for mm, per in cz["methods"].items()}},
-                   "texture_fit": rnd(load("results/zzzuwk_texture.json"))}
+                   "texture_fit": rnd(load("results/d3/zzzuwk_texture.json"))}
 
     # ---- the GPU scorer against 19's CPU pre-pass (label-independent; from the submitted run) -----------------------
     rc = load(GPU_CHECK)["rank_check"]

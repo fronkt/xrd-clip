@@ -13,7 +13,7 @@ import os
 import re
 
 P = json.load(open("results/rsos_numbers.json"))
-CZ = json.load(open("results/case_zzzuwk.json"))
+CZ = json.load(open("results/d3/case_zzzuwk.json"))
 TITLE = re.search(r'^title: "(.*)"$', open("paper/rsos/manuscript.md", encoding="utf-8").read(), re.M).group(1)
 B, D, EX, ROB, M = P["bench"], P["dataset"], P["extra"], P["robustness"], P["models"]
 MODEL = P["model_name"]

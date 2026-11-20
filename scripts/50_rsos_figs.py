@@ -214,7 +214,7 @@ def main() -> int:
     fig_schematic(rn)
     fig_sweep(nums.sweep(nums.MODEL))
     fig_real(rn)
-    f23.fig_case(rn, rn["case"], np.load("cache/real_bench/case_zzzuwk.npz"))
+    f23.fig_case(rn, rn["case"], np.load("cache/real_bench/case_zzzuwk_rsos.npz"))
     import os
     os.replace("paper/rsos/figs/fig4_case_zzzuwk.pdf", "paper/rsos/figs/fig5_case_zzzuwk.pdf")
     os.replace("paper/rsos/figs/fig4_case_zzzuwk.png", "paper/rsos/figs/fig5_case_zzzuwk.png")

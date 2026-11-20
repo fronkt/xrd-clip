@@ -11,6 +11,7 @@ The .npz (gitignored: simulated CSD patterns) holds the curves for the paper fig
 """
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from importlib import import_module
@@ -40,8 +41,14 @@ def per_offset(spec: dict, q_raw: np.ndarray, r_raw: np.ndarray) -> "tuple[np.nd
 
 
 def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--hub", default="results/real_bench_hub.json", help="21 eval output: which entries win ZZZUWK")
+    ap.add_argument("--full", default="cache/real_bench/full", help="21 score matrices for the context block")
+    ap.add_argument("--out", default="results/case_zzzuwk.json")
+    ap.add_argument("--npz", default="cache/real_bench/case_zzzuwk.npz")
+    args = ap.parse_args()
     full_precision()
-    hub = json.load(open("results/real_bench_hub.json"))
+    hub = json.load(open(args.hub))
     shards = bench.shard_table(None)
     lib_rc = hubm.library_refcodes(shards)
     gidx = {rc: i for i, rc in enumerate(lib_rc)}
@@ -85,7 +92,7 @@ def main() -> int:
     # context: how well do ZZZUWK's patterns match their own entries, relative to the other benchmark patterns?
     ctx = {}
     for key in ("pearson_bkg", "cos_zs_bkg", "wcc_1_bkg"):
-        S = np.load(f"cache/real_bench/full/S_{key}.npy", mmap_mode="r")
+        S = np.load(f"{args.full}/S_{key}.npy", mmap_mode="r")
         tmax = np.array([np.asarray(S[i])[[gidx[rc] for rc in q["sets"]["std"][0]]].max()
                          for i, q in enumerate(qinfo)])
         other = np.array([i for i in range(len(qinfo)) if i not in rows])
@@ -114,9 +121,9 @@ def main() -> int:
                       for hkl, t in refl.items()}
     res["context"] = ctx
     print(json.dumps(ctx, indent=1))
-    with open("results/case_zzzuwk.json", "w") as fh:
+    with open(args.out, "w") as fh:
         json.dump(res, fh, indent=1)
-    np.savez_compressed("cache/real_bench/case_zzzuwk.npz", entries=np.array(ents), raw=raw, q_raw=qr,
+    np.savez_compressed(args.npz, entries=np.array(ents), raw=raw, q_raw=qr,
                         q_ids=np.array([qinfo[i]["id"] for i in rows]),
                         pearson=pear, grid=A.GRID, **curves)
     for name, per in res["methods"].items():

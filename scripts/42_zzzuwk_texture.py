@@ -116,7 +116,7 @@ def main() -> int:
            "median_pearson_best_texture": float(np.median([p["pearson_best_texture"] for p in per])),
            "best_axis_counts": ax_count, "median_best_r": float(np.median([p["best_r"] for p in per])),
            "per_pattern": per, "reflections": table}
-    json.dump(out, open("results/zzzuwk_texture.json", "w"), indent=1)
+    json.dump(out, open(sys.argv[1] if len(sys.argv) > 1 else "results/zzzuwk_texture.json", "w"), indent=1)
     print(json.dumps({k: v for k, v in out.items() if k not in ("per_pattern", "reflections")}, indent=1))
     for r in table:
         print(r)
