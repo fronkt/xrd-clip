@@ -758,3 +758,18 @@ F7 Package paper/dd/submissions/RSOS/ (manuscript, ESI, cover letter stating the
   - COD v3 twins DONE: exactly 3 entries changed (2000503, 2001223, 2004836); shard_000 re-embedded (other entries
     identical to 3e-8); COD eval: classical unchanged, model top-1 unchanged, 40 std / 10 sc ranks moved by one place.
   - Citation audit of the 6 unaudited keys running (Codex); contexts in D:\xrd-clip\rsos_private\gates\citation-audit_2026-11-19.
+- 11-19/20 overnight (698b420, df59dfe): board review r1 (D:\xrd-clip\rsos_private\gates\board_r1_triage.md) fixes.
+  - A07 disorder: CSD API CIFs carry no occupancies -> 37 disordered added entries re-simulated (52/53, per-entry A
+    occupancies / B major component by agreement with the CCDC simulation; QQQAUJ07 0.50 = CSD lists one component).
+    run_fix.sh ALL rc 0: 51 record, rescore chunk 78 in 11 caches, hub patches (lnq2 + v1), 30 patches (5 models),
+    eval queue END fail=0, case24 + texture42.
+  - A05 compounds: union-find (GOFWUV+QQQAUJ, IYESEO+QIQVAQ) -> 121 compounds (ambient 24, sc 29, within-family 33).
+  - New numbers (provisional critic2): ambient classical 0.53-0.69 (Pearson 0.42; WCC1 0.69; only WCC1 > Pearson
+    excludes 0), any same-form 0.72-0.90, model 0.00 / 0.02; CSLS +0.02-0.05 std (only WCC2 +0.05 [0.01, 0.09]).
+  - ZZZUWK: full occupancy -> cos+zs, WCC1, WCC2 0/20 (GUSRIV 'hub' 20/20), Pearson 12; occupancies -> cos+zs, WCC1, lnq
+    20/20, Pearson 18, WCC2 10 (18 with CSLS); CCDC r 0.77 -> 0.98. 4.5 rewritten; Fig 5 redrawn (both simulations +
+    before/after/CSLS bars); Fig 6 markers only; ESI S1 simulation-check table, S6 before/after; changes table +3 rows;
+    response doc 1.3 rewritten (texture explanation was wrong) + "Further corrections" section.
+  - verify_claims_rsos: 162/162 on provisional numbers.
+  - Running: c2_chain4 (ba42ijs80): X2 pattern_100/887 (~71 comparisons left at 23:30, ~3.5 h), then control 914/1008,
+    eval, inject, evals. THEN: 48 -> 49 -> 50 -> --fill (real manuscript) -> build.sh -> paper-claim-audit -> report.
