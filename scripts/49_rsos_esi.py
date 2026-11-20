@@ -422,6 +422,18 @@ DEVIATIONS = [
     ["variable-cell re-rank", "59 shortlists", "60 (the label correction added one single-crystal pattern)", "label correction"],
     ["practitioner baseline", "none", "library rescaled to 295 K by its recorded temperatures",
      "references determined at other temperatures are commonly rescaled to room temperature"],
+    ["compound (unit of weighting and of the bootstrap)", "CSD refcode family (123 compounds)",
+     "refcode families whose same-form sets share an entry are one compound (GOFWUV with QQQAUJ, IYESEO with QIQVAQ; "
+     f"{D['n_compounds']} compounds; also applied to the COD replica)", "two compounds were counted twice"],
+    ["disordered added library entries", "simulated with every disorder site at full occupancy (the CIFs written by the CSD "
+     "Python API carry no occupancies)", f"re-simulated with the CSD site occupancies or as the major component, whichever "
+     f"agrees better with the CCDC simulation ({P['simulation_check']['n_resimulated']} entries); every score cache and "
+     "evaluation recomputed", "an independent check against the CCDC simulation (ZZZUWK median r "
+     f"{P['simulation_check']['pre_occ_groups']['zzzuwk']['median']:.2f} before, "
+     f"{P['simulation_check']['groups']['zzzuwk']['median']:.2f} after)"],
+    ["ZZZUWK case", "attributed to texture (relative intensities far from the simulation)", "attributed to the full-occupancy "
+     "simulation; with occupancies cosine + zero scan and WCC with l = 1° rank a same-form entry first for all 20 patterns "
+     "instead of none", "the disordered entries above"],
     ["open replica", "model embeddings of the earlier model", "COD symmetry operators from each CIF (from the space-group "
      "symbol for CIFs without an operator list; operator lists quoted inside comment fields are ignored)",
      "the model needs the operators; a quoted list had been read for 3 library entries, none of them an answer"],
