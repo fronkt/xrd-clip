@@ -335,6 +335,17 @@ def s7_model() -> list:
           f"{se['d3_sym_s1']['n_positive']}); the 95 % family-bootstrap intervals separate in {se[MODEL]['n_ci_separated']} and "
           f"{se['d3_sym_s1']['n_ci_separated']} conditions; mean absolute difference between the two seeds "
           f"{se['seed_mean_abs_diff']:.3f}.", ""]
+    isp = EX["instrument_split"]
+    gl = {"lab_cu": "laboratory Cu", "sync_ambient": "synchrotron, ambient", "sync_pressure": "synchrotron, pressure series",
+          "other": "Mo, Co and other"}
+    L += [f"{T()} By instrument (exploratory; prompted by the external set of Section S14), any same-form entry: patterns ranked "
+          "first / within the top 10 / within the top 100 / median rank for the learned models; patterns ranked first and "
+          "median rank for the classical scores.", ""]
+    L += table(["checkpoint or score"] + [f"{gl[g]} ({isp['groups'][g]['n']} / {isp['groups'][g]['n_compounds']})" for g in gl],
+               [[lab] + [f"{isp[x][g]['top1']} / {isp[x][g]['top10']} / {isp[x][g]['top100']} / {isp[x][g]['median_rank']:,.1f}"
+                         for g in gl] for x, lab in CKPTS] +
+               [[NAMES[k]] + [f"{isp[k][g]['top1']} / {isp[k][g]['median_rank']:,.1f}" for g in gl]
+                for k in ("lnq_bkg", "cos_zs_bkg", "pearson_bkg", "wcc_1_bkg", "wcc_2_bkg")]) + [""]
     L += [f"Training-split control: the crystal form of {ns.get('train', 0)} patterns has an entry in the training split, "
           f"{ns.get('val', 0)} in the validation split, {ns.get('test', 0)} in the test split and {ns.get('none', 0)} in no split. "
           f"Model top-1 / median rank for patterns whose form is in the training split "
@@ -609,11 +620,20 @@ def s13_s14() -> list:
                 "median rank"], rows)
     rk = lambda r, key: "–" if r["ranks"][key] < 0 else f"{r['ranks'][key] + 1:,}"
     L += ["", f"{T()} Rank of the best correct entry per pattern (1 = first place; '–': no correct entry in the library).", ""]
-    L += table(["compound", "anchor", "article DOI", "source", "Cu-grid coverage", "ln q, any", "Pearson, any", "model, any",
-                "ln q, single-crystal", "model, single-crystal"],
+    L += table(["compound", "anchor", "article DOI", "source", "Cu-grid coverage", "anchor's split", "ln q, any", "Pearson, any",
+                "model, any", "ln q, single-crystal", "model, single-crystal"],
                [[r["compound"], r["refcode"], r["doi"], f"{r['kind']}, {r['wavelength']:.4f} Å", f2(r["cu_grid_coverage"]),
-                 rk(r, "std|lnq_bkg"), rk(r, "std|pearson_bkg"), rk(r, "std|model_bkg"), rk(r, "sc|lnq_bkg"),
+                 r["self_entry_split"], rk(r, "std|lnq_bkg"), rk(r, "std|pearson_bkg"), rk(r, "std|model_bkg"), rk(r, "sc|lnq_bkg"),
                  rk(r, "sc|model_bkg")] for r in pp_])
+    kk = ROB["kaduk_by_instrument"]
+    L += ["", f"{T()} The learned models on the external set by instrument, any same-form entry: patterns ranked first / "
+          "within the top 10 / median rank. The anchor's split is the model's scaffold split (training, validation, test); "
+          f"of the {kk[MODEL]['synchrotron']['n']} synchrotron anchors, " + ", ".join(f"{v} in {k}" for k, v in
+                                                                                       sorted(kk["sync_self_entry_split"].items()))
+          + ".", ""]
+    L += table(["checkpoint", "synchrotron", "laboratory Cu"],
+               [[lab, *(f"{kk[x][kd_]['top1']} / {kk[x][kd_]['top10']} / {kk[x][kd_]['median_rank']:,.1f} (n = {kk[x][kd_]['n']})"
+                        for kd_ in ("synchrotron", "lab Cu"))] for x, lab in CKPTS if x in kk])
     return L
 
 

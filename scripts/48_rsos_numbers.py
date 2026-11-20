@@ -534,6 +534,20 @@ def main() -> int:
     for row in ex["critic2"]["per_pattern"]:
         row["pressure_series"] = bool(scc.get(row["id"], {}).get("pressure_series", False))
     ex["sc_ambient_split"] = spl
+    # exploratory, prompted by the external set (Kaduk profiles): the learned models by instrument, any same-form entry
+    sync_ = wlc == "synchrotron"
+    groups_i = {"lab_cu": wlc == "Cu", "sync_ambient": sync_ & ~hp, "sync_pressure": sync_ & hp,
+                "other": ~sync_ & (wlc != "Cu")}
+    isp = {"groups": {g: {"n": int(s.sum()), "n_compounds": int(len(set(stems[s])))} for g, s in groups_i.items()}}
+    for x in (m, SEED2, ABLATION, ORIGINAL):
+        rr = main_ranks(x)["std|model_bkg"]
+        isp[x] = {g: {"top1": int((rr[s] == 0).sum()), "top10": int((rr[s] < 10).sum()), "top100": int((rr[s] < 100).sum()),
+                      "median_rank": float(np.median(rr[s]) + 1)} for g, s in groups_i.items()}
+    for k in CLS_KEYS:
+        rr = R[f"none|std|{k}"]
+        isp[k] = {g: {"top1": int((rr[s] == 0).sum()), "top1_frac": rd((rr[s] == 0).mean()),
+                      "median_rank": float(np.median(rr[s]) + 1)} for g, s in groups_i.items()}
+    ex["instrument_split"] = isp
     pp_ = ex["critic2"]["per_pattern"]
     for key, field in (("control", "rank_in_shortlist"), ("injected", "rank_if_shortlisted")):
         summ = {}
@@ -685,7 +699,23 @@ def main() -> int:
     kr = npz(f"cache/real_bench_kaduk/rescore_main/ranks_{m}.npz")
     for i, row in enumerate(ks["patterns"]):
         row["ranks"] = {k: int(kr[k][i]) for k in kr.files if "@" not in k}
+        row["self_entry_split"] = split.get(row["refcode"], "none")
     rob["kaduk"] = {**slim(kd), "summary": rnd(ks)}
+    kind = np.array([p["kind"] for p in ks["patterns"]])
+    kk = {}
+    for x, f in ((m, f"cache/real_bench_kaduk/rescore_main/ranks_{m}.npz"),
+                 (SEED2, f"cache/real_bench_kaduk/rescore_main/ranks_{SEED2}.npz"),
+                 (ORIGINAL, "cache/real_bench_kaduk/rescore_main/ranks.npz")):
+        zk = npz(f)["std|model_bkg"]
+        kk[x] = {kd_: {"n": int((kind == kd_).sum()), "top1": int((zk[kind == kd_] == 0).sum()),
+                       "top10": int((zk[kind == kd_] < 10).sum()), "median_rank": float(np.median(zk[kind == kd_]) + 1),
+                       "ranks": sorted(int(v) + 1 for v in zk[kind == kd_])} for kd_ in ("synchrotron", "lab Cu")}
+    kk["self_entry_split"] = dict(Counter(split.get(p["refcode"], "none") for p in ks["patterns"]))
+    kk["sync_self_entry_split"] = dict(Counter(split.get(p["refcode"], "none") for p in ks["patterns"] if p["kind"] == "synchrotron"))
+    kk["sync_not_train_ranks"] = sorted(int(kr["std|model_bkg"][i]) + 1 for i, p in enumerate(ks["patterns"])
+                                        if p["kind"] == "synchrotron" and split.get(p["refcode"], "none") != "train")
+    kk["classical_top1"] = {k: int((kr[f"std|{k}"] == 0).sum()) for k in CLS_KEYS}
+    rob["kaduk_by_instrument"] = kk
     # open COD replica: classical scores from the R5 run, the model from this model's COD embeddings
     cod = load(f"results/d3/rescore_main_cod_{m}.json")
     rob["cod"] = slim(cod)

@@ -141,6 +141,21 @@ def kd_m(td, key):
     return KD["macro"][f"{td}|{key}"]["top1"]
 
 
+def cnt_rng(fracs):   # compound-weighted values on the 3 single-crystal Kaduk compounds, as counts: "1–2", "2"
+    n = KD["summary"]["n_sc_compounds"]
+    c = [round(v * n) for v in fracs]
+    return str(c[0]) if min(c) == max(c) else f"{min(c)}–{max(c)}"
+
+
+def seq(v):           # [1, 38, 111] -> "1, 38 and 111"
+    v = [f"{x:,}" for x in v]
+    return v[0] if len(v) == 1 else ", ".join(v[:-1]) + " and " + v[-1]
+
+
+ISP, KK = EX["instrument_split"], ROB["kaduk_by_instrument"]
+INST_G = ("lab_cu", "sync_ambient", "sync_pressure")
+
+
 def t2diff(var, ref="main", keys=CLS):
     return [T2[var][k][s] - T2[ref][k][s] for k in keys for s in ("ambient", "std")]
 
@@ -205,8 +220,20 @@ PH = {
     "cod_std_range": rng([cod_m("std", k)["value"] for k in CLS]), "cod_model": f2(cod_m("std", "model_bkg")["value"]),
     "cod_si_change": f"{cod_si_change:.2f}",
     "kaduk_cls_range": rng([kd_m("std", k)["value"] for k in CLS]), "kaduk_model": mci(kd_m("std", "model_bkg")),
-    "kaduk_sc_range": rng([kd_m("sc", k)["value"] for k in CLS]),
-    "kaduk_sc_model": "none" if kd_m("sc", "model_bkg")["value"] == 0 else f2(kd_m("sc", "model_bkg")["value"]),
+    "kaduk_model_med": mr(KD["per_pattern"]["std|model_bkg"]["median_rank"]),
+    "kaduk_sc_range": cnt_rng([kd_m("sc", k)["value"] for k in CLS]),
+    "kaduk_sc_model": cnt_rng([kd_m("sc", "model_bkg")["value"]]),
+    # exploratory instrument / source split (Section 4.6)
+    "inst_labcu_med": mr(ISP[M]["lab_cu"]["median_rank"]), "inst_labcu_n": str(ISP["groups"]["lab_cu"]["n"]),
+    "inst_syncamb_med": mr(ISP[M]["sync_ambient"]["median_rank"]), "inst_syncamb_n": str(ISP["groups"]["sync_ambient"]["n"]),
+    "inst_syncp_med": mr(ISP[M]["sync_pressure"]["median_rank"]), "inst_syncp_n": str(ISP["groups"]["sync_pressure"]["n"]),
+    "inst_pearson_range": f"{pct(min(ISP['pearson_bkg'][g]['top1_frac'] for g in INST_G))}–"
+                          f"{pct(max(ISP['pearson_bkg'][g]['top1_frac'] for g in INST_G))} %",
+    "kad_sync_n": str(KK[M]["synchrotron"]["n"]), "kad_sync_med": mr(KK[M]["synchrotron"]["median_rank"]),
+    "kad_sync_top1": str(KK[M]["synchrotron"]["top1"]), "kad_lab_n": str(KK[M]["lab Cu"]["n"]),
+    "kad_lab_min": f"{(min(KK[M]['lab Cu']['ranks']) // 100) * 100:,}",
+    "kad_sync_train": str(KK["sync_self_entry_split"].get("train", 0)),
+    "kad_sync_nontrain_n": words(len(KK["sync_not_train_ranks"])), "kad_sync_nontrain": seq(KK["sync_not_train_ranks"]),
     "c2_cpu_min": f"{C2['cpu_min_median']:.1f}",
     "checkpoint_statement": "The trained model checkpoints are derived from CSD structures and are not distributed; the "
                             "learned models' results can be checked against the released ranks.",
@@ -219,8 +246,10 @@ SPLIT = {"lnq_bkg": "lnq", "wcc_1_bkg": "wcc_1", "wcc_2_bkg": "wcc_2", "cos_zs_b
 
 
 def table1() -> str:
-    head = ("| Score | Ambient single-crystal: top-1 [95 % CI] | top-10 | median rank | Any same-form: top-1 [95 % CI] "
-            "| top-10 | median rank |\n|---|---|---|---|---|---|---|")
+    # pipe-table column widths follow the dashes of the separator line (pandoc), so the score names do not wrap
+    head = ("| Score | Top-1 [95 % CI] | Top-10 | Median rank | Top-1 [95 % CI] | Top-10 | Median rank |\n"
+            "|" + "-" * 26 + "|" + "-" * 17 + "|" + "-" * 7 + "|" + "-" * 9 + "|" + "-" * 17 + "|" + "-" * 7 + "|" + "-" * 9 + "|\n"
+            "| | *Ambient single-crystal* | | | *Any same-form entry* | | |")
     rows = []
     for k in ["lnq_bkg", "wcc_1_bkg", "wcc_2_bkg", "cos_zs_bkg", "pearson_bkg"]:
         a, s = AS[SPLIT[k]], b(k)
@@ -244,7 +273,7 @@ T2_COLS = ["lnq_bkg", "wcc_1_bkg", "wcc_2_bkg", "cos_zs_bkg", "pearson_bkg", "mo
 
 def table2() -> str:
     head = ("| Variant | ln q scan | WCC, l = 1° | WCC, l = 2° | Cosine + zero scan | Pearson, fixed grid | Learned model |\n"
-            "|---|---|---|---|---|---|---|")
+            "|" + "-" * 34 + "|" + "|".join("-" * 11 for _ in range(6)) + "|")
     rows = [f"| {lab} | " + " | ".join(f"{f2(T2[v][k]['ambient'])} / {f2(T2[v][k]['std'])}" for k in T2_COLS) + " |"
             for v, lab in T2_ROWS]
     return head + "\n" + "\n".join(rows)
@@ -516,9 +545,29 @@ CLAIMS = [
     need(cod_si["n_si_queries"] == 2, f"without these two queries no compound-weighted top-1 changes by more than {PH['cod_si_change']}"),
     f"deposited with {KD['summary']['n_compounds']} structure reports in Powder Diffraction ({KD['summary']['n_patterns']} patterns, "
     f"{sum(r['kind'] == 'synchrotron' for r in KD['summary']['patterns'])} of them synchrotron)",
-    f"the classical scores reach a compound-weighted top-1 of {PH['kaduk_cls_range']} and the model {PH['kaduk_model']}",
-    f"only {KD['summary']['n_sc_compounds']} compounds keep an independent single-crystal reference, and the classical scores "
+    f"the classical scores reach a compound-weighted top-1 of {PH['kaduk_cls_range']} and the model {PH['kaduk_model']}, "
+    f"with a median rank of {PH['kaduk_model_med']}",
+    f"only {KD['summary']['n_sc_compounds']} compounds keep an independent single-crystal reference; the classical scores "
     f"place it first for {PH['kaduk_sc_range']} of them and the model for {PH['kaduk_sc_model']}",
+    # exploratory instrument / source split (4.6, discussion, conclusions, abstract)
+    f"whereas the measured patterns sit at a median rank of about {about(measured[1])} ({PH['kaduk_model_med']} on an "
+    f"external set of {KD['summary']['n_patterns']} profiles)",
+    f"On the opXRD patterns its median rank is {PH['inst_labcu_med']} for the {PH['inst_labcu_n']} laboratory Cu patterns, "
+    f"{PH['inst_syncamb_med']} for the {PH['inst_syncamb_n']} ambient synchrotron patterns and {PH['inst_syncp_med']} for the "
+    f"{PH['inst_syncp_n']} pressure-series patterns, whereas fixed-grid Pearson ranks the answer first for "
+    f"{PH['inst_pearson_range']} of the patterns in each of these groups",
+    need(sum(ISP["groups"][g]["n"] for g in ISP["groups"]) == D["n_queries"] and ISP["groups"]["sync_pressure"]["n"] == AS["n_pressure_series_patterns"],
+         f"On the {PH['kad_sync_n']} synchrotron profiles of the external set, all from one group's Rietveld studies, the model's "
+         f"median rank is {PH['kad_sync_med']} and it ranks {PH['kad_sync_top1']} of them first, while its {PH['kad_lab_n']} "
+         f"laboratory Cu profiles rank beyond {PH['kad_lab_min']}"),
+    need(ov["model_bkg_train"]["median_rank"] > 1000,
+         f"Of those {PH['kad_sync_n']} self-entries, {PH['kad_sync_train']} are in the model's training split, but on the opXRD "
+         f"patterns membership made no difference, and the {PH['kad_sync_nontrain_n']} that are not rank {PH['kad_sync_nontrain']}"),
+    need(min(ISP[M][g]["median_rank"] for g in INST_G) >= 1000,
+         f"it ranks the self-entry at a median of {PH['kad_sync_med']}, against thousands on the opXRD patterns"),
+    need(KK[M]["synchrotron"]["median_rank"] < 0.01 * min(ISP[M][g]["median_rank"] for g in INST_G),
+         "These differences depend on the source of the data, because on high-resolution synchrotron profiles from one "
+         "external source the model does far better than on the opXRD patterns"),
     # ---- discussion, conclusions
     f"the shift-tolerant scores reach a compound-weighted top-1 of {rng(amb_tol)}, and when the pattern's self-entry is in the "
     f"library they reach up to {f2(max(std_cls))}, with even fixed-grid Pearson correlation at {f2(b('pearson_bkg')['macro_top1'])}",

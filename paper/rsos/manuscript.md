@@ -16,8 +16,8 @@ Purdue University, West Lafayette, Indiana, USA. E-mail: cai485@purdue.edu. ORCI
 
 ## Abstract
 
-Contrastive models that embed powder X-ray diffraction patterns and crystal structures in a shared space have been
-proposed for structure retrieval but are mostly evaluated on simulated patterns. We built a benchmark of 188
+Contrastive models that embed powder X-ray diffraction patterns and crystal structures in a shared space are
+proposed for structure retrieval but mostly evaluated on simulated patterns. We built a benchmark of 188
 measured patterns of 123 organic compounds, identified each pattern's crystal form in the Cambridge Structural
 Database by packing similarity, and ranked every pattern against 309,080 simulated entries. When the
 correct answer must be an independent single-crystal structure determined at ambient pressure (38 patterns of 26
@@ -25,10 +25,10 @@ compounds), shift-tolerant classical profile scores rank it first for a compound
 contrastive model with a space-group-aware structure encoder, trained with every measurement effect we could
 simulate, ranks it first for none of these compounds. When the entry refined against the pattern itself also
 counts, the classical scores reach 0.71–0.88 and the model reaches 0.02.
-Simulations of the same patterns with the effects of their own measurements are retrieved by the model at a median
-rank of 8, whereas the measured patterns sit at a median rank of about 5,600, so the model fails on differences our
-simulation does not reproduce. We release the benchmark, an open replica from the Crystallography Open Database
-and every per-pattern rank.
+Simulations of these patterns with their own measurement effects are retrieved by the model at a median rank of 8,
+whereas the measured patterns sit at a median rank of about 5,600 (4 on an external set of 19 profiles), so the
+model fails on differences our simulation does not reproduce. We release the benchmark, an open replica and every
+per-pattern rank.
 
 **Keywords:** powder X-ray diffraction; crystal structure retrieval; search–match; contrastive learning;
 Cambridge Structural Database; polymorphism
@@ -553,6 +553,18 @@ condition do the intervals separate), but they leave the measured benchmark unch
 entry for {{model_recall_1000}} of the patterns, and re-ranking that list with the ln q scan gives a compound-weighted
 top-1 of {{hybrid_lnq}}, against 0.88 for the ln q scan on the whole library.
 
+The model's ranks also depend on where the patterns come from, a split we examined only after seeing the external set
+of Section 4.8. On the opXRD patterns its median rank is {{inst_labcu_med}} for the {{inst_labcu_n}} laboratory Cu
+patterns, {{inst_syncamb_med}} for the {{inst_syncamb_n}} ambient synchrotron patterns and {{inst_syncp_med}} for
+the {{inst_syncp_n}} pressure-series patterns, whereas fixed-grid Pearson ranks the answer first for
+{{inst_pearson_range}} of the patterns in each of these groups. On the {{kad_sync_n}} synchrotron profiles of the
+external set, all from one group's Rietveld studies, the model's median rank is {{kad_sync_med}} and it ranks
+{{kad_sync_top1}} of them first, while its {{kad_lab_n}} laboratory Cu profiles rank beyond {{kad_lab_min}}.
+Of those {{kad_sync_n}} self-entries, {{kad_sync_train}} are in the model's training split, but on the opXRD
+patterns membership made no difference, and the {{kad_sync_nontrain_n}} that are not rank {{kad_sync_nontrain}}. We have not
+identified what separates these profiles from the opXRD synchrotron patterns; their counting statistics and angular
+resolution, and the way their structures were refined, are candidates.
+
 ![](figs/fig6_effect_ladder.pdf)
 
 **Figure 6.** Effect ladder. Each pattern's self-entry is rendered cleanly, with one effect of its measurement at a
@@ -600,9 +612,11 @@ of them synchrotron) [@kaduk2015tramadol; @kaduk2015folic; @kaduk2015fingolimod;
 @kaduk2015sitagliptin; @kaduk2016paliperidone; @kaduk2017palmitate; @kaduk2017hydrocortisone; @wheatley2018estradiol;
 @reid2015curcumin; @kaduk2015saxagliptin; @reid2016trandolapril; @reid2021donepezil] form an external set, scored
 with a design fixed before any result. When any same-form entry counts, the classical scores reach a compound-weighted
-top-1 of {{kaduk_cls_range}} and the model {{kaduk_model}}; this is generous, because each pattern's own Rietveld
-entry is in the library. With those entries excluded, only 3 compounds keep an independent single-crystal reference,
-and the classical scores place it first for {{kaduk_sc_range}} of them and the model for {{kaduk_sc_model}}.
+top-1 of {{kaduk_cls_range}} and the model {{kaduk_model}}, with a median rank of {{kaduk_model_med}}; this is
+generous, because each pattern's own Rietveld entry is in the library. With those entries excluded, only 3 compounds
+keep an independent single-crystal reference; the classical scores place it first for {{kaduk_sc_range}} of them and
+the model for {{kaduk_sc_model}}, so this set is too small to test the separation seen on the opXRD single-crystal
+patterns. The model's much better ranks on these profiles than on the opXRD patterns are examined in Section 4.6.
 
 ## 5. Discussion
 
@@ -629,7 +643,10 @@ distinguish here, is bounded by the shortlist it re-ranks, and in its automated 
 high-pressure patterns that make up most of the mismatched cells. This case remains open for classical methods too,
 and it is where a learned method could show its value. For the learned model, the failure is the transfer from
 simulated to measured patterns, not the size of the library or the absence of symmetry information, and it survives
-a training simulation that reproduces every effect we could model. Full-profile generative models have shown the same
+a training simulation that reproduces every effect we could model. How far the model falls depends on the source of the
+measurements: on high-resolution synchrotron profiles from one external source it ranks the self-entry at a median of
+{{kad_sync_med}}, against thousands on the opXRD patterns, and which property of those profiles matters is open.
+Full-profile generative models have shown the same
 sensitivity to how realistic the training patterns are [@segal2026xrdiff]. A learned method aimed at that transfer,
 for example one adapted with measured patterns rather than with further simulated effects, seems a more promising use
 of learning than a stand-alone retriever.
@@ -661,7 +678,9 @@ encoder ranks it first for none of them. When the pattern's self-entry also coun
 0.71–0.88 and the model reaches 0.02. The model retrieves simulated patterns of the same targets, including patterns
 rendered with every measurement effect we could model, so its failure lies in differences between measured and
 simulated patterns that our simulation does not reproduce, and its pattern encoder already places measured patterns
-away from their simulations. A more realistic library, a different intensity convention and the label checks leave
+away from their simulations. These differences depend on the source of the data, because on high-resolution
+synchrotron profiles from one external source the model does far better than on the opXRD patterns. A more realistic
+library, a different intensity convention and the label checks leave
 the classical results unchanged, and an open replica built from the COD reproduces the any-same-form result. The hard
 open case is a measured pattern whose only reference was determined at another temperature or pressure, so that the
 cells differ anisotropically by more than about 1 %. We release the benchmark so that learned methods can be compared
