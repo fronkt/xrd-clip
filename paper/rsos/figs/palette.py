@@ -118,3 +118,23 @@ def panel_tag(ax, s, x=0.005, y=0.995, fontsize=8.5, weight="bold"):
     """The (a)/(D1) label, in a consistent place across every panel."""
     return ax.text(x, y, s, transform=ax.transAxes, ha="left", va="top",
                    fontsize=fontsize, fontweight=weight, color=INK, zorder=Z_TOP)
+
+
+# --- illustrated figures 1 and 2 (gen_fig1_benchmark.py, gen_fig_model.py), poster style -----------------------
+# ink + greys + the paper's two method colours: blue = classical / the data, vermilion = the model's operator tokens
+BLUE = "#0072B2"          # scripts/23_paper_figs.py classical colour (Okabe-Ito blue)
+BLUE_DEEP = "#1b3f66"     # headings, arrows
+MODEL = "#D55E00"         # scripts/23_paper_figs.py STYLE["model"]
+INK2 = "#5b6168"          # secondary text
+TRACK = "#c9cdd2"
+TIER = ["#d5e0ec", "#a6bfd9", "#5b84b3", "#1b3f66"]
+METAL = "#c3cbd3"
+METAL_LIGHT = "#dde2e7"
+MOUNT = "#56626f"
+SLATE = "#8d99a6"
+GLASS = "#8fa3b8"
+GLASS_FILL = "#eef3f8"
+BEAM = "#4f86c6"
+CARBON = "#4a525c"
+OXYGEN = "#c8504a"
+SHADOW = "#27364a"

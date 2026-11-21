@@ -117,11 +117,11 @@ of 16 entries over 15 patterns concern library entries, the rest entries outside
 
 ![](figs/fig1_benchmark.pdf)
 
-**Figure 1.** Construction of the benchmark. Top: each measured pattern is identified from its own deposited
+**Figure 1.** Construction of the benchmark. Left to right: each measured pattern is identified from its own deposited
 structure. CSD candidates from a reduced-cell search are compared with that structure by packing similarity, and the
 matching anchor entries are compared with their refcode family to collect every entry of the same solid form.
-Bottom: the measured pattern, on a Cu Kα1 2θ axis with Kα2 retained, is scored against all 309,080 simulated library
-patterns, and the rank of the first correct entry is recorded under each answer set.
+The measured pattern, on a Cu Kα1 2θ axis with Kα2 retained, is scored against all 309,080 simulated library
+patterns, and the rank of the first correct entry is recorded under each of three answer sets (right: numbers of patterns / compounds).
 
 Of the 196 patterns, 189 were identified; the other seven, three of them Si frameworks or silsesquioxanes that passed
 the element filter, have no packing match. One identified pattern records its 2θ axis in radians (0.01

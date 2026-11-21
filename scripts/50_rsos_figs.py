@@ -270,7 +270,7 @@ def fig_case(rn: dict, z) -> None:
 
 def main() -> int:
     rn = json.load(open("results/rsos_numbers.json"))
-    fig_schematic(rn)
+    # figure 1 is now paper/rsos/figs/gen_fig1_benchmark.py (illustrated, 2026-11-21); fig_schematic kept for the record
     fig_sweep(nums.sweep(nums.MODEL))
     fig_real(rn)
     fig_case(rn, np.load("cache/real_bench/case_zzzuwk_rsos.npz"))
