@@ -1,7 +1,6 @@
 Dear Editor,
 
-Please consider the enclosed manuscript, "Retrieving organic crystal structures from measured powder diffraction
-patterns: a benchmark of classical profile matching and a symmetry-aware contrastive model", for publication as a
+Please consider the enclosed manuscript, "Retrieving organic crystal structures from measured powder patterns: a benchmark of classical profile matching and a symmetry-aware contrastive model", for publication as a
 Research Article in Royal Society Open Science (subject area: Chemistry; also relevant to Computer Science and
 Artificial Intelligence).
 

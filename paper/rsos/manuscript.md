@@ -1,5 +1,5 @@
 ---
-title: "Retrieving organic crystal structures from measured powder diffraction patterns: a benchmark of classical profile matching and a symmetry-aware contrastive model"
+title: "Retrieving organic crystal structures from measured powder patterns: a benchmark of classical profile matching and a symmetry-aware contrastive model"
 bibliography: refs_rsos.bib
 csl: royal-society-open-science.csl
 link-citations: true
