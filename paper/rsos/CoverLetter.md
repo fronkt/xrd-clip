@@ -18,8 +18,7 @@ An earlier version was submitted to RSC Advances (manuscript RA-ART-10-2026-0102
 after peer review. The present manuscript is substantially revised. We fixed three defects in the model and its
 training simulation, retrained it with a structure encoder that sees the space group and with two seeds, made the
 ambient single-crystal set the headline, added texture along each structure's own growth axis to the simulated tests,
-and added checks of the labels, of the intensity convention and of the anchor procedure. We enclose the previous reviews
-with a point-by-point response and a table of every change from the earlier version.
+and added checks of the labels, of the intensity convention and of the anchor procedure. We enclose a point-by-point response to the previous reviews and a table of every change from the earlier version.
 
 All code, the benchmark definition, an open replica built from the Crystallography Open Database and every
 per-pattern rank are available at https://github.com/fronkt/xrd-clip and archived at Zenodo (https://doi.org/10.5281/zenodo.24407260). Structures from the
