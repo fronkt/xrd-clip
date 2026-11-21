@@ -1,6 +1,6 @@
 # Supplementary material
 
-Retrieving organic crystal structures from measured powder diffraction patterns: a benchmark of classical profile matching and a symmetry-aware contrastive model. F. Cai.
+Retrieving organic crystal structures from measured powder patterns: a benchmark of classical profile matching and a symmetry-aware contrastive model. F. Cai.
 
 All tables are generated from the deposited results file, so they cannot drift from the data. Corrected labels throughout (Section S2). 'The model' is the symmetry-aware encoder, seed 0.
 
