@@ -773,7 +773,9 @@ with the ICDD; these profiles are not redistributed. Supplementary information (
 
 ## Acknowledgements
 
-The author thanks the opXRD and COD contributors whose deposited powder data made the benchmark possible, the CCDC for
+The author thanks Prof. Xiaoming Wang (School of Engineering Technology, Purdue University) for his support of the
+author's research and for supporting the author as a research assistant. The author also thanks the opXRD and COD
+contributors whose deposited powder data made the benchmark possible, the CCDC for
 the CSD and its Python API, and the ICDD for providing the deposited donepezil hydrochloride CIF. This work used the
 Anvil supercomputer at Purdue University through allocation CHE260157 from the Advanced Cyberinfrastructure
 Coordination Ecosystem: Services & Support (ACCESS) program, which is supported by U.S. National Science Foundation
